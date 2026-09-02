@@ -394,7 +394,7 @@ const ReportMargin: React.FC = () => {
             </Table.Summary.Row>
           </Table.Summary>
         )}
-        className='report-margin-table parent bg-white rounded-lg shadow'
+        className='report-margin-table parent rounded-lg shadow'
       />
     </div>
   )

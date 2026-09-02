@@ -168,7 +168,7 @@ export default function MenuContent() {
         variant='overline'
         sx={{
           fontWeight: 600,
-          color: 'text.secondary',
+          color: 'rgba(255,255,255,0.45)',
           letterSpacing: '0.5px',
           mb: 1,
           px: 1,
@@ -184,17 +184,22 @@ export default function MenuContent() {
                 <ListItemButton
                   onClick={() => handleToggle(index)}
                   sx={{
-                    borderRadius: 2,
+                    borderRadius: 999,
                     mx: 1,
                     px: 2,
                     py: 1,
-                    backgroundColor: isParentActive(item) ? 'action.selected' : 'transparent',
+                    backgroundColor: isParentActive(item) ? 'rgba(255,255,255,0.92)' : 'transparent',
                     '&:hover': {
-                      backgroundColor: 'action.hover',
+                      backgroundColor: isParentActive(item) ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.06)',
                     },
                   }}
                 >
-                  <ListItemIcon sx={{ minWidth: 40, color: isParentActive(item) ? 'primary.main' : 'text.secondary' }}>
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 40,
+                      color: isParentActive(item) ? '#0A0C16' : 'rgba(255,255,255,0.55)',
+                    }}
+                  >
                     {item.icon}
                   </ListItemIcon>
                   <ListItemText
@@ -202,29 +207,35 @@ export default function MenuContent() {
                     primaryTypographyProps={{
                       fontSize: '14px',
                       fontWeight: isParentActive(item) ? 600 : 500,
-                      color: isParentActive(item) ? 'primary.main' : 'text.primary',
+                      color: isParentActive(item) ? '#0A0C16' : '#FFFFFF',
                     }}
                   />
-                  {openItems[index] ? <ExpandLess /> : <ExpandMore />}
+                  {openItems[index] ? (
+                    <ExpandLess sx={{ color: isParentActive(item) ? '#0A0C16' : 'rgba(255,255,255,0.55)' }} />
+                  ) : (
+                    <ExpandMore sx={{ color: isParentActive(item) ? '#0A0C16' : 'rgba(255,255,255,0.55)' }} />
+                  )}
                 </ListItemButton>
               ) : (
                 <Link to={item.path as string} style={{ textDecoration: 'none', width: '100%' }}>
                   <ListItemButton
                     sx={{
-                      borderRadius: 2,
+                      borderRadius: 999,
                       mx: 1,
                       px: 2,
                       py: 1,
-                      backgroundColor: isActiveRoute(item.path as string) ? 'action.selected' : 'transparent',
+                      backgroundColor: isActiveRoute(item.path as string) ? 'rgba(255,255,255,0.92)' : 'transparent',
                       '&:hover': {
-                        backgroundColor: 'action.hover',
+                        backgroundColor: isActiveRoute(item.path as string)
+                          ? 'rgba(255,255,255,0.92)'
+                          : 'rgba(255,255,255,0.06)',
                       },
                     }}
                   >
                     <ListItemIcon
                       sx={{
                         minWidth: 40,
-                        color: isActiveRoute(item.path as string) ? 'primary.main' : 'text.secondary',
+                        color: isActiveRoute(item.path as string) ? '#0A0C16' : 'rgba(255,255,255,0.55)',
                       }}
                     >
                       {item.icon}
@@ -234,7 +245,7 @@ export default function MenuContent() {
                       primaryTypographyProps={{
                         fontSize: '14px',
                         fontWeight: isActiveRoute(item.path as string) ? 600 : 500,
-                        color: isActiveRoute(item.path as string) ? 'primary.main' : 'text.primary',
+                        color: isActiveRoute(item.path as string) ? '#0A0C16' : '#FFFFFF',
                       }}
                     />
                   </ListItemButton>
@@ -249,21 +260,23 @@ export default function MenuContent() {
                       <Link to={nestedItem.path} style={{ textDecoration: 'none', width: '100%' }}>
                         <ListItemButton
                           sx={{
-                            borderRadius: 2,
+                            borderRadius: 999,
                             mx: 1,
                             px: 2,
                             py: 0.75,
                             pl: 6,
-                            backgroundColor: isActiveRoute(nestedItem.path) ? 'action.selected' : 'transparent',
+                            backgroundColor: isActiveRoute(nestedItem.path) ? 'rgba(255,255,255,0.92)' : 'transparent',
                             '&:hover': {
-                              backgroundColor: 'action.hover',
+                              backgroundColor: isActiveRoute(nestedItem.path)
+                                ? 'rgba(255,255,255,0.92)'
+                                : 'rgba(255,255,255,0.06)',
                             },
                           }}
                         >
                           <ListItemIcon
                             sx={{
                               minWidth: 32,
-                              color: isActiveRoute(nestedItem.path) ? 'primary.main' : 'text.secondary',
+                              color: isActiveRoute(nestedItem.path) ? '#0A0C16' : 'rgba(255,255,255,0.55)',
                             }}
                           >
                             {nestedItem.icon}
@@ -273,7 +286,7 @@ export default function MenuContent() {
                             primaryTypographyProps={{
                               fontSize: '13px',
                               fontWeight: isActiveRoute(nestedItem.path) ? 600 : 400,
-                              color: isActiveRoute(nestedItem.path) ? 'primary.main' : 'text.primary',
+                              color: isActiveRoute(nestedItem.path) ? '#0A0C16' : '#FFFFFF',
                             }}
                           />
                         </ListItemButton>
@@ -293,7 +306,7 @@ export default function MenuContent() {
             variant='overline'
             sx={{
               fontWeight: 600,
-              color: 'text.secondary',
+              color: 'rgba(255,255,255,0.45)',
               letterSpacing: '0.5px',
               mb: 1,
               px: 1,
@@ -301,7 +314,7 @@ export default function MenuContent() {
           >
             Internal Tools
           </Typography>
-          <Divider sx={{ mb: 2 }} />
+          <Divider sx={{ mb: 2, borderColor: 'rgba(255,255,255,0.08)' }} />
 
           <List dense>
             {secondaryListItems.map((item, index) => (
@@ -310,18 +323,18 @@ export default function MenuContent() {
                   <ListItemButton
                     onClick={() => item.nestedItems && handleToggle(index + 100)}
                     sx={{
-                      borderRadius: 2,
+                      borderRadius: 999,
                       mx: 1,
                       px: 2,
                       py: 1,
-                      backgroundColor: isParentActive(item) ? 'action.selected' : 'transparent',
+                      backgroundColor: isParentActive(item) ? 'rgba(255,255,255,0.92)' : 'transparent',
                       '&:hover': {
-                        backgroundColor: 'action.hover',
+                        backgroundColor: isParentActive(item) ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.06)',
                       },
                     }}
                   >
                     <ListItemIcon
-                      sx={{ minWidth: 40, color: isParentActive(item) ? 'primary.main' : 'text.secondary' }}
+                      sx={{ minWidth: 40, color: isParentActive(item) ? '#0A0C16' : 'rgba(255,255,255,0.55)' }}
                     >
                       {item.icon}
                     </ListItemIcon>
@@ -330,10 +343,15 @@ export default function MenuContent() {
                       primaryTypographyProps={{
                         fontSize: '14px',
                         fontWeight: isParentActive(item) ? 600 : 500,
-                        color: isParentActive(item) ? 'primary.main' : 'text.primary',
+                        color: isParentActive(item) ? '#0A0C16' : '#FFFFFF',
                       }}
                     />
-                    {item.nestedItems && (openItems[index + 100] ? <ExpandLess /> : <ExpandMore />)}
+                    {item.nestedItems &&
+                      (openItems[index + 100] ? (
+                        <ExpandLess sx={{ color: isParentActive(item) ? '#0A0C16' : 'rgba(255,255,255,0.55)' }} />
+                      ) : (
+                        <ExpandMore sx={{ color: isParentActive(item) ? '#0A0C16' : 'rgba(255,255,255,0.55)' }} />
+                      ))}
                   </ListItemButton>
                 </ListItem>
                 {item.nestedItems && (
@@ -344,21 +362,25 @@ export default function MenuContent() {
                           <Link to={nestedItem.path} style={{ textDecoration: 'none', width: '100%' }}>
                             <ListItemButton
                               sx={{
-                                borderRadius: 2,
+                                borderRadius: 999,
                                 mx: 1,
                                 px: 2,
                                 py: 0.75,
                                 pl: 6,
-                                backgroundColor: isActiveRoute(nestedItem.path) ? 'action.selected' : 'transparent',
+                                backgroundColor: isActiveRoute(nestedItem.path)
+                                  ? 'rgba(255,255,255,0.92)'
+                                  : 'transparent',
                                 '&:hover': {
-                                  backgroundColor: 'action.hover',
+                                  backgroundColor: isActiveRoute(nestedItem.path)
+                                    ? 'rgba(255,255,255,0.92)'
+                                    : 'rgba(255,255,255,0.06)',
                                 },
                               }}
                             >
                               <ListItemIcon
                                 sx={{
                                   minWidth: 32,
-                                  color: isActiveRoute(nestedItem.path) ? 'primary.main' : 'text.secondary',
+                                  color: isActiveRoute(nestedItem.path) ? '#0A0C16' : 'rgba(255,255,255,0.55)',
                                 }}
                               >
                                 {nestedItem.icon}
@@ -368,7 +390,7 @@ export default function MenuContent() {
                                 primaryTypographyProps={{
                                   fontSize: '13px',
                                   fontWeight: isActiveRoute(nestedItem.path) ? 600 : 400,
-                                  color: isActiveRoute(nestedItem.path) ? 'primary.main' : 'text.primary',
+                                  color: isActiveRoute(nestedItem.path) ? '#0A0C16' : '#FFFFFF',
                                 }}
                               />
                             </ListItemButton>

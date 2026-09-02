@@ -1,5 +1,4 @@
 import { useAuth } from '../provider/AuthProvider'
-import { Switch, Space } from 'antd'
 import { useLocation } from 'react-router-dom'
 
 const ApiSwitcher = () => {
@@ -9,24 +8,30 @@ const ApiSwitcher = () => {
   const isDisabled = ['/transaction', '/merchant-transaction'].includes(location.pathname)
 
   return (
-    <Space>
-      <Switch
-        checked={isDev}
-        onChange={toggleApi}
-        disabled={isDisabled}
-        checkedChildren={<span className='text-white mb-1 font-semibold'>Development</span>}
-        unCheckedChildren={<span className=' mb-1 font-semibold'>Production</span>}
-        className={`${isDev ? 'bg-green-500 border-green-600' : '!bg-[#79B5FF] border-gray-400'}`}
-        style={{
-          backgroundColor: isDev ? '#22c55e' : '#ffffff',
-          border: `1px solid ${isDev ? '#16a34a' : '#d1d5db'}`,
-          height: '24px',
-          fontSize: '18px !important',
-          display: 'flex',
-          alignItems: 'center',
+    <div className={`aura-api-switch${isDisabled ? ' is-disabled' : ''}`} role='group' aria-label='API environment'>
+      <button
+        type='button'
+        className={`aura-api-opt${!isDev ? ' active prod' : ''}`}
+        disabled={isDisabled || !isDev}
+        onClick={() => {
+          if (isDev && !isDisabled) toggleApi()
         }}
-      />
-    </Space>
+        title='Use Production API'
+      >
+        Prod
+      </button>
+      <button
+        type='button'
+        className={`aura-api-opt${isDev ? ' active dev' : ''}`}
+        disabled={isDisabled || isDev}
+        onClick={() => {
+          if (!isDev && !isDisabled) toggleApi()
+        }}
+        title='Use Development API'
+      >
+        Dev
+      </button>
+    </div>
   )
 }
 

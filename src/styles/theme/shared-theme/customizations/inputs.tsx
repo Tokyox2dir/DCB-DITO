@@ -383,7 +383,7 @@ export const inputsCustomizations: Components<Theme> = {
         // color: (theme.vars || theme).palette.text.primary,
         // borderRadius: (theme.vars || theme).shape.borderRadius,
         border: `1px solid ${(theme.vars || theme).palette.divider}`,
-        backgroundColor: 'white',
+        backgroundColor: 'background.paper',
         transition: 'border 120ms ease-in',
         '&:hover': {
           borderColor: gray[400],

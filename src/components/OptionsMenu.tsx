@@ -29,8 +29,8 @@ export default function OptionsMenu() {
 
   const handleLogout = () => {
     localStorage.removeItem('token')
-
-    navigate('/login')
+    navigate('/login', { replace: true })
+    window.location.href = '/login'
   }
 
   return (

@@ -15,7 +15,8 @@ import { jwtDecode } from 'jwt-decode'
 import { useAuth } from '../provider/AuthProvider'
 import { UserOutlined } from '@ant-design/icons'
 import { Avatar } from 'antd'
-import logoImage from '../../public/logo.png';
+import logoImage from '../../public/logo.png'
+import { smsSurfaces } from '../styles/theme/shared-theme/themePrimitives'
 
 const drawerWidth = 240
 
@@ -27,6 +28,10 @@ const Drawer = styled(MuiDrawer)({
   [`& .${drawerClasses.paper}`]: {
     width: drawerWidth,
     boxSizing: 'border-box',
+    backgroundColor: smsSurfaces.paper,
+    backgroundImage: 'none',
+    borderRight: `1px solid ${smsSurfaces.border}`,
+    color: '#fff',
   },
 })
 
@@ -58,7 +63,9 @@ export default function SideMenu({ open }: SideMenuProps) {
         sx={{
           display: { xs: 'none', md: 'block' },
           [`& .${drawerClasses.paper}`]: {
-            backgroundColor: 'background.paper',
+            backgroundColor: smsSurfaces.paper,
+            backgroundImage: 'none',
+            borderRight: `1px solid ${smsSurfaces.border}`,
           },
         }}
       >
@@ -131,7 +138,7 @@ export default function SideMenu({ open }: SideMenuProps) {
             Payment Management
           </Typography>
         </Box>
-        <Divider />
+        <Divider sx={{ borderColor: 'rgba(255,255,255,0.08)' }} />
         <MenuContent />
         {/* <CardAlert /> */}
         <Box
@@ -140,9 +147,8 @@ export default function SideMenu({ open }: SideMenuProps) {
             bottom: 0,
             left: 0,
             right: 0,
-            borderTop: '1px solid',
-            borderColor: 'divider',
-            backgroundColor: 'background.paper',
+            borderTop: `1px solid ${smsSurfaces.border}`,
+            backgroundColor: smsSurfaces.paper,
           }}
         >
           <Stack
@@ -155,7 +161,7 @@ export default function SideMenu({ open }: SideMenuProps) {
           >
             <Avatar
               style={{
-                backgroundColor: '#667eea',
+                backgroundColor: '#00B4F0',
                 width: 40,
                 height: 40,
               }}

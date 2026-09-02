@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import Grid from '@mui/material/Grid2'
 
-import { alpha } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
 import { TextField, OutlinedInput, Select, MenuItem } from '@mui/material'
 import Button from '@mui/material/Button'
@@ -87,12 +86,12 @@ export default function Summary() {
 
       <Box
         component='main'
-        sx={(theme) => ({
+        sx={{
           flexGrow: 1,
-          backgroundColor: theme.vars ? `white` : alpha(theme.palette.background.default, 1),
+          backgroundColor: 'background.default',
           overflow: 'auto',
           pt: 4,
-        })}
+        }}
       >
         <Stack
           spacing={2}

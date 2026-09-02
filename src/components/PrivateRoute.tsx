@@ -4,22 +4,24 @@ import { ReactNode } from 'react'
 
 interface PrivateRouteProps {
   children: ReactNode
-  allowedRoles?: string[] | null // Tambahkan properti untuk allowedRoles
+  allowedRoles?: string[] | null
 }
 
 const PrivateRoute = ({ children, allowedRoles }: PrivateRouteProps) => {
   const { token, role } = useAuth()
-  const isAuthenticated = !!token // Cek apakah pengguna terautentikasi
-  // const hasAccess = allowedRoles ? allowedRoles.includes(role as string) : true // Cek apakah role ada dalam allowedRoles
-  // console.log('hasAccess: ', hasAccess)
+
+  if (!token) {
+    return <Navigate to='/login' replace />
+  }
+
   if (role == null) {
     return <div className='p-4 text-center'>Loading...</div>
   }
 
-  const hasAccess = allowedRoles ? allowedRoles?.includes(role as string) : true
-  if (!hasAccess) return <Navigate to='/' />
+  const hasAccess = allowedRoles ? allowedRoles.includes(role) : true
+  if (!hasAccess) return <Navigate to='/' replace />
 
-  return isAuthenticated ? children : <Navigate to='/login' />
+  return children
 }
 
 export default PrivateRoute

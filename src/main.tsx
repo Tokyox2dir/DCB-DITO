@@ -4,6 +4,7 @@ import * as ReactDOM from 'react-dom/client'
 import { createTheme, StyledEngineProvider, ThemeProvider } from '@mui/material/styles'
 import { CssBaseline } from '@mui/material'
 import './index.css'
+import './styles/sms-shell.css'
 import App from './App'
 
 const rootElement = document.getElementById('root')

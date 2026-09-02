@@ -14,6 +14,7 @@ import {
 } from 'chart.js'
 import axios from 'axios'
 import dayjs from 'dayjs'
+import { useColorScheme } from '@mui/material/styles'
 import { useAuth } from '../provider/AuthProvider'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
@@ -99,6 +100,18 @@ export function checkAbnormal(values: number[], latest: number, type: 'success' 
 
 const TransactionChartCard: React.FC = () => {
   const { token, apiUrl } = useAuth()
+  const { mode, systemMode } = useColorScheme()
+  const isDark = ((mode === 'system' ? systemMode : mode) || 'dark') !== 'light'
+  const theme = {
+    text: isDark ? '#f0e8ea' : '#2a1618',
+    muted: isDark ? '#c4b0b3' : '#6a5558',
+    card: isDark ? '#1a1416' : '#ffffff',
+    header: isDark ? '#24181a' : '#f7f2f2',
+    border: isDark ? '#3a2a2e' : '#e6d4d6',
+    abnormalBg: isDark ? '#3a2020' : '#fff1f0',
+    abnormalHeader: isDark ? '#8f3030' : '#ffccc7',
+    grid: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
+  }
   const [monitorData, setMonitorData] = useState<TransactionData[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -242,7 +255,8 @@ const TransactionChartCard: React.FC = () => {
     ],
   })
 
-  const chartOptions = {
+  const chartOptions = useMemo(
+    () => ({
     responsive: true,
     maintainAspectRatio: false,
 
@@ -281,9 +295,10 @@ const TransactionChartCard: React.FC = () => {
         beginAtZero: true,
         suggestedMax: 8,
         grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
+          color: theme.grid,
         },
         ticks: {
+          color: theme.muted,
           stepSize: 1,
           callback: function (value: any) {
             return Number(value) % 1 === 0 ? value : null
@@ -293,9 +308,10 @@ const TransactionChartCard: React.FC = () => {
       },
       x: {
         grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
+          color: theme.grid,
         },
         ticks: {
+          color: theme.muted,
           padding: 10,
           maxTicksLimit: 6,
           font: {
@@ -308,7 +324,9 @@ const TransactionChartCard: React.FC = () => {
       intersect: false,
       mode: 'index' as const,
     },
-  }
+  }),
+    [theme.grid, theme.muted],
+  )
 
   const getLatestStats = (data: TransactionData) => {
     // Ambil data dari 1 interval sebelumnya karena data terbaru mungkin belum selesai
@@ -450,7 +468,7 @@ const TransactionChartCard: React.FC = () => {
                             style={{
                               fontSize: '14px',
                               fontWeight: 'bold',
-                              color: isAbnormal ? '#fff' : '#000',
+                              color: theme.text,
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'space-between',
@@ -465,8 +483,9 @@ const TransactionChartCard: React.FC = () => {
                                 <Tag
                                   color='red'
                                   style={{
-                                    color: 'red',
-                                    border: '1px solid #fff',
+                                    color: '#ffb4b4',
+                                    border: '1px solid #a84f4f',
+                                    background: '#3a2020',
                                     fontSize: '10px',
                                     padding: '0 6px',
                                     height: '20px',
@@ -481,16 +500,18 @@ const TransactionChartCard: React.FC = () => {
                         }
                         style={{
                           height: '500px',
-                          boxShadow: isAbnormal ? '0 4px 12px rgba(255,77,79,0.3)' : '0 4px 12px rgba(0,0,0,0.15)',
+                          boxShadow: isAbnormal ? '0 4px 12px rgba(255,77,79,0.3)' : '0 4px 12px rgba(0,0,0,0.08)',
                           borderRadius: '12px',
-                          border: isAbnormal ? '2px solid #ff4d4f' : '1px solid #f0f0f0',
+                          border: isAbnormal ? '2px solid #ff4d4f' : `1px solid ${theme.border}`,
+                          background: theme.card,
                         }}
                         styles={{
                           header: {
-                            backgroundColor: isAbnormal ? '#ff4d4f' : '#fafafa',
-                            borderBottom: isAbnormal ? '1px solid #ff7875' : '1px solid #d9d9d9',
+                            backgroundColor: isAbnormal ? theme.abnormalHeader : theme.header,
+                            borderBottom: isAbnormal ? '1px solid #a84f4f' : `1px solid ${theme.border}`,
                             borderRadius: '12px 12px 0 0',
                             padding: '12px 16px',
+                            color: theme.text,
                           },
                         }}
                         bodyStyle={{
@@ -498,7 +519,8 @@ const TransactionChartCard: React.FC = () => {
                           height: 'calc(100% - 60px)',
                           display: 'flex',
                           flexDirection: 'column',
-                          backgroundColor: isAbnormal ? '#fff2f0' : '#fff',
+                          backgroundColor: isAbnormal ? theme.abnormalBg : theme.card,
+                          color: theme.text,
                         }}
                       >
                         <div style={{ marginBottom: '16px' }}>

@@ -4,7 +4,6 @@
 // import type {} from '@mui/x-tree-view/themeAugmentation';
 import { useState, useEffect } from 'react'
 import Grid from '@mui/material/Grid2'
-import { alpha } from '@mui/material/styles'
 // import CssBaseline from '@mui/material/CssBaseline'
 import { TextField, OutlinedInput, Select, MenuItem, Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
@@ -464,12 +463,12 @@ export default function TransactionsMerchant() {
   return (
     <Box
       component='main'
-      sx={(theme) => ({
+      sx={{
         flexGrow: 1,
-        backgroundColor: theme.vars ? `white` : alpha(theme.palette.background.default, 1),
+        backgroundColor: 'background.default',
         overflow: 'auto',
         pt: 4,
-      })}
+      }}
     >
       <Stack
         spacing={2}

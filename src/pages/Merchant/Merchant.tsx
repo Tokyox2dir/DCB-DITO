@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 
 import { Box, Stack, Typography } from '@mui/material'
-import { alpha } from '@mui/material/styles'
 import { Table, Button, Input, Space } from 'antd'
 import { ColumnType } from 'antd/es/table'
 import axios from 'axios'
@@ -250,12 +249,12 @@ const Merchant = () => {
   return (
     <Box
       component='main'
-      sx={(theme) => ({
+      sx={{
         flexGrow: 1,
-        backgroundColor: theme.vars ? `white` : alpha(theme.palette.background.default, 1),
+        backgroundColor: 'background.default',
         overflow: 'auto',
         pt: 4,
-      })}
+      }}
     >
       <Stack
         spacing={2}

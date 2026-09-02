@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-mui-color-scheme="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/fav.ico" />
@@ -24,6 +24,13 @@
     </style>
   </head>
   <body>
+    <script>
+      (function () {
+        var t = localStorage.getItem('dcb_theme') || 'dark'
+        document.documentElement.setAttribute('data-theme', t)
+        document.documentElement.setAttribute('data-mui-color-scheme', t)
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

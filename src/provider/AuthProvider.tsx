@@ -55,6 +55,12 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       localStorage.setItem('token', newToken)
+    } else {
+      setRole(null)
+      setAppId(null)
+      setAppKey(null)
+      localStorage.removeItem('token')
+      delete axios.defaults.headers.common['Authorization']
     }
   }
 

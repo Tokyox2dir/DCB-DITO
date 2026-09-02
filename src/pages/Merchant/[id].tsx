@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import dayjs from 'dayjs'
 import { Box, Typography as MuiTypography } from '@mui/material'
-import { alpha } from '@mui/material/styles'
 import {
   Card,
   Tag,
@@ -154,12 +153,12 @@ const DetailMerchant = () => {
   return (
     <Box
       component='main'
-      sx={(theme) => ({
+      sx={{
         flexGrow: 1,
-        backgroundColor: theme.vars ? `white` : alpha(theme.palette.background.default, 1),
+        backgroundColor: 'background.default',
         overflow: 'auto',
         pt: 4,
-      })}
+      }}
     >
       <div style={{ padding: '24px' }}>
         {/* Header */}

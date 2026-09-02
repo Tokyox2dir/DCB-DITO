@@ -41,7 +41,9 @@ const router = createBrowserRouter([
         path: 'monitoring',
         element: (
           <PrivateRoute allowedRoles={['admin', 'superadmin']}>
-            <Monitoring />
+            <MerchantProvider>
+              <Monitoring />
+            </MerchantProvider>
           </PrivateRoute>
         ),
       },
