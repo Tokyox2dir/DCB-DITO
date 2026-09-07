@@ -27,7 +27,7 @@ export default function RankingCard({ title, subtitle, variant, icon, items, loa
   const barClass = variant === 'client' ? 'dash-rank-bar' : `dash-rank-bar ${variant}`
 
   return (
-    <article className='dash-rank-card'>
+    <article className={`dash-rank-card dash-rank-${variant}`} aria-busy={loading}>
       <div className='dash-rank-head'>
         <span className={iconClass}>{icon}</span>
         <div>
@@ -35,8 +35,9 @@ export default function RankingCard({ title, subtitle, variant, icon, items, loa
           <small>{subtitle}</small>
         </div>
       </div>
+      <div className='dash-rank-columns' aria-hidden='true'><span>Ranking</span><span>Transactions</span></div>
       <ol className='dash-rank-list'>
-        {loading && rows.length === 0 && <li className='dash-rank-empty'>Loading…</li>}
+        {loading && rows.length === 0 && <li className='dash-rank-empty' role='status'>Loading rankings…</li>}
         {!loading && rows.length === 0 && <li className='dash-rank-empty'>No traffic data.</li>}
         {rows.map((row, index) => {
           const pct = max > 0 ? Math.round((row.value * 100) / max) : 0
@@ -48,7 +49,7 @@ export default function RankingCard({ title, subtitle, variant, icon, items, loa
                   <strong title={row.label}>{row.label}</strong>
                   <span>{formatValue(row.value)}</span>
                 </div>
-                <div className={barClass}>
+                <div className={barClass} aria-hidden='true'>
                   <i style={{ width: `${pct}%` }} />
                 </div>
               </div>

@@ -16,7 +16,7 @@ import { useAuth } from '../provider/AuthProvider'
 import { UserOutlined } from '@ant-design/icons'
 import { Avatar } from 'antd'
 import logoImage from '../../public/logo.png'
-import { smsSurfaces } from '../styles/theme/shared-theme/themePrimitives'
+
 
 const drawerWidth = 240
 
@@ -28,10 +28,10 @@ const Drawer = styled(MuiDrawer)({
   [`& .${drawerClasses.paper}`]: {
     width: drawerWidth,
     boxSizing: 'border-box',
-    backgroundColor: smsSurfaces.paper,
+    backgroundColor: 'var(--dash-surface)',
     backgroundImage: 'none',
-    borderRight: `1px solid ${smsSurfaces.border}`,
-    color: '#fff',
+    borderRight: `1px solid var(--dash-border)`,
+    color: 'var(--dash-text)',
   },
 })
 
@@ -63,9 +63,9 @@ export default function SideMenu({ open }: SideMenuProps) {
         sx={{
           display: { xs: 'none', md: 'block' },
           [`& .${drawerClasses.paper}`]: {
-            backgroundColor: smsSurfaces.paper,
+            backgroundColor: 'var(--dash-surface)',
             backgroundImage: 'none',
-            borderRight: `1px solid ${smsSurfaces.border}`,
+            borderRight: `1px solid var(--dash-border)`,
           },
         }}
       >
@@ -147,8 +147,8 @@ export default function SideMenu({ open }: SideMenuProps) {
             bottom: 0,
             left: 0,
             right: 0,
-            borderTop: `1px solid ${smsSurfaces.border}`,
-            backgroundColor: smsSurfaces.paper,
+            borderTop: `1px solid var(--dash-border)`,
+            backgroundColor: 'var(--dash-surface)',
           }}
         >
           <Stack

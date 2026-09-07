@@ -669,10 +669,10 @@ export default function Transactions() {
           <Typography component='h2' variant='h6' sx={{ mb: 2 }}>
             Redpay Transactions
           </Typography>
-          <Card variant='outlined' className='p-3'>
+          <Card variant='outlined' className='transaction-filter'>
             <span className='font-semibold'>Filter Transaction</span>
             <div className='mt-3'>
-              <form onSubmit={handleSubmit}>
+              <form className='transaction-filter-form' onSubmit={handleSubmit}>
                 <Grid container rowSpacing={2} className='mb-2' columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
                   <Grid size={{ xs: 12, md: 4 }}>
                     <FormLabel className='font-medium'>User MDN</FormLabel>
@@ -795,7 +795,7 @@ export default function Transactions() {
                       onChange={handleChange}
                       name='status'
                       value={formData.status}
-                      input={<OutlinedInput label='status' />}
+                      input={<OutlinedInput />}
                     >
                       {status.map((s) => (
                         <MenuItem key={s.value} value={s.value}>
@@ -856,7 +856,7 @@ export default function Transactions() {
                   <Grid size={{ xs: 12, md: 4 }}>
                     <FormLabel className='font-medium'>Denom</FormLabel>
                     <Select
-                      style={{ marginTop: '6px' }}
+
                       fullWidth
                       labelId='denom-label'
                       id='denom'
@@ -864,7 +864,7 @@ export default function Transactions() {
                       type='number'
                       value={formData.denom}
                       onChange={handleChange}
-                      input={<OutlinedInput label='denom' />}
+                      input={<OutlinedInput />}
                     >
                       <MenuItem key='all' value={0}>
                         All
@@ -878,15 +878,17 @@ export default function Transactions() {
                   </Grid>
                 </Grid>
                 {/* <Grid container rowSpacing={1} className='mb-2' columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                 
+
                 </Grid> */}
                 <Grid container rowSpacing={1} className='mb-2' columnSpacing={{ xs: 1, sm: 2, md: 3 }}></Grid>
-                <Button type='submit' className='mt-3 mr-4' variant='contained' color='primary'>
+                <div className='transaction-filter-actions'>
+                <Button type='submit' variant='contained' color='primary'>
                   Submit
                 </Button>
-                <Button type='button' className='mt-3' variant='outlined' color='inherit' onClick={handleReset}>
+                <Button type='button' variant='outlined' color='inherit' onClick={handleReset}>
                   Reset
                 </Button>
+                </div>
               </form>
             </div>
           </Card>

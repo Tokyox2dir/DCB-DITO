@@ -426,7 +426,7 @@ const TransactionDetail: React.FC = () => {
 
   return (
     <div className='flex flex-col gap-2 pb-8'>
-      <Card className='bg-slate-100' sx={{ padding: 2 }}>
+      <Card className='transaction-detail-surface' sx={{ padding: 2 }}>
         <Typography variant='h5' sx={{ mb: 2 }}>
           Transaction Detail
         </Typography>
@@ -626,7 +626,7 @@ const TransactionDetail: React.FC = () => {
         </Box>
       </Card>
       {notifications.length > 0 && (
-        <Card className='bg-slate-100' sx={{ padding: 2, mt: 2 }}>
+        <Card className='transaction-detail-surface' sx={{ padding: 2, mt: 2 }}>
           <Typography variant='h5' sx={{ mb: 2 }}>
             Payment Notification History
           </Typography>
@@ -635,7 +635,7 @@ const TransactionDetail: React.FC = () => {
               const isExpanded = !!expandedNotifications[index]
               const isSuccess = notification.status_code >= 200 && notification.status_code < 300
               return (
-                <Box key={index} sx={{ border: '1px solid #cbd5e1', borderRadius: 1, bgcolor: '#fff' }}>
+                <Box key={index} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, bgcolor: 'background.paper' }}>
                   <Box
                     onClick={() => toggleNotification(index)}
                     display='flex'
@@ -659,7 +659,7 @@ const TransactionDetail: React.FC = () => {
                         {notification.status_code}
                       </span>
                     </Box>
-                    <span style={{ fontSize: 12, color: '#64748b' }}>{notification.duration_ms.toFixed(2)} ms</span>
+                    <span style={{ fontSize: 12, color: 'var(--dash-muted)' }}>{notification.duration_ms.toFixed(2)} ms</span>
                   </Box>
                   {isExpanded && (
                     <Box sx={{ borderTop: '1px solid #e2e8f0', padding: 1.5 }} display='flex' flexDirection='column' gap={1}>
@@ -677,13 +677,13 @@ const TransactionDetail: React.FC = () => {
                       </div>
                       <div>
                         <strong>Request Body:</strong>
-                        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: '#f1f5f9', padding: 8, borderRadius: 4 }}>
+                        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: 'var(--dash-surface-2)', padding: 8, borderRadius: 4 }}>
                           {JSON.stringify(notification.request_body, null, 2)}
                         </pre>
                       </div>
                       <div>
                         <strong>Response Body:</strong>
-                        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: '#f1f5f9', padding: 8, borderRadius: 4 }}>
+                        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: 'var(--dash-surface-2)', padding: 8, borderRadius: 4 }}>
                           {JSON.stringify(notification.response_body, null, 2)}
                         </pre>
                       </div>

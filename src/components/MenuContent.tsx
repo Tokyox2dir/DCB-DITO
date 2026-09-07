@@ -188,16 +188,16 @@ export default function MenuContent() {
                     mx: 1,
                     px: 2,
                     py: 1,
-                    backgroundColor: isParentActive(item) ? 'rgba(255,255,255,0.92)' : 'transparent',
+                    backgroundColor: isParentActive(item) ? 'var(--dash-surface-2)' : 'transparent',
                     '&:hover': {
-                      backgroundColor: isParentActive(item) ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.06)',
+                      backgroundColor: isParentActive(item) ? 'var(--dash-surface-2)' : 'var(--dash-surface-2)',
                     },
                   }}
                 >
                   <ListItemIcon
                     sx={{
                       minWidth: 40,
-                      color: isParentActive(item) ? '#0A0C16' : 'rgba(255,255,255,0.55)',
+                      color: isParentActive(item) ? 'var(--dash-accent)' : 'var(--dash-muted)',
                     }}
                   >
                     {item.icon}
@@ -207,13 +207,13 @@ export default function MenuContent() {
                     primaryTypographyProps={{
                       fontSize: '14px',
                       fontWeight: isParentActive(item) ? 600 : 500,
-                      color: isParentActive(item) ? '#0A0C16' : '#FFFFFF',
+                      color: isParentActive(item) ? 'var(--dash-accent)' : 'var(--dash-text)',
                     }}
                   />
                   {openItems[index] ? (
-                    <ExpandLess sx={{ color: isParentActive(item) ? '#0A0C16' : 'rgba(255,255,255,0.55)' }} />
+                    <ExpandLess sx={{ color: isParentActive(item) ? 'var(--dash-accent)' : 'var(--dash-muted)' }} />
                   ) : (
-                    <ExpandMore sx={{ color: isParentActive(item) ? '#0A0C16' : 'rgba(255,255,255,0.55)' }} />
+                    <ExpandMore sx={{ color: isParentActive(item) ? 'var(--dash-accent)' : 'var(--dash-muted)' }} />
                   )}
                 </ListItemButton>
               ) : (
@@ -224,18 +224,18 @@ export default function MenuContent() {
                       mx: 1,
                       px: 2,
                       py: 1,
-                      backgroundColor: isActiveRoute(item.path as string) ? 'rgba(255,255,255,0.92)' : 'transparent',
+                      backgroundColor: isActiveRoute(item.path as string) ? 'var(--dash-surface-2)' : 'transparent',
                       '&:hover': {
                         backgroundColor: isActiveRoute(item.path as string)
-                          ? 'rgba(255,255,255,0.92)'
-                          : 'rgba(255,255,255,0.06)',
+                          ? 'var(--dash-surface-2)'
+                          : 'var(--dash-surface-2)',
                       },
                     }}
                   >
                     <ListItemIcon
                       sx={{
                         minWidth: 40,
-                        color: isActiveRoute(item.path as string) ? '#0A0C16' : 'rgba(255,255,255,0.55)',
+                        color: isActiveRoute(item.path as string) ? 'var(--dash-accent)' : 'var(--dash-muted)',
                       }}
                     >
                       {item.icon}
@@ -245,7 +245,7 @@ export default function MenuContent() {
                       primaryTypographyProps={{
                         fontSize: '14px',
                         fontWeight: isActiveRoute(item.path as string) ? 600 : 500,
-                        color: isActiveRoute(item.path as string) ? '#0A0C16' : '#FFFFFF',
+                        color: isActiveRoute(item.path as string) ? 'var(--dash-accent)' : 'var(--dash-text)',
                       }}
                     />
                   </ListItemButton>
@@ -265,18 +265,18 @@ export default function MenuContent() {
                             px: 2,
                             py: 0.75,
                             pl: 6,
-                            backgroundColor: isActiveRoute(nestedItem.path) ? 'rgba(255,255,255,0.92)' : 'transparent',
+                            backgroundColor: isActiveRoute(nestedItem.path) ? 'var(--dash-surface-2)' : 'transparent',
                             '&:hover': {
                               backgroundColor: isActiveRoute(nestedItem.path)
-                                ? 'rgba(255,255,255,0.92)'
-                                : 'rgba(255,255,255,0.06)',
+                                ? 'var(--dash-surface-2)'
+                                : 'var(--dash-surface-2)',
                             },
                           }}
                         >
                           <ListItemIcon
                             sx={{
                               minWidth: 32,
-                              color: isActiveRoute(nestedItem.path) ? '#0A0C16' : 'rgba(255,255,255,0.55)',
+                              color: isActiveRoute(nestedItem.path) ? 'var(--dash-accent)' : 'var(--dash-muted)',
                             }}
                           >
                             {nestedItem.icon}
@@ -286,7 +286,7 @@ export default function MenuContent() {
                             primaryTypographyProps={{
                               fontSize: '13px',
                               fontWeight: isActiveRoute(nestedItem.path) ? 600 : 400,
-                              color: isActiveRoute(nestedItem.path) ? '#0A0C16' : '#FFFFFF',
+                              color: isActiveRoute(nestedItem.path) ? 'var(--dash-accent)' : 'var(--dash-text)',
                             }}
                           />
                         </ListItemButton>
@@ -327,14 +327,14 @@ export default function MenuContent() {
                       mx: 1,
                       px: 2,
                       py: 1,
-                      backgroundColor: isParentActive(item) ? 'rgba(255,255,255,0.92)' : 'transparent',
+                      backgroundColor: isParentActive(item) ? 'var(--dash-surface-2)' : 'transparent',
                       '&:hover': {
-                        backgroundColor: isParentActive(item) ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.06)',
+                        backgroundColor: isParentActive(item) ? 'var(--dash-surface-2)' : 'var(--dash-surface-2)',
                       },
                     }}
                   >
                     <ListItemIcon
-                      sx={{ minWidth: 40, color: isParentActive(item) ? '#0A0C16' : 'rgba(255,255,255,0.55)' }}
+                      sx={{ minWidth: 40, color: isParentActive(item) ? 'var(--dash-accent)' : 'var(--dash-muted)' }}
                     >
                       {item.icon}
                     </ListItemIcon>
@@ -343,14 +343,14 @@ export default function MenuContent() {
                       primaryTypographyProps={{
                         fontSize: '14px',
                         fontWeight: isParentActive(item) ? 600 : 500,
-                        color: isParentActive(item) ? '#0A0C16' : '#FFFFFF',
+                        color: isParentActive(item) ? 'var(--dash-accent)' : 'var(--dash-text)',
                       }}
                     />
                     {item.nestedItems &&
                       (openItems[index + 100] ? (
-                        <ExpandLess sx={{ color: isParentActive(item) ? '#0A0C16' : 'rgba(255,255,255,0.55)' }} />
+                        <ExpandLess sx={{ color: isParentActive(item) ? 'var(--dash-accent)' : 'var(--dash-muted)' }} />
                       ) : (
-                        <ExpandMore sx={{ color: isParentActive(item) ? '#0A0C16' : 'rgba(255,255,255,0.55)' }} />
+                        <ExpandMore sx={{ color: isParentActive(item) ? 'var(--dash-accent)' : 'var(--dash-muted)' }} />
                       ))}
                   </ListItemButton>
                 </ListItem>
@@ -368,19 +368,19 @@ export default function MenuContent() {
                                 py: 0.75,
                                 pl: 6,
                                 backgroundColor: isActiveRoute(nestedItem.path)
-                                  ? 'rgba(255,255,255,0.92)'
+                                  ? 'var(--dash-surface-2)'
                                   : 'transparent',
                                 '&:hover': {
                                   backgroundColor: isActiveRoute(nestedItem.path)
-                                    ? 'rgba(255,255,255,0.92)'
-                                    : 'rgba(255,255,255,0.06)',
+                                    ? 'var(--dash-surface-2)'
+                                    : 'var(--dash-surface-2)',
                                 },
                               }}
                             >
                               <ListItemIcon
                                 sx={{
                                   minWidth: 32,
-                                  color: isActiveRoute(nestedItem.path) ? '#0A0C16' : 'rgba(255,255,255,0.55)',
+                                  color: isActiveRoute(nestedItem.path) ? 'var(--dash-accent)' : 'var(--dash-muted)',
                                 }}
                               >
                                 {nestedItem.icon}
@@ -390,7 +390,7 @@ export default function MenuContent() {
                                 primaryTypographyProps={{
                                   fontSize: '13px',
                                   fontWeight: isActiveRoute(nestedItem.path) ? 600 : 400,
-                                  color: isActiveRoute(nestedItem.path) ? '#0A0C16' : '#FFFFFF',
+                                  color: isActiveRoute(nestedItem.path) ? 'var(--dash-accent)' : 'var(--dash-text)',
                                 }}
                               />
                             </ListItemButton>

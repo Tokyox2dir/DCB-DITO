@@ -200,7 +200,7 @@ const TransactionMerchantDetail: React.FC = () => {
 
   return (
     <div>
-      <Card className='bg-slate-100' sx={{ padding: 2 }}>
+      <Card className='transaction-detail-surface' sx={{ padding: 2 }}>
         <Typography variant='h5' sx={{ mb: 2 }}>
           Transaction Detail
         </Typography>

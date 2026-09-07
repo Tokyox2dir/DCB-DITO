@@ -1,4 +1,3 @@
-import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -43,13 +42,12 @@ function AreaGradient({ color, id }: { color: string; id: string }) {
 }
 
 export default function StatCard({ title, value, interval, trend, data }: StatCardProps) {
-  const theme = useTheme()
   const daysInWeek = getDaysInMonth(4, 2024)
 
   const trendColors = {
-    up: theme.palette.mode === 'light' ? theme.palette.success.main : theme.palette.success.dark,
-    down: theme.palette.mode === 'light' ? theme.palette.error.main : theme.palette.error.dark,
-    neutral: theme.palette.mode === 'light' ? theme.palette.grey[400] : theme.palette.grey[700],
+    up: 'var(--theme-success)',
+    down: 'var(--theme-danger)',
+    neutral: 'var(--dash-muted)',
   }
 
   const labelColors = {

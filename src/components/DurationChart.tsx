@@ -1,3 +1,4 @@
+import { useColorScheme } from '@mui/material/styles'
 import React, { useEffect, useMemo, useState, useCallback } from 'react'
 import { Card, Select, Spin, Empty, DatePicker, Tag, Space } from 'antd'
 import { Line } from 'react-chartjs-2'
@@ -61,6 +62,8 @@ interface DurationCardGroup {
 const AUTO_REFRESH_INTERVAL = 10 * 60 * 1000
 
 const DurationChart: React.FC = () => {
+  const { mode, systemMode } = useColorScheme()
+  const chartText = (mode === 'system' ? systemMode : mode) === 'light' ? '#52637a' : '#94a3b8'
   const { token, apiUrl } = useAuth()
 
   // === State ===
@@ -298,6 +301,7 @@ const DurationChart: React.FC = () => {
           display: points.length > 1,
           position: 'top' as const,
           labels: {
+            color: chartText,
             usePointStyle: true,
             pointStyle: 'circle',
             padding: 20,
@@ -360,7 +364,7 @@ const DurationChart: React.FC = () => {
           ticks: {
             padding: 12,
             font: { size: 12 },
-            color: '#94a3b8',
+            color: chartText,
             callback: function (value: any) {
               return formatSecondsToDuration(Number(value))
             },
@@ -369,7 +373,7 @@ const DurationChart: React.FC = () => {
             display: true,
             text: 'Duration (seconds)',
             font: { size: 12, weight: 500 as const },
-            color: '#94a3b8',
+            color: chartText,
             padding: { bottom: 8 },
           },
         },
@@ -383,7 +387,7 @@ const DurationChart: React.FC = () => {
             padding: 10,
             maxTicksLimit: 12,
             font: { size: 12 },
-            color: '#94a3b8',
+            color: chartText,
             maxRotation: 45,
             minRotation: 0,
           },
@@ -391,7 +395,7 @@ const DurationChart: React.FC = () => {
             display: true,
             text: 'Time (per 10 minutes)',
             font: { size: 12, weight: 500 as const },
-            color: '#94a3b8',
+            color: chartText,
             padding: { top: 8 },
           },
         },
@@ -405,7 +409,7 @@ const DurationChart: React.FC = () => {
         easing: 'easeOutQuart' as const,
       },
     }),
-    [],
+    [chartText],
   )
 
   // === Stats Summary ===
@@ -463,7 +467,7 @@ const DurationChart: React.FC = () => {
             >
               ⏱️ Transaction Duration Monitoring
             </h2>
-            <p style={{ margin: '4px 0 0', color: '#94a3b8', fontSize: 13 }}>
+            <p style={{ margin: '4px 0 0', color: 'var(--dash-muted)', fontSize: 13 }}>
               Average transaction completion duration (per 10 minutes)
               <Tag
                 color='blue'
@@ -502,7 +506,7 @@ const DurationChart: React.FC = () => {
           }}
         >
           <div style={{ flex: '1 1 200px' }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#64748b', marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--dash-muted)', marginBottom: 6 }}>
               Merchant
             </label>
             <Select
@@ -517,7 +521,7 @@ const DurationChart: React.FC = () => {
           </div>
 
           <div style={{ flex: '1 1 200px' }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#64748b', marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--dash-muted)', marginBottom: 6 }}>
               Payment Method
             </label>
             <Select
@@ -532,7 +536,7 @@ const DurationChart: React.FC = () => {
           </div>
 
           <div style={{ flex: '1 1 150px' }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#64748b', marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--dash-muted)', marginBottom: 6 }}>
               Status
             </label>
             <Select
@@ -568,10 +572,10 @@ const DurationChart: React.FC = () => {
                 border: '1px solid rgba(99,102,241,0.15)',
               }}
             >
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#6366f1', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--dash-accent)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Avg Duration
               </div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#4f46e5', marginTop: 4 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--dash-accent)', marginTop: 4 }}>
                 {stats.avgTotal}
               </div>
             </div>
@@ -587,7 +591,7 @@ const DurationChart: React.FC = () => {
               <div style={{ fontSize: 11, fontWeight: 600, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Max Duration
               </div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#dc2626', marginTop: 4 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-danger)', marginTop: 4 }}>
                 {stats.maxTotal}
               </div>
             </div>
@@ -603,7 +607,7 @@ const DurationChart: React.FC = () => {
               <div style={{ fontSize: 11, fontWeight: 600, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Min Duration
               </div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#059669', marginTop: 4 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-success)', marginTop: 4 }}>
                 {stats.minTotal}
               </div>
             </div>
@@ -619,7 +623,7 @@ const DurationChart: React.FC = () => {
               <div style={{ fontSize: 11, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Total Transactions
               </div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#d97706', marginTop: 4 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-warning)', marginTop: 4 }}>
                 {stats.totalTransactions.toLocaleString()}
               </div>
             </div>
@@ -632,10 +636,10 @@ const DurationChart: React.FC = () => {
                 border: '1px solid rgba(148,163,184,0.15)',
               }}
             >
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--dash-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Data Points
               </div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: '#475569', marginTop: 4 }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--dash-text)', marginTop: 4 }}>
                 {stats.dataPoints}
               </div>
             </div>
@@ -653,7 +657,7 @@ const DurationChart: React.FC = () => {
           >
             <Space direction='vertical' align='center'>
               <Spin size='large' />
-              <span style={{ color: '#64748b', fontSize: 13 }}>Loading duration data...</span>
+              <span style={{ color: 'var(--dash-muted)', fontSize: 13 }}>Loading duration data...</span>
             </Space>
           </div>
         )}
@@ -715,13 +719,13 @@ const DurationChart: React.FC = () => {
                           margin: 0,
                           fontSize: 18,
                           fontWeight: 700,
-                          color: '#334155',
+                          color: 'var(--dash-text)',
                           letterSpacing: '-0.2px',
                         }}
                       >
                         {group.merchant_name}
                       </h3>
-                      <div style={{ marginTop: 4, color: '#6366f1', fontSize: 13, fontWeight: 600 }}>
+                      <div style={{ marginTop: 4, color: 'var(--dash-accent)', fontSize: 13, fontWeight: 600 }}>
                         {group.payment_method.toUpperCase()}
                       </div>
                     </div>
@@ -752,10 +756,10 @@ const DurationChart: React.FC = () => {
                         border: '1px solid rgba(99,102,241,0.15)',
                       }}
                     >
-                      <div style={{ fontSize: 11, fontWeight: 600, color: '#6366f1', textTransform: 'uppercase' }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--dash-accent)', textTransform: 'uppercase' }}>
                         Avg Duration
                       </div>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: '#4f46e5', marginTop: 4 }}>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--dash-accent)', marginTop: 4 }}>
                         {formatSecondsToDuration(Math.round(avgTotal))}
                       </div>
                     </div>
@@ -771,7 +775,7 @@ const DurationChart: React.FC = () => {
                       <div style={{ fontSize: 11, fontWeight: 600, color: '#ef4444', textTransform: 'uppercase' }}>
                         Max Duration
                       </div>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: '#dc2626', marginTop: 4 }}>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-danger)', marginTop: 4 }}>
                         {formatSecondsToDuration(maxTotal)}
                       </div>
                     </div>
@@ -787,7 +791,7 @@ const DurationChart: React.FC = () => {
                       <div style={{ fontSize: 11, fontWeight: 600, color: '#10b981', textTransform: 'uppercase' }}>
                         Min Duration
                       </div>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: '#059669', marginTop: 4 }}>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-success)', marginTop: 4 }}>
                         {formatSecondsToDuration(minTotal)}
                       </div>
                     </div>
@@ -803,7 +807,7 @@ const DurationChart: React.FC = () => {
                       <div style={{ fontSize: 11, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase' }}>
                         Total Transactions
                       </div>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: '#d97706', marginTop: 4 }}>
+                      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-warning)', marginTop: 4 }}>
                         {totalTransactions.toLocaleString('id-ID')}
                       </div>
                     </div>

@@ -1,0 +1,103 @@
+/* Minimal modern: shared surfaces and spacing for both appearance modes. */
+:root, html[data-theme='dark'] {
+  --dash-bg: #101722;
+  --dash-surface: #1b2636;
+  --dash-surface-2: #253348;
+  --dash-border: #3b4c63;
+  --dash-text: #f3f6fc;
+  --dash-muted: #b9c7da;
+  --dash-subtle: #a4b5cc;
+  --dash-accent: #69a5ff;
+  --dash-shadow: 0 4px 18px rgba(0,0,0,0.08);
+  --theme-accent-soft: #203e68;
+  --theme-primary: #2563eb;
+  --theme-on-primary: #ffffff;
+  --theme-primary-hover: #1d4ed8;
+}
+html[data-theme='light'] {
+  --dash-bg: #eef2f8;
+  --dash-surface: #ffffff;
+  --dash-surface-2: #e8eef6;
+  --dash-border: #cbd5e3;
+  --dash-text: #17263d;
+  --dash-muted: #4b607b;
+  --dash-subtle: #526780;
+  --dash-accent: #1d4ed8;
+  --dash-shadow: 0 4px 18px rgba(37,55,85,0.035);
+  --theme-accent-soft: #dce8ff;
+  --theme-primary: #2563eb;
+  --theme-on-primary: #ffffff;
+  --theme-primary-hover: #1d4ed8;
+}
+html[data-theme] {
+  --v2-bg: var(--dash-bg);
+  --v2-paper: var(--dash-surface);
+  --v2-ink: var(--dash-text);
+  --v2-muted: var(--dash-muted);
+  --v2-line: var(--dash-border);
+  --v2-shadow: var(--dash-shadow);
+}
+
+/* Original layout with shared appearance tokens. */
+html[data-theme] .aura-v2-shell,
+html[data-theme] .aura-v2-topbar-sticky { background: var(--dash-bg); }
+html[data-theme] .aura-v2-topbar { background: var(--dash-surface); }
+html[data-theme] .aura-v2-brand strong { color: var(--dash-text); }
+html[data-theme] .aura-v2-tab.active,
+html[data-theme] .aura-v2-tab:hover { background: var(--theme-accent-soft); color: var(--dash-accent); }
+html[data-theme] .aura-v2-user,
+html[data-theme] .aura-v2-theme,
+html[data-theme] .aura-v2-logout { background: var(--dash-surface-2); color: var(--dash-text); }
+html[data-theme] .aura-v2-avatar { background: var(--theme-primary); color: var(--theme-on-primary); }
+.aura-v2-tabs { justify-content: center; }
+.dashboard-overview { width: 100%; max-width: none; margin: 0; }
+.dash-refresh { background: var(--dash-surface); color: var(--dash-text); border: 1px solid var(--dash-border); border-radius: 10px; padding: 8px 14px; cursor: pointer; }
+.dash-refresh:disabled { opacity: .6; cursor: wait; }
+.dash-rank-columns { display: flex; justify-content: space-between; font-size: 11px; color: var(--dash-muted); margin-bottom: 12px; }
+.login-shell { min-height: 100dvh; display: grid; align-items: center; padding: 40px 7vw; background: var(--login-background); }
+.login-form-column { width: 100%; max-width: 420px; }
+.login-form-surface { padding: 32px; border-radius: 24px; border: 1px solid var(--dash-border); background: var(--dash-surface); box-shadow: var(--dash-shadow); }
+.login-intro { display: none; }
+@media (max-width: 600px) { .login-shell { padding: 24px 16px; } .login-form-surface { padding: 24px; } }
+@media (prefers-reduced-motion: reduce) { .login-form-column { animation: none; } }
+html[data-theme] .mon-panel,
+html[data-theme] .mon-filter,
+html[data-theme] .dash-rank-card { background: var(--dash-surface); border-color: var(--dash-border); }
+html[data-theme] .mon-panel-title h4 { color: var(--dash-text); }
+/* Detail panels must own their foreground and background as a pair. */
+.transaction-detail-surface.MuiCard-root { background-color: var(--dash-surface); color: var(--dash-text); border-color: var(--dash-border); }
+/* Login and transaction filters use consistent control geometry. */
+.login-shell { grid-template-columns: minmax(0, 480px) minmax(0, 1fr); gap: clamp(48px, 8vw, 160px); padding: 64px clamp(24px, 9vw, 180px); background: var(--dash-bg); }
+.login-shell .login-form-column { max-width: 480px; }
+.login-form-surface { position: relative; padding: 40px; box-shadow: none; border-radius: 24px; }
+.login-form-surface > .MuiBox-root:first-child { position: absolute; right: 24px; top: 24px; }
+.login-form-surface .MuiOutlinedInput-root { min-height: 50px; }
+.login-form-surface .MuiInputBase-input { background: transparent; border-radius: 0; }
+.login-form-surface input:is(:autofill, :-webkit-autofill) { -webkit-box-shadow: 0 0 0 1000px var(--dash-surface-2) inset !important; box-shadow: 0 0 0 1000px var(--dash-surface-2) inset !important; -webkit-text-fill-color: var(--dash-text) !important; caret-color: var(--dash-text); }
+.login-intro { display: block; color: var(--dash-text); padding: 40px 0; max-width: 560px; }
+.login-intro small { color: var(--dash-accent); font-size: 12px; letter-spacing: .08em; }
+.login-intro h2 { font-size: clamp(32px, 3.2vw, 52px); font-weight: 600; line-height: 1.15; letter-spacing: -.04em; margin: 22px 0; }
+.login-intro p { color: var(--dash-muted); font-size: 15px; line-height: 1.8; max-width: 420px; }
+.login-intro ul { list-style: none; padding: 24px 0 0; margin-top: 28px; border-top: 1px solid var(--dash-border); }
+.login-intro li { color: var(--dash-muted); font-size: 13px; padding: 8px 0; }
+.transaction-filter.MuiCard-root { padding: 24px; }
+.transaction-filter-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 24px; }
+.transaction-filter-form > .MuiGrid2-container { display: contents; }
+.transaction-filter-form > .MuiGrid2-container > .MuiGrid2-root { width: auto; min-width: 0; display: flex; flex-direction: column; }
+.transaction-filter .MuiFormLabel-root { display: block; line-height: 20px; font-size: 13px; margin-bottom: 6px; color: var(--dash-muted); }
+.transaction-filter .MuiInputBase-root { min-height: 44px; height: 44px; border-radius: 10px; font-size: 14px; }
+.transaction-filter .MuiInputBase-input { padding-top: 11px; padding-bottom: 11px; }
+.transaction-filter .ant-picker { width: 100%; height: 44px; border-radius: 10px; }
+.transaction-filter .ant-select { height: auto !important; min-height: 44px !important; }
+.transaction-filter .ant-select .ant-select-selector { min-height: 44px; border-radius: 10px; align-items: center; }
+.transaction-filter-form > .MuiButton-root { margin: 4px 0 0; justify-self: start; min-height: 38px; }
+.transaction-filter-form > .MuiButton-root:last-child { grid-column: 2; }
+@media (max-width: 1000px) { .login-shell { grid-template-columns: minmax(0, 480px); padding: 48px 6vw; } .login-intro { display: none; } }
+@media (max-width: 700px) { .transaction-filter-form { grid-template-columns: minmax(0, 1fr); } .transaction-filter-form > .MuiButton-root:last-child { grid-column: 1; } .transaction-filter.MuiCard-root { padding: 18px; } .login-form-surface { padding: 32px 24px; } }
+
+.transaction-filter-actions { grid-column: 1 / -1; display: flex; gap: 12px; padding-top: 6px; }
+/* Center the standalone login card at every viewport size. */
+.login-shell { grid-template-columns: minmax(0, 460px); justify-content: center; align-content: center; gap: 0; padding: 40px 20px; }
+.login-form-surface { border: 1px solid var(--dash-border); box-shadow: 0 12px 36px rgba(0, 0, 0, .08); }
+html[data-theme='dark'] .login-form-surface { border-color: #465166; }
+html[data-theme='light'] .login-form-surface { border-color: #cdd6e3; }

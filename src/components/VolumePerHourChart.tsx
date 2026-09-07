@@ -160,9 +160,9 @@ export default function VolumePerHourChart({
     [series, fineSeries, hourPatch, referenceNow, status],
   )
 
-  const todayColor = isDark ? '#e08a8a' : '#c45c5c'
+  const todayColor = isDark ? '#60a5fa' : '#3b82f6'
   const yestColor = isDark ? '#6b7280' : '#a0aec0'
-  const tickColor = isDark ? '#b8a0a3' : '#6b7280'
+  const tickColor = isDark ? '#94a3b8' : '#6b7280'
   const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
 
   const data = {

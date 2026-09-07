@@ -97,12 +97,12 @@ export const purple = {
   900: 'hsl(270, 65%, 12%)',
 }
 
-/** Soft red DCB surfaces */
+/** Shared navy surfaces */
 export const smsSurfaces = {
-  background: '#120e10',
-  paper: '#1a1416',
-  elevated: '#24181a',
-  border: 'rgba(196, 92, 92, 0.18)',
+  background: '#101722',
+  paper: '#1b2636',
+  elevated: '#272b34',
+  border: '#3b4c63',
 }
 
 export const red = {
@@ -129,13 +129,13 @@ export const getDesignTokens = (mode: PaletteMode) => {
       mode,
       primary: {
         light: brand[200],
-        main: brand[400],
+        main: '#2563eb',
         dark: brand[700],
         contrastText: brand[50],
         ...(mode === 'dark' && {
           contrastText: brand[50],
           light: brand[300],
-          main: brand[400],
+          main: '#2563eb',
           dark: brand[700],
         }),
       },
@@ -186,8 +186,8 @@ export const getDesignTokens = (mode: PaletteMode) => {
       },
       divider: mode === 'dark' ? alpha(gray[700], 0.6) : alpha(gray[300], 0.4),
       background: {
-        default: 'hsl(0, 0%, 99%)',
-        paper: 'hsl(220, 35%, 97%)',
+        default: '#f5f6f8',
+        paper: '#ffffff',
         ...(mode === 'dark' && {
           default: smsSurfaces.background,
           paper: smsSurfaces.paper,
@@ -198,8 +198,8 @@ export const getDesignTokens = (mode: PaletteMode) => {
         secondary: gray[600],
         warning: orange[400],
         ...(mode === 'dark' && {
-          primary: '#FFFFFF',
-          secondary: 'rgba(255, 255, 255, 0.55)',
+          primary: '#e9ecf2',
+          secondary: '#a0a8b7',
         }),
       },
       action: {
@@ -272,7 +272,7 @@ export const colorSchemes = {
     palette: {
       primary: {
         light: brand[200],
-        main: brand[400],
+        main: '#2563eb',
         dark: brand[700],
         contrastText: brand[50],
       },
@@ -302,8 +302,8 @@ export const colorSchemes = {
       },
       divider: alpha(gray[300], 0.4),
       background: {
-        default: 'hsl(0, 0%, 99%)',
-        paper: 'hsl(220, 35%, 97%)',
+        default: '#eef2f8',
+        paper: '#ffffff',
       },
       text: {
         primary: gray[800],
@@ -320,9 +320,9 @@ export const colorSchemes = {
   dark: {
     palette: {
       primary: {
-        contrastText: brand[50],
-        light: brand[300],
-        main: brand[400],
+        contrastText: '#ffffff',
+        light: '#93c5fd',
+        main: '#2563eb',
         dark: brand[700],
       },
       info: {
@@ -355,8 +355,8 @@ export const colorSchemes = {
         paper: smsSurfaces.paper,
       },
       text: {
-        primary: '#FFFFFF',
-        secondary: 'rgba(255, 255, 255, 0.55)',
+        primary: '#f3f6fc',
+        secondary: '#b9c7da',
       },
       action: {
         hover: 'rgba(255, 255, 255, 0.06)',

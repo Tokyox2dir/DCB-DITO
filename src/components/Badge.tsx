@@ -12,16 +12,17 @@ const Badge: React.FC<BadgeProps> = ({ text, color }) => {
 
   switch (color) {
     case 'success':
-      backgroundColor = '#4CAF50' // Hijau
+      backgroundColor = '#15803d' // Hijau
       break
     case 'error':
-      backgroundColor = '#F44336' // Merah
+      backgroundColor = '#b91c1c' // Merah
       break
     case 'pending':
-      backgroundColor = '#FFC107' // Kuning
+      backgroundColor = '#FFC107'
+      textColor = '#422006' // Kuning
       break
     case 'waiting-callback':
-      backgroundColor = '#945af2' // Kuning
+      backgroundColor = '#6d28d9' // Kuning
       break
     default:
       backgroundColor = '#9E9E9E' // Abu-abu untuk status tidak dikenal

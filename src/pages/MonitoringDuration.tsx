@@ -69,12 +69,12 @@ export default function MonitoringDuration(props: { disableCustomTheme?: boolean
                       sx={{
                         fontWeight: 800,
                         letterSpacing: '-0.02em',
-                        color: '#334155',
+                        color: 'text.primary',
                       }}
                     >
                       Transaction Duration Monitoring
                     </Typography>
-                    <Typography variant='body2' sx={{ color: '#64748b', mt: 0.75, lineHeight: 1.7 }}>
+                    <Typography variant='body2' sx={{ color: 'text.secondary', mt: 0.75, lineHeight: 1.7 }}>
                       This page tracks how long transactions take to complete from start to finish, with a focus on
                       average total duration, supplier duration, and merchant duration. The data is displayed in
                       10-minute intervals so spikes and slowdowns are easier to spot.
@@ -95,7 +95,7 @@ export default function MonitoringDuration(props: { disableCustomTheme?: boolean
                       mt: 0.5,
                       borderRadius: 2,
                       border: '1px solid rgba(148, 163, 184, 0.14)',
-                      backgroundColor: 'rgba(255,255,255,0.6)',
+                      backgroundColor: 'background.paper',
                       '&:before': { display: 'none' },
                       '&.Mui-expanded': { margin: 0 },
                     }}
@@ -109,7 +109,7 @@ export default function MonitoringDuration(props: { disableCustomTheme?: boolean
                         '&.Mui-expanded': { minHeight: 48 },
                       }}
                     >
-                      <Typography variant='subtitle2' sx={{ fontWeight: 700, color: '#334155' }}>
+                      <Typography variant='subtitle2' sx={{ fontWeight: 700, color: 'text.primary' }}>
                         View details
                       </Typography>
                     </AccordionSummary>
@@ -126,14 +126,14 @@ export default function MonitoringDuration(props: { disableCustomTheme?: boolean
                           sx={{
                             p: 2,
                             borderRadius: 2,
-                            bgcolor: 'rgba(255,255,255,0.72)',
+                            bgcolor: 'background.paper',
                             border: '1px solid rgba(148, 163, 184, 0.12)',
                           }}
                         >
-                          <Typography variant='subtitle2' sx={{ fontWeight: 700, color: '#334155', mb: 0.5 }}>
+                          <Typography variant='subtitle2' sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5 }}>
                             How to read the merchant cards
                           </Typography>
-                          <Typography variant='body2' sx={{ color: '#64748b', lineHeight: 1.7 }}>
+                          <Typography variant='body2' sx={{ color: 'text.secondary', lineHeight: 1.7 }}>
                             Each card represents one merchant and payment method combination. The chart inside the card
                             makes it easier to compare duration trends across channels without reading one crowded chart.
                           </Typography>
@@ -143,14 +143,14 @@ export default function MonitoringDuration(props: { disableCustomTheme?: boolean
                           sx={{
                             p: 2,
                             borderRadius: 2,
-                            bgcolor: 'rgba(255,255,255,0.72)',
+                            bgcolor: 'background.paper',
                             border: '1px solid rgba(148, 163, 184, 0.12)',
                           }}
                         >
-                          <Typography variant='subtitle2' sx={{ fontWeight: 700, color: '#334155', mb: 0.5 }}>
+                          <Typography variant='subtitle2' sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5 }}>
                             Available filters
                           </Typography>
-                          <Typography variant='body2' sx={{ color: '#64748b', lineHeight: 1.7 }}>
+                          <Typography variant='body2' sx={{ color: 'text.secondary', lineHeight: 1.7 }}>
                             Use merchant, payment method, status, and date range filters to narrow the dataset and make
                             investigation easier when a transaction starts to slow down.
                           </Typography>

@@ -531,7 +531,7 @@ const AddMerchant = ({ onSuccess }: AddMerchantProps) => {
           <div>
             <div style={{ fontWeight: 'bold' }}>{slug.replace(/_/g, ' ').toUpperCase()}</div>
             {method && (
-              <div style={{ fontSize: '12px', color: '#666' }}>
+              <div style={{ fontSize: '12px', color: 'var(--dash-muted)' }}>
                 {method.type} {method.description && `- ${method.description}`}
               </div>
             )}
@@ -559,9 +559,9 @@ const AddMerchant = ({ onSuccess }: AddMerchantProps) => {
       key: 'status',
       render: (value: number) =>
         value === 1 ? (
-          <span style={{ color: '#52c41a' }}>Active</span>
+          <span style={{ color: 'var(--theme-success)' }}>Active</span>
         ) : (
-          <span style={{ color: '#ff4d4f' }}>Inactive</span>
+          <span style={{ color: 'var(--theme-danger)' }}>Inactive</span>
         ),
     },
     {
@@ -975,7 +975,7 @@ const AddMerchant = ({ onSuccess }: AddMerchantProps) => {
                           <div>
                             <label style={{ fontWeight: 'bold' }}>Routes & Weight</label>
                             {fields.length > 1 && (
-                              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                              <div style={{ fontSize: '12px', color: 'var(--dash-muted)', marginTop: '4px' }}>
                                 Total weight harus 100%
                               </div>
                             )}

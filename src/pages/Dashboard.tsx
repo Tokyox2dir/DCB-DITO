@@ -33,6 +33,7 @@ function topN(map: Map<string, number>, n = 5): RankingItem[] {
 export default function Dashboard() {
   const { token, apiUrl } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
   const [merchants, setMerchants] = useState<RankingItem[]>([])
   const [paymentMethods, setPaymentMethods] = useState<RankingItem[]>([])
   const [successLeaders, setSuccessLeaders] = useState<RankingItem[]>([])
@@ -47,7 +48,6 @@ export default function Dashboard() {
     }
   }, [token])
 
-  const periodLabel = dayjs().format('MMMM YYYY')
 
   useEffect(() => {
     if (!token || !apiUrl) return
@@ -123,21 +123,23 @@ export default function Dashboard() {
     }
 
     load()
-  }, [apiUrl, token])
+  }, [apiUrl, token, refreshKey])
 
   return (
-    <section className='dash-page'>
+    <section className='dash-page dashboard-overview'>
       <header className='dash-header'>
         <div>
           <h1 className='dash-title'>Dashboard</h1>
           <p className='dash-subtitle'>
-            Top traffic overview ({periodLabel}) for {username}.
+            Welcome, {username}. Transaction rankings from the last 8 hours.
           </p>
         </div>
-        <div className='dash-live'>Live overview</div>
+        <button className='dash-refresh' type='button' disabled={loading} onClick={() => setRefreshKey((key) => key + 1)}>
+          {loading ? 'Refreshing…' : 'Refresh data'}
+        </button>
       </header>
 
-      <section className='dash-rank-grid'>
+      <section className='dash-rank-grid' aria-label='Payment performance rankings'>
         <RankingCard
           title='Top 5 Merchants'
           subtitle='By transaction volume'

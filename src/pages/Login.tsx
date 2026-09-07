@@ -15,6 +15,7 @@ import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
 import axios from 'axios'
 import { useAuth } from '../provider/AuthProvider'
 import AppTheme from '../styles/theme/shared-theme/AppTheme'
+import ColorModeIconDropdown from '../styles/theme/shared-theme/ColorModeIconDropdown'
 
 export default function Login(props: { disableCustomTheme?: boolean }) {
   const [passwordError, setPasswordError] = useState(false)
@@ -105,51 +106,11 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
 
   return (
     <AppTheme {...props}>
-      <Box
-        sx={{
-          minHeight: '100dvh',
-          position: 'relative',
-          overflow: 'hidden',
-          display: 'grid',
-          placeItems: 'center',
-          px: 2,
-          background: 'linear-gradient(160deg, #1a1012 0%, #120e10 45%, #2a1418 100%)',
-        }}
-      >
-        <Box
-          sx={{
-            position: 'absolute',
-            width: 420,
-            height: 420,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(196,92,92,0.28) 0%, rgba(196,92,92,0) 70%)',
-            top: '-80px',
-            right: '-60px',
-            filter: 'blur(4px)',
-            animation: 'floatOrb 8s ease-in-out infinite',
-            '@keyframes floatOrb': {
-              '0%, 100%': { transform: 'translateY(0px)' },
-              '50%': { transform: 'translateY(24px)' },
-            },
-          }}
-        />
-        <Box
-          sx={{
-            position: 'absolute',
-            width: 340,
-            height: 340,
-            borderRadius: '50%',
-            background: 'radial-gradient(circle, rgba(168,79,79,0.22) 0%, rgba(168,79,79,0) 70%)',
-            bottom: '-90px',
-            left: '-40px',
-            animation: 'floatOrb 10s ease-in-out infinite reverse',
-          }}
-        />
-
-        <Box
+      <Box className='login-shell'>
+        <Box className='login-form-column'
           sx={{
             width: '100%',
-            maxWidth: 420,
+            maxWidth: 460,
             position: 'relative',
             zIndex: 1,
             opacity: entered ? 1 : 0,
@@ -165,17 +126,11 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
             },
           }}
         >
-          <Box
-            sx={{
-              borderRadius: '24px',
-              border: '1px solid rgba(196,92,92,0.22)',
-              background: 'rgba(26, 20, 22, 0.88)',
-              boxShadow: '0 24px 64px rgba(20, 8, 10, 0.45)',
-              backdropFilter: 'blur(16px)',
-              p: { xs: 3, sm: 4 },
-            }}
-          >
-            <Box sx={{ textAlign: 'center', mb: 3.5 }}>
+          <Box className='login-form-surface'>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+              <ColorModeIconDropdown aria-label='Change color theme' />
+            </Box>
+            <Box sx={{ textAlign: 'left', mb: 4 }}>
               <Box
                 component='img'
                 src='/logo.png'
@@ -183,6 +138,7 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
                 sx={{
                   height: 44,
                   mb: 1.5,
+                  display: 'inline-block',
                   opacity: entered ? 1 : 0,
                   transform: entered ? 'translateY(0)' : 'translateY(12px)',
                   transition: 'all 0.6s ease 0.1s',
@@ -190,9 +146,9 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
               />
               <Typography
                 sx={{
-                  color: '#f3ecee',
-                  fontWeight: 800,
-                  fontSize: { xs: 24, sm: 28 },
+                  color: 'var(--dash-text)',
+                  fontWeight: 650,
+                  fontSize: { xs: 26, sm: 30 },
                   letterSpacing: '-0.03em',
                   opacity: entered ? 1 : 0,
                   transform: entered ? 'translateY(0)' : 'translateY(12px)',
@@ -203,7 +159,7 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
               </Typography>
               <Typography
                 sx={{
-                  color: '#b8a0a3',
+                  color: 'var(--dash-muted)',
                   fontSize: 13,
                   mt: 0.75,
                   fontWeight: 600,
@@ -217,7 +173,7 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
             </Box>
 
             {formError && (
-              <Box
+              <Box role='alert'
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -226,9 +182,9 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
                   px: 1.5,
                   py: 1.25,
                   borderRadius: '12px',
-                  border: '1px solid rgba(196,92,92,0.35)',
-                  background: 'rgba(168,79,79,0.14)',
-                  color: '#f0b4b4',
+                  border: '1px solid var(--theme-danger)',
+                  background: 'var(--theme-danger-bg)',
+                  color: 'var(--theme-danger)',
                   fontSize: 13,
                   fontWeight: 600,
                 }}
@@ -247,7 +203,9 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
               <TextField
                 id='username'
                 name='username'
-                placeholder='Username'
+                label='Username'
+                placeholder='Enter your username'
+                InputLabelProps={{ shrink: true }}
                 autoComplete='username'
                 autoFocus
                 required
@@ -255,27 +213,29 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position='start'>
-                      <PersonOutlineIcon sx={{ color: '#b8a0a3', fontSize: 20 }} />
+                      <PersonOutlineIcon sx={{ color: 'var(--dash-muted)', fontSize: 20 }} />
                     </InputAdornment>
                   ),
                 }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    borderRadius: '14px',
-                    background: '#151012',
-                    color: '#f3ecee',
-                    '& fieldset': { borderColor: '#3a2a2e' },
-                    '&:hover fieldset': { borderColor: '#a84f4f' },
-                    '&.Mui-focused fieldset': { borderColor: '#c45c5c' },
+                    borderRadius: '12px',
+                    background: 'var(--dash-surface-2)',
+                    color: 'var(--dash-text)',
+                    '& fieldset': { borderColor: 'var(--dash-border)' },
+                    '&:hover fieldset': { borderColor: '#2563eb' },
+                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
                   },
-                  '& .MuiInputBase-input::placeholder': { color: '#8a7074', opacity: 1 },
+                  '& .MuiInputBase-input::placeholder': { color: 'var(--dash-muted)', opacity: 1 },
                 }}
               />
 
               <TextField
                 id='password'
                 name='password'
-                placeholder='Password'
+                label='Password'
+                placeholder='Enter your password'
+                InputLabelProps={{ shrink: true }}
                 type={showPassword ? 'text' : 'password'}
                 autoComplete='current-password'
                 required
@@ -285,16 +245,17 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position='start'>
-                      <LockOutlinedIcon sx={{ color: '#b8a0a3', fontSize: 20 }} />
+                      <LockOutlinedIcon sx={{ color: 'var(--dash-muted)', fontSize: 20 }} />
                     </InputAdornment>
                   ),
                   endAdornment: (
                     <InputAdornment position='end'>
                       <IconButton
-                        aria-label='toggle password'
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        aria-pressed={showPassword}
                         onClick={() => setShowPassword((v) => !v)}
                         edge='end'
-                        sx={{ color: '#b8a0a3' }}
+                        sx={{ color: 'var(--dash-muted)' }}
                       >
                         {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
                       </IconButton>
@@ -303,15 +264,15 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
                 }}
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    borderRadius: '14px',
-                    background: '#151012',
-                    color: '#f3ecee',
-                    '& fieldset': { borderColor: passwordError ? '#a84f4f' : '#3a2a2e' },
-                    '&:hover fieldset': { borderColor: '#a84f4f' },
-                    '&.Mui-focused fieldset': { borderColor: '#c45c5c' },
+                    borderRadius: '12px',
+                    background: 'var(--dash-surface-2)',
+                    color: 'var(--dash-text)',
+                    '& fieldset': { borderColor: passwordError ? 'var(--theme-danger)' : 'var(--dash-border)' },
+                    '&:hover fieldset': { borderColor: '#2563eb' },
+                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
                   },
-                  '& .MuiFormHelperText-root': { color: '#d48484' },
-                  '& .MuiInputBase-input::placeholder': { color: '#8a7074', opacity: 1 },
+                  '& .MuiFormHelperText-root': { color: 'var(--theme-danger)' },
+                  '& .MuiInputBase-input::placeholder': { color: 'var(--dash-muted)', opacity: 1 },
                 }}
               />
 
@@ -319,23 +280,25 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
                 type='submit'
                 fullWidth
                 disabled={loading}
+                aria-busy={loading}
+                aria-label={loading ? 'Signing in' : 'Sign in'}
                 sx={{
                   mt: 1,
                   py: 1.35,
-                  borderRadius: '14px',
+                  borderRadius: '12px',
                   textTransform: 'none',
                   fontWeight: 800,
                   fontSize: 15,
-                  color: '#fff',
-                  background: 'linear-gradient(135deg, #a84f4f 0%, #c45c5c 100%)',
-                  boxShadow: '0 10px 28px rgba(168, 79, 79, 0.35)',
+                  color: 'var(--theme-on-primary)',
+                  background: 'var(--theme-primary)',
+                  boxShadow: 'none',
                   '&:hover': {
-                    background: 'linear-gradient(135deg, #964646 0%, #b85050 100%)',
-                    boxShadow: '0 12px 32px rgba(168, 79, 79, 0.45)',
+                    background: 'var(--theme-primary-hover)',
+                    boxShadow: 'none',
                   },
                   '&.Mui-disabled': {
                     color: 'rgba(255,255,255,0.7)',
-                    background: 'rgba(168,79,79,0.45)',
+                    background: 'rgba(37,99,235,0.45)',
                   },
                 }}
               >
@@ -344,7 +307,7 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
             </Box>
           </Box>
 
-          <Typography sx={{ textAlign: 'center', mt: 2.5, color: '#8a7074', fontSize: 12, fontWeight: 600 }}>
+          <Typography sx={{ textAlign: 'center', mt: 3, color: 'var(--dash-muted)', fontSize: 12, fontWeight: 600 }}>
             Redpay · Payment Management
           </Typography>
         </Box>

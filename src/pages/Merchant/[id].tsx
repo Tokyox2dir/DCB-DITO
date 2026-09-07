@@ -130,7 +130,7 @@ const DetailMerchant = () => {
         <code
           style={{
             padding: '2px 6px',
-            backgroundColor: '#f5f5f5',
+            backgroundColor: 'var(--dash-surface-2)',
             borderRadius: '4px',
             fontSize: '12px',
             minWidth: '150px',
@@ -240,7 +240,7 @@ const DetailMerchant = () => {
                   <Descriptions.Item label='Address'>{merchantDetail.address || '-'}</Descriptions.Item>
                   <Descriptions.Item label='UID'>
                     <code
-                      style={{ padding: '2px 6px', backgroundColor: '#f5f5f5', borderRadius: '4px', fontSize: '12px' }}
+                      style={{ padding: '2px 6px', backgroundColor: 'var(--dash-surface-2)', borderRadius: '4px', fontSize: '12px' }}
                     >
                       {merchantDetail.u_id || '-'}
                     </code>
@@ -513,12 +513,12 @@ const DetailMerchant = () => {
                           key={index}
                           style={{
                             padding: '8px 12px',
-                            backgroundColor: '#f5f5f5',
+                            backgroundColor: 'var(--dash-surface-2)',
                             borderRadius: '6px',
                             border: '1px solid #d9d9d9',
                           }}
                         >
-                          <div style={{ fontWeight: 600, fontSize: '12px', color: '#1677ff', marginBottom: '4px' }}>
+                          <div style={{ fontWeight: 600, fontSize: '12px', color: 'var(--dash-accent)', marginBottom: '4px' }}>
                             {rw.payment_method.replace(/_/g, ' ').toUpperCase()}
                           </div>
                           <div style={{ fontSize: '12px' }}>

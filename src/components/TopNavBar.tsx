@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
@@ -140,21 +140,6 @@ export default function TopNavBar() {
   const resolvedMode = (mode === 'system' ? systemMode : mode) || 'dark'
   const isDark = resolvedMode !== 'light'
 
-  useEffect(() => {
-    const saved = localStorage.getItem('dcb_theme') as 'light' | 'dark' | null
-    const initialTheme = saved || 'dark'
-    document.documentElement.setAttribute('data-theme', initialTheme)
-    document.documentElement.setAttribute('data-mui-color-scheme', initialTheme)
-    if (setMode && mode !== initialTheme) setMode(initialTheme)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    const theme = isDark ? 'dark' : 'light'
-    document.documentElement.setAttribute('data-theme', theme)
-    document.documentElement.setAttribute('data-mui-color-scheme', theme)
-    localStorage.setItem('dcb_theme', theme)
-  }, [isDark])
 
   const handleLogout = () => {
     setUserAnchor(null)
@@ -166,9 +151,6 @@ export default function TopNavBar() {
   const handleToggleTheme = () => {
     const next = isDark ? 'light' : 'dark'
     setMode?.(next)
-    document.documentElement.setAttribute('data-theme', next)
-    document.documentElement.setAttribute('data-mui-color-scheme', next)
-    localStorage.setItem('dcb_theme', next)
   }
 
   const activeDropdown = navItems.find((n) => n.type === 'dropdown' && n.label === openDropdown) as
@@ -196,7 +178,7 @@ export default function TopNavBar() {
             if (item.type === 'link') {
               const active = isMatch(location.pathname, item.match)
               return (
-                <Link key={item.label} className={`aura-v2-tab${active ? ' active' : ''}`} to={item.path}>
+                <Link key={item.label} className={`aura-v2-tab${active ? ' active' : ''}`} to={item.path} aria-current={active ? 'page' : undefined}>
                   <i /> {item.label}
                 </Link>
               )
@@ -208,6 +190,8 @@ export default function TopNavBar() {
                 key={item.label}
                 type='button'
                 className={`aura-v2-tab${active || openDropdown === item.label ? ' active' : ''}`}
+                aria-haspopup='menu'
+                aria-expanded={openDropdown === item.label}
                 onClick={(e) => {
                   setDropdownAnchor(e.currentTarget)
                   setOpenDropdown(item.label)
@@ -258,11 +242,11 @@ export default function TopNavBar() {
           sx: {
             mt: 0.75,
             minWidth: 200,
-            bgcolor: isDark ? '#1a1416' : '#ffffff',
-            border: `1px solid ${isDark ? '#3a2a2e' : '#e6d4d6'}`,
+            bgcolor: 'var(--dash-surface)',
+            border: `1px solid ${isDark ? '#363b46' : '#e0e3e9'}`,
             backgroundImage: 'none',
-            color: isDark ? '#f3ecee' : '#2a1618',
-            boxShadow: '0 12px 32px rgba(20, 8, 10, 0.28)',
+            color: 'var(--dash-text)',
+            boxShadow: '0 12px 32px rgba(15, 23, 42, 0.28)',
           },
         }}
       >
@@ -293,21 +277,21 @@ export default function TopNavBar() {
           sx: {
             mt: 0.75,
             minWidth: 180,
-            bgcolor: isDark ? '#1a1416' : '#ffffff',
-            border: `1px solid ${isDark ? '#3a2a2e' : '#e6d4d6'}`,
+            bgcolor: 'var(--dash-surface)',
+            border: `1px solid ${isDark ? '#363b46' : '#e0e3e9'}`,
             backgroundImage: 'none',
-            color: isDark ? '#f3ecee' : '#2a1618',
-            boxShadow: '0 12px 32px rgba(20, 8, 10, 0.28)',
+            color: 'var(--dash-text)',
+            boxShadow: '0 12px 32px rgba(15, 23, 42, 0.28)',
           },
         }}
       >
         <Box sx={{ px: 2, py: 1.5 }}>
           <div style={{ fontSize: 13, fontWeight: 700 }}>{username}</div>
-          <div style={{ fontSize: 11, color: isDark ? '#b8a0a3' : '#7a5f62', textTransform: 'capitalize' }}>
+          <div style={{ fontSize: 11, color: 'var(--dash-muted)', textTransform: 'capitalize' }}>
             {role}
           </div>
         </Box>
-        <Divider sx={{ borderColor: isDark ? '#3a2a2e' : '#e6d4d6' }} />
+        <Divider sx={{ borderColor: isDark ? '#363b46' : '#e0e3e9' }} />
         <MenuItem
           onClick={() => {
             setUserAnchor(null)
@@ -327,16 +311,16 @@ export default function TopNavBar() {
         PaperProps={{
           sx: {
             width: 300,
-            bgcolor: isDark ? '#1a1416' : '#ffffff',
+            bgcolor: 'var(--dash-surface)',
             backgroundImage: 'none',
-            color: isDark ? '#f3ecee' : '#2a1618',
-            borderRight: `1px solid ${isDark ? '#3a2a2e' : '#e6d4d6'}`,
+            color: 'var(--dash-text)',
+            borderRight: `1px solid ${isDark ? '#363b46' : '#e0e3e9'}`,
           },
         }}
       >
         <Box sx={{ p: 2 }}>
           <div style={{ fontWeight: 900, fontSize: 16, marginBottom: 4 }}>Redpay Panel</div>
-          <div style={{ color: isDark ? '#b8a0a3' : '#7a5f62', fontSize: 12, marginBottom: 16 }}>
+          <div style={{ color: 'var(--dash-muted)', fontSize: 12, marginBottom: 16 }}>
             Payment Management
           </div>
           <List dense>
@@ -352,8 +336,8 @@ export default function TopNavBar() {
                   sx={{
                     borderRadius: 999,
                     mb: 0.5,
-                    bgcolor: active ? (isDark ? '#f3ecee' : '#2a1618') : 'transparent',
-                    color: active ? (isDark ? '#2a1618' : '#ffffff') : 'inherit',
+                    bgcolor: active ? (isDark ? '#f1f5f9' : '#20242c') : 'transparent',
+                    color: active ? (isDark ? '#20242c' : '#ffffff') : 'inherit',
                   }}
                 >
                   <ListItemText

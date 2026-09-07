@@ -238,25 +238,25 @@ const ReportMargin: React.FC = () => {
       <style>{`
         /* Parent table header */
         .report-margin-table.parent .ant-table-thead > tr > th {
-          background-color: #0ea5e9; /* sky-500 */
-          color: #ffffff;
+          background-color: var(--theme-primary); /* sky-500 */
+          color: var(--theme-on-primary);
           font-size: 15px;
           font-weight: 600;
         }
         /* Child table header */
         .report-margin-table.child .ant-table-thead > tr > th {
-          background-color: #e0f2fe; /* sky-100 */
-          color: #0369a1; /* sky-700 */
+          background-color: var(--theme-accent-soft); /* sky-100 */
+          color: var(--dash-accent); /* sky-700 */
           font-size: 14px;
           font-weight: 600;
         }
         /* Hover */
         .report-margin-table .ant-table-tbody > tr:hover > td {
-          background-color: #f8fafc; /* slate-50 */
+          background-color: var(--dash-surface-2); /* slate-50 */
         }
         /* Summary row */
         .report-margin-table .ant-table-summary {
-          background-color: #f1f5f9; /* slate-100 */
+          background-color: var(--dash-surface-2); /* slate-100 */
         }
         /* Body text size */
         .report-margin-table.parent .ant-table-tbody > tr > td {
@@ -272,14 +272,14 @@ const ReportMargin: React.FC = () => {
         }
         /* Thick borders override */
         .report-margin-table .ant-table-container {
-          border-inline-start: 1.5px solid #cbd5e1 !important;
-          border-top: 1.5px solid #cbd5e1 !important;
+          border-inline-start: 1.5px solid var(--dash-border) !important;
+          border-top: 1.5px solid var(--dash-border) !important;
         }
         .report-margin-table .ant-table-thead > tr > th,
         .report-margin-table .ant-table-tbody > tr > td,
         .report-margin-table .ant-table-summary > tr > td {
-          border-bottom: 1.5px solid #cbd5e1 !important;
-          border-inline-end: 1.5px solid #cbd5e1 !important;
+          border-bottom: 1.5px solid var(--dash-border) !important;
+          border-inline-end: 1.5px solid var(--dash-border) !important;
         }
       `}</style>
       <Title level={4} style={{ marginBottom: 16 }}>

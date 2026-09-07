@@ -325,7 +325,7 @@ const MerchantProfile: React.FC = () => {
                     <Input
                       value={client.client_name}
                       disabled
-                      prefix={<Business style={{ color: '#666' }} />}
+                      prefix={<Business style={{ color: 'var(--dash-muted)' }} />}
                       size='large'
                       style={{ borderRadius: 8 }}
                     />
@@ -342,7 +342,7 @@ const MerchantProfile: React.FC = () => {
                     <Input
                       value={client.mobile}
                       disabled
-                      prefix={<Phone style={{ color: '#666' }} />}
+                      prefix={<Phone style={{ color: 'var(--dash-muted)' }} />}
                       size='large'
                       style={{ borderRadius: 8 }}
                     />
@@ -359,7 +359,7 @@ const MerchantProfile: React.FC = () => {
                     <Input
                       value={client.phone}
                       disabled
-                      prefix={<Phone style={{ color: '#666' }} />}
+                      prefix={<Phone style={{ color: 'var(--dash-muted)' }} />}
                       size='large'
                       style={{ borderRadius: 8 }}
                     />
@@ -377,7 +377,7 @@ const MerchantProfile: React.FC = () => {
                       value={editMode ? formData.email : client.email}
                       onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('email', e.target.value)}
                       disabled={!editMode}
-                      prefix={<Email style={{ color: '#666' }} />}
+                      prefix={<Email style={{ color: 'var(--dash-muted)' }} />}
                       size='large'
                       style={{ borderRadius: 8 }}
                     />
@@ -400,7 +400,7 @@ const MerchantProfile: React.FC = () => {
                       rows={3}
                       variant='outlined'
                       InputProps={{
-                        startAdornment: <LocationOn style={{ color: '#666', marginRight: 8 }} />,
+                        startAdornment: <LocationOn style={{ color: 'var(--dash-muted)', marginRight: 8 }} />,
                       }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
@@ -441,7 +441,7 @@ const MerchantProfile: React.FC = () => {
                                   handleAppInputChange(app.id, 'callback_url', e.target.value)
                                 }
                                 disabled={!editMode}
-                                prefix={<Language style={{ color: '#666' }} />}
+                                prefix={<Language style={{ color: 'var(--dash-muted)' }} />}
                                 size='large'
                                 style={{ borderRadius: 8 }}
                               />
@@ -462,7 +462,7 @@ const MerchantProfile: React.FC = () => {
                                     handleAppInputChange(app.id, 'fail_callback', e.target.value)
                                   }
                                   disabled={!editMode}
-                                  prefix={<Language style={{ color: '#666' }} />}
+                                  prefix={<Language style={{ color: 'var(--dash-muted)' }} />}
                                   size='large'
                                   style={{ borderRadius: 8 }}
                                 />
@@ -483,7 +483,7 @@ const MerchantProfile: React.FC = () => {
                                   handleAppInputChange(app.id, 'mobile', e.target.value)
                                 }
                                 disabled={!editMode}
-                                prefix={<Phone style={{ color: '#666' }} />}
+                                prefix={<Phone style={{ color: 'var(--dash-muted)' }} />}
                                 size='large'
                                 style={{ borderRadius: 8 }}
                               />

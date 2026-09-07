@@ -560,7 +560,7 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
           <div>
             <div style={{ fontWeight: 'bold' }}>{slug.replace(/_/g, ' ').toUpperCase()}</div>
             {method && (
-              <div style={{ fontSize: '12px', color: '#666' }}>
+              <div style={{ fontSize: '12px', color: 'var(--dash-muted)' }}>
                 {method.type} {method.description && `- ${method.description}`}
               </div>
             )}
@@ -588,9 +588,9 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
       key: 'status',
       render: (value: number) =>
         value === 1 ? (
-          <span style={{ color: '#52c41a' }}>Aktif</span>
+          <span style={{ color: 'var(--theme-success)' }}>Aktif</span>
         ) : (
-          <span style={{ color: '#ff4d4f' }}>Tidak Aktif</span>
+          <span style={{ color: 'var(--theme-danger)' }}>Tidak Aktif</span>
         ),
     },
     {
@@ -635,9 +635,9 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
           fontWeight: 600,
           height: 28,
           minWidth: 70,
-          backgroundColor: '#ff9800',
-          borderColor: '#ff9800',
-          color: 'white',
+          backgroundColor: 'var(--theme-primary)',
+          borderColor: 'var(--theme-primary)',
+          color: 'var(--theme-on-primary)',
         }}
       >
         Edit
@@ -1032,7 +1032,7 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
                           <div>
                             <label style={{ fontWeight: 'bold' }}>Routes & Weight</label>
                             {fields.length > 1 && (
-                              <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                              <div style={{ fontSize: '12px', color: 'var(--dash-muted)', marginTop: '4px' }}>
                                 Total weight harus 100%
                               </div>
                             )}

@@ -233,8 +233,8 @@ const ReportMarginPaymentMethod: React.FC = () => {
     <div className='flex flex-col p-6 gap-4'>
       <style>{`
         .report-margin-payment-method .ant-table-thead > tr > th {
-          background-color: #f0f9ff;
-          color: #0f172a;
+          background-color: var(--dash-surface-2);
+          color: var(--dash-text);
           font-weight: 600;
         }
         .report-margin-payment-method .ant-table-tbody > tr > td {
@@ -242,14 +242,14 @@ const ReportMarginPaymentMethod: React.FC = () => {
         }
         /* Thick borders override */
         .report-margin-payment-method .ant-table-container {
-          border-inline-start: 1.5px solid #cbd5e1 !important;
-          border-top: 1.5px solid #cbd5e1 !important;
+          border-inline-start: 1.5px solid var(--dash-border) !important;
+          border-top: 1.5px solid var(--dash-border) !important;
         }
         .report-margin-payment-method .ant-table-thead > tr > th,
         .report-margin-payment-method .ant-table-tbody > tr > td,
         .report-margin-payment-method .ant-table-summary > tr > td {
-          border-bottom: 1.5px solid #cbd5e1 !important;
-          border-inline-end: 1.5px solid #cbd5e1 !important;
+          border-bottom: 1.5px solid var(--dash-border) !important;
+          border-inline-end: 1.5px solid var(--dash-border) !important;
         }
       `}</style>
       <Title level={4} style={{ marginBottom: 4 }}>

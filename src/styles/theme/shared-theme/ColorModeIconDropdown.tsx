@@ -37,7 +37,7 @@ export default function ColorModeIconDropdown(props: IconButtonOwnProps) {
       />
     )
   }
-  const resolvedMode = (systemMode || mode) as 'light' | 'dark'
+  const resolvedMode = (mode === 'system' ? systemMode : mode) as 'light' | 'dark'
   const icon = {
     light: <LightModeIcon />,
     dark: <DarkModeIcon />,
@@ -58,7 +58,7 @@ export default function ColorModeIconDropdown(props: IconButtonOwnProps) {
       </IconButton>
       <Menu
         anchorEl={anchorEl}
-        id='account-menu'
+        id='color-scheme-menu'
         open={open}
         onClose={handleClose}
         onClick={handleClose}

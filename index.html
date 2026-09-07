@@ -26,7 +26,11 @@
   <body>
     <script>
       (function () {
-        var t = localStorage.getItem('dcb_theme') || 'dark'
+        var t = 'dark'
+        try {
+          var saved = localStorage.getItem('dcb_theme')
+          t = saved === 'light' || saved === 'dark' ? saved : saved === 'system' && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+        } catch (_) { /* Use default if storage is unavailable. */ }
         document.documentElement.setAttribute('data-theme', t)
         document.documentElement.setAttribute('data-mui-color-scheme', t)
       })()

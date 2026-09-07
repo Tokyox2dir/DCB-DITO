@@ -109,11 +109,11 @@ const TransactionChartCardHourly: React.FC = () => {
   const { mode, systemMode } = useColorScheme()
   const isDark = ((mode === 'system' ? systemMode : mode) || 'dark') !== 'light'
   const theme = {
-    text: isDark ? '#f0e8ea' : '#2a1618',
-    muted: isDark ? '#c4b0b3' : '#6a5558',
-    card: isDark ? '#1a1416' : '#ffffff',
-    header: isDark ? '#24181a' : '#f7f2f2',
-    border: isDark ? '#3a2a2e' : '#e6d4d6',
+    text: isDark ? '#e9ecf2' : '#20242c',
+    muted: isDark ? '#a8b8cc' : '#626a78',
+    card: isDark ? '#1d2027' : '#ffffff',
+    header: isDark ? '#272b34' : '#f5f6f8',
+    border: isDark ? '#363b46' : '#e0e3e9',
     abnormalBg: isDark ? '#3a2020' : '#fff1f0',
     abnormalHeader: isDark ? '#8f3030' : '#ffccc7',
     grid: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
@@ -480,9 +480,9 @@ const TransactionChartCardHourly: React.FC = () => {
                                 <Tag
                                   color='red'
                                   style={{
-                                    color: '#ffb4b4',
-                                    border: '1px solid #a84f4f',
-                                    background: '#3a2020',
+                                    color: 'var(--theme-danger)',
+                                    border: '1px solid #2563eb',
+                                    background: 'var(--theme-danger-bg)',
                                     fontSize: '10px',
                                     padding: '0 6px',
                                     height: '20px',
@@ -505,7 +505,7 @@ const TransactionChartCardHourly: React.FC = () => {
                         styles={{
                           header: {
                             backgroundColor: isAbnormal ? theme.abnormalHeader : theme.header,
-                            borderBottom: isAbnormal ? '1px solid #a84f4f' : `1px solid ${theme.border}`,
+                            borderBottom: isAbnormal ? '1px solid #2563eb' : `1px solid ${theme.border}`,
                             borderRadius: '12px 12px 0 0',
                             padding: '12px 16px',
                             color: theme.text,
