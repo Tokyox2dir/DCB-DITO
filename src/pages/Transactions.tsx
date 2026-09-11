@@ -1,3 +1,4 @@
+import { paymentMethods } from '../utils/paymentMethods'
 // import type {} from '@mui/x-date-pickers/themeAugmentation';
 // import type {} from '@mui/x-charts/themeAugmentation';
 // import type {} from '@mui/x-data-grid/themeAugmentation';
@@ -371,28 +372,7 @@ export default function Transactions() {
     }
   }, [])
 
-  const routes = [
-    { name: 'All', value: '' },
-    { name: 'Xl', value: 'xl_airtime' },
-    { name: 'Telkomsel', value: 'telkomsel_airtime' },
-    { name: 'Tri', value: 'three_airtime' },
-    { name: 'Indosat', value: 'indosat_airtime' },
-    { name: 'Smartfren', value: 'smartfren_airtime' },
-    { name: 'Gopay', value: 'gopay' },
-    { name: 'Shopeepay', value: 'shopeepay' },
-    { name: 'Qris', value: 'qris' },
-    { name: 'Ovo', value: 'ovo' },
-    { name: 'Dana', value: 'dana' },
-    { name: 'Va Bca', value: 'va_bca' },
-    { name: 'Va Bri', value: 'va_bri' },
-    { name: 'Va Bni', value: 'va_bni' },
-    { name: 'Va Mandiri', value: 'va_mandiri' },
-    { name: 'Va Sinarmas', value: 'va_sinarmas' },
-    { name: 'Va Permata', value: 'va_permata' },
-    { name: 'Alfamart', value: 'alfamart_otc' },
-    { name: 'Indomaret', value: 'indomaret_otc' },
-    { name: 'Credit Card', value: 'visa_master' },
-  ]
+  const routes = paymentMethods
 
   const status = [
     { name: 'All', value: '' },

@@ -1,3 +1,4 @@
+import { paymentMethods } from '../utils/paymentMethods'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, Col, DatePicker, Row, Select, Space, Typography } from 'antd'
 import axios from 'axios'
@@ -31,20 +32,7 @@ const LIVE_WINDOW_MINUTES = 10
 const LIVE_PAGE_SIZE = 500
 const LIVE_MAX_PAGES = 2
 
-const paymentMethods = [
-  { name: 'All', value: '' },
-  { name: 'Xl', value: 'xl_airtime' },
-  { name: 'Telkomsel', value: 'telkomsel_airtime' },
-  { name: 'Tri', value: 'three_airtime' },
-  { name: 'Indosat', value: 'indosat_airtime' },
-  { name: 'Smartfren', value: 'smartfren_airtime' },
-  { name: 'Gopay', value: 'gopay' },
-  { name: 'Shopeepay', value: 'shopeepay' },
-  { name: 'Qris', value: 'qris' },
-  { name: 'Ovo', value: 'ovo' },
-  { name: 'Dana', value: 'dana' },
-  { name: 'Va Bca', value: 'va_bca' },
-]
+
 
 type Filters = {
   dateRange: [Dayjs, Dayjs] | null
