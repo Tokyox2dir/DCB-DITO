@@ -114,8 +114,9 @@ export default function AppShell() {
     <div className='sf-shell'>
       <header className='sf-topbar'>
         <div className='sf-top-left'>
-          <Link to='/' className='sf-brand' aria-label='Redpay home'>
-            <img src='/logo.png' alt='Redpay' />
+          <Link to='/' className='sf-brand sf-logo' aria-label='Redpay home'>
+            <img className='on-light' src='/logo.png' alt='Redpay' />
+            <img className='on-dark' src='/logo-white.png' alt='' />
           </Link>
           <div className='sf-title'>
             <button type='button' className='sf-back' aria-label='Go back' onClick={() => navigate(-1)}>

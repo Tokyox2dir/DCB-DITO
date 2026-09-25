@@ -1,9 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -12,10 +10,23 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined'
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import ArrowForwardRoundedIcon from '@mui/icons-material/ArrowForwardRounded'
+import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined'
+import GridViewRoundedIcon from '@mui/icons-material/GridViewRounded'
+import NotificationsActiveOutlinedIcon from '@mui/icons-material/NotificationsActiveOutlined'
+import HttpsOutlinedIcon from '@mui/icons-material/HttpsOutlined'
+import SwapHorizRoundedIcon from '@mui/icons-material/SwapHorizRounded'
 import axios from 'axios'
 import { useAuth } from '../provider/AuthProvider'
+import { paymentMethods } from '../utils/paymentMethods'
 import AppTheme from '../styles/theme/shared-theme/AppTheme'
 import ColorModeIconDropdown from '../styles/theme/shared-theme/ColorModeIconDropdown'
+
+// Payment method names from the shared list, shown in the showcase marquee.
+const METHOD_NAMES = paymentMethods.filter((m) => m.value).map((m) => m.name)
+
+// Decorative heatmap strip on the showcase panel (no real data).
+const HEAT_PATTERN = ['low', 'mid', 'low', 'high', 'mid', 'low', 'mid', 'high', 'high', 'mid', 'alert', 'mid', 'low', 'mid', 'high', 'now']
 
 export default function Login(props: { disableCustomTheme?: boolean }) {
   const [passwordError, setPasswordError] = useState(false)
@@ -104,102 +115,132 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
     }
   }
 
+  const inputSx = {
+    '& .MuiOutlinedInput-root': {
+      minHeight: 52,
+      borderRadius: '14px',
+      background: 'var(--sf-card-2)',
+      color: 'var(--sf-ink)',
+      '& fieldset': { borderColor: 'transparent' },
+      '&:hover fieldset': { borderColor: 'var(--sf-line)' },
+      '&.Mui-focused fieldset': { borderColor: 'var(--sf-ink)', borderWidth: '1.5px' },
+      '&.Mui-error fieldset': { borderColor: 'var(--sf-bad)' },
+    },
+    '& .MuiInputLabel-root': { color: 'var(--sf-muted)', fontWeight: 600 },
+    '& .MuiInputLabel-root.Mui-focused': { color: 'var(--sf-ink)' },
+    '& .MuiFormHelperText-root': { color: 'var(--sf-bad)', mx: 0.5 },
+    '& .MuiInputBase-input::placeholder': { color: 'var(--sf-muted)', opacity: 1 },
+  }
+
   return (
     <AppTheme {...props}>
-      <Box className='login-shell'>
-        <Box className='login-form-column'
-          sx={{
-            width: '100%',
-            maxWidth: 460,
-            position: 'relative',
-            zIndex: 1,
-            opacity: entered ? 1 : 0,
-            transform: entered ? 'translateY(0) scale(1)' : 'translateY(28px) scale(0.98)',
-            transition: 'opacity 0.55s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1)',
-            animation: shake ? 'loginShake 0.5s ease' : 'none',
-            '@keyframes loginShake': {
-              '0%, 100%': { transform: 'translateX(0)' },
-              '20%': { transform: 'translateX(-10px)' },
-              '40%': { transform: 'translateX(10px)' },
-              '60%': { transform: 'translateX(-7px)' },
-              '80%': { transform: 'translateX(7px)' },
-            },
-          }}
-        >
-          <Box className='login-form-surface'>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+      <main className={`sf-login${entered ? ' is-entered' : ''}`}>
+        <section className='sf-login-showcase' aria-hidden='true'>
+          <div className='sf-login-top'>
+            <img className='sf-login-logo' src='/logo-white.png' alt='' />
+            <span className='sf-login-live'>
+              <i /> Live payment monitoring
+            </span>
+          </div>
+
+          <div className='sf-login-copy'>
+            <h2>Every payment, one calm view.</h2>
+            <p>Track traffic, catch failing merchants early and pull settlement reports from a single panel.</p>
+            <div className='sf-login-status'>
+              <small>Every status, tracked</small>
+              <div className='sf-login-status-pills'>
+                <span className='ok'>Success</span>
+                <span className='pend'>Pending</span>
+                <span className='wait'>Waiting</span>
+                <span className='bad'>Failed</span>
+              </div>
+              <div className='sf-login-status-bar'>
+                <i className='ok' />
+                <i className='pend' />
+                <i className='wait' />
+                <i className='bad' />
+              </div>
+            </div>
+          </div>
+
+          <div className='sf-login-marquee'>
+            <div className='sf-login-marquee-track'>
+              {[...METHOD_NAMES, ...METHOD_NAMES].map((name, i) => (
+                <span key={i} className={`tone-${i % 4}`}>
+                  {name}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className='sf-login-tiles'>
+            <div className='sf-login-tile peach'>
+              <MonitorHeartOutlinedIcon />
+              <strong>Live monitoring</strong>
+              <small>Real-time charts per merchant</small>
+            </div>
+            <div className='sf-login-tile sky'>
+              <GridViewRoundedIcon />
+              <strong>Traffic heatmap</strong>
+              <small>10-minute slots at a glance</small>
+            </div>
+            <div className='sf-login-tile rose'>
+              <NotificationsActiveOutlinedIcon />
+              <strong>Failure alerts</strong>
+              <small>Spot problems before users do</small>
+            </div>
+          </div>
+
+          <div className='sf-login-heat-wrap'>
+            <div className='sf-login-heat-head'>
+              <span>Traffic heatmap · preview</span>
+              <span className='sf-login-legend'>
+                <i className='mid' /> Busy <i className='high' /> Peak <i className='alert' /> Failed <i className='now' /> Now
+              </span>
+            </div>
+            <div className='sf-login-heat'>
+              {HEAT_PATTERN.map((level, i) => (
+                <i key={i} className={level} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className='sf-login-panel'>
+          <i className='sf-login-blob one' aria-hidden='true' />
+          <i className='sf-login-blob two' aria-hidden='true' />
+          <Box
+            className='sf-login-card'
+            sx={{
+              animation: shake ? 'loginShake 0.5s ease' : 'none',
+              '@keyframes loginShake': {
+                '0%, 100%': { transform: 'translateX(0)' },
+                '20%': { transform: 'translateX(-10px)' },
+                '40%': { transform: 'translateX(10px)' },
+                '60%': { transform: 'translateX(-7px)' },
+                '80%': { transform: 'translateX(7px)' },
+              },
+            }}
+          >
+            <div className='sf-login-card-head'>
+              <span className='sf-logo sf-login-logo'>
+                <img className='on-light' src='/logo.png' alt='Redpay' />
+                <img className='on-dark' src='/logo-white.png' alt='' />
+              </span>
               <ColorModeIconDropdown aria-label='Change color theme' />
-            </Box>
-            <Box sx={{ textAlign: 'left', mb: 4 }}>
-              <Box
-                component='img'
-                src='/logo.png'
-                alt='Redpay'
-                sx={{
-                  height: 44,
-                  mb: 1.5,
-                  display: 'inline-block',
-                  opacity: entered ? 1 : 0,
-                  transform: entered ? 'translateY(0)' : 'translateY(12px)',
-                  transition: 'all 0.6s ease 0.1s',
-                }}
-              />
-              <Typography
-                sx={{
-                  color: 'var(--dash-text)',
-                  fontWeight: 650,
-                  fontSize: { xs: 26, sm: 30 },
-                  letterSpacing: '-0.03em',
-                  opacity: entered ? 1 : 0,
-                  transform: entered ? 'translateY(0)' : 'translateY(12px)',
-                  transition: 'all 0.6s ease 0.15s',
-                }}
-              >
-                Welcome back
-              </Typography>
-              <Typography
-                sx={{
-                  color: 'var(--dash-muted)',
-                  fontSize: 13,
-                  mt: 0.75,
-                  fontWeight: 600,
-                  opacity: entered ? 1 : 0,
-                  transform: entered ? 'translateY(0)' : 'translateY(12px)',
-                  transition: 'all 0.6s ease 0.2s',
-                }}
-              >
-                Sign in to Redpay Panel
-              </Typography>
-            </Box>
+            </div>
+
+            <h1 className='sf-login-title'>Welcome back</h1>
+            <p className='sf-login-sub'>Sign in to your Redpay panel to continue.</p>
 
             {formError && (
-              <Box role='alert'
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  mb: 2,
-                  px: 1.5,
-                  py: 1.25,
-                  borderRadius: '12px',
-                  border: '1px solid var(--theme-danger)',
-                  background: 'var(--theme-danger-bg)',
-                  color: 'var(--theme-danger)',
-                  fontSize: 13,
-                  fontWeight: 600,
-                }}
-              >
+              <div role='alert' className='sf-login-error'>
                 <ErrorOutlineIcon sx={{ fontSize: 18 }} />
                 {formError}
-              </Box>
+              </div>
             )}
 
-            <Box
-              component='form'
-              onSubmit={handleSubmit}
-              noValidate
-              sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
-            >
+            <Box component='form' onSubmit={handleSubmit} noValidate className='sf-login-form'>
               <TextField
                 id='username'
                 name='username'
@@ -213,21 +254,11 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position='start'>
-                      <PersonOutlineIcon sx={{ color: 'var(--dash-muted)', fontSize: 20 }} />
+                      <PersonOutlineIcon sx={{ color: 'var(--sf-muted)', fontSize: 20 }} />
                     </InputAdornment>
                   ),
                 }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '12px',
-                    background: 'var(--dash-surface-2)',
-                    color: 'var(--dash-text)',
-                    '& fieldset': { borderColor: 'var(--dash-border)' },
-                    '&:hover fieldset': { borderColor: '#2563eb' },
-                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
-                  },
-                  '& .MuiInputBase-input::placeholder': { color: 'var(--dash-muted)', opacity: 1 },
-                }}
+                sx={inputSx}
               />
 
               <TextField
@@ -245,7 +276,7 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position='start'>
-                      <LockOutlinedIcon sx={{ color: 'var(--dash-muted)', fontSize: 20 }} />
+                      <LockOutlinedIcon sx={{ color: 'var(--sf-muted)', fontSize: 20 }} />
                     </InputAdornment>
                   ),
                   endAdornment: (
@@ -255,63 +286,35 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
                         aria-pressed={showPassword}
                         onClick={() => setShowPassword((v) => !v)}
                         edge='end'
-                        sx={{ color: 'var(--dash-muted)' }}
+                        sx={{ color: 'var(--sf-muted)' }}
                       >
                         {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
                       </IconButton>
                     </InputAdornment>
                   ),
                 }}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: '12px',
-                    background: 'var(--dash-surface-2)',
-                    color: 'var(--dash-text)',
-                    '& fieldset': { borderColor: passwordError ? 'var(--theme-danger)' : 'var(--dash-border)' },
-                    '&:hover fieldset': { borderColor: '#2563eb' },
-                    '&.Mui-focused fieldset': { borderColor: '#3b82f6' },
-                  },
-                  '& .MuiFormHelperText-root': { color: 'var(--theme-danger)' },
-                  '& .MuiInputBase-input::placeholder': { color: 'var(--dash-muted)', opacity: 1 },
-                }}
+                sx={inputSx}
               />
 
-              <Button
-                type='submit'
-                fullWidth
-                disabled={loading}
-                aria-busy={loading}
-                aria-label={loading ? 'Signing in' : 'Sign in'}
-                sx={{
-                  mt: 1,
-                  py: 1.35,
-                  borderRadius: '12px',
-                  textTransform: 'none',
-                  fontWeight: 800,
-                  fontSize: 15,
-                  color: 'var(--theme-on-primary)',
-                  background: 'var(--theme-primary)',
-                  boxShadow: 'none',
-                  '&:hover': {
-                    background: 'var(--theme-primary-hover)',
-                    boxShadow: 'none',
-                  },
-                  '&.Mui-disabled': {
-                    color: 'rgba(255,255,255,0.7)',
-                    background: 'rgba(37,99,235,0.45)',
-                  },
-                }}
-              >
-                {loading ? <CircularProgress size={22} sx={{ color: '#fff' }} /> : 'Sign in'}
-              </Button>
+              <button type='submit' className='sf-login-submit' disabled={loading} aria-busy={loading}>
+                {loading ? <CircularProgress size={20} sx={{ color: 'inherit' }} /> : 'Sign in'}
+                {!loading && <ArrowForwardRoundedIcon sx={{ fontSize: 18 }} />}
+              </button>
             </Box>
+
+            <p className='sf-login-foot'>Redpay · Payment Management</p>
           </Box>
 
-          <Typography sx={{ textAlign: 'center', mt: 3, color: 'var(--dash-muted)', fontSize: 12, fontWeight: 600 }}>
-            Redpay · Payment Management
-          </Typography>
-        </Box>
-      </Box>
+          <div className='sf-login-badges' aria-hidden='true'>
+            <span>
+              <HttpsOutlinedIcon /> Encrypted sign-in
+            </span>
+            <span>
+              <SwapHorizRoundedIcon /> Prod &amp; Dev API
+            </span>
+          </div>
+        </section>
+      </main>
     </AppTheme>
   )
 }
