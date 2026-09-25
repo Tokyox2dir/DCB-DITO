@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import { Table, Select, DatePicker, Row, Col, message } from 'antd'
 import axios from 'axios'
 import type { TableColumnsType } from 'antd'
-import Typography from '@mui/material/Typography'
 import dayjs, { Dayjs } from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
@@ -693,15 +692,14 @@ const ReportDownload: React.FC = () => {
   }, [filteredApp, filteredPaymentMethod, filteredMonth, filteredDate, filteredDateRange, reportType])
 
   return (
-    <div className='flex flex-col p-6'>
-      <Typography component='h2' variant='h2' sx={{ mb: 6 }}>
-        Download Report
-      </Typography>
+    <div className='sf-page'>
+      <h2 className='sf-page-title'>Download Report</h2>
 
       {/* Filter Controls */}
+      <div className='sf-panel'>
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }} className='flex gap-6'>
         <Col className='flex gap-4'>
-          <label htmlFor='type-select' className='text-2xl'>
+          <label htmlFor='type-select' className='sf-field-label'>
             Type :
           </label>
           <Select id='type-select' value={reportType} style={{ width: 150 }} onChange={(val) => setReportType(val)}>
@@ -711,7 +709,7 @@ const ReportDownload: React.FC = () => {
           </Select>
         </Col>
         <Col className='flex gap-4'>
-          <label htmlFor='app-select' className='text-2xl'>
+          <label htmlFor='app-select' className='sf-field-label'>
             App :
           </label>
           <Select
@@ -737,7 +735,7 @@ const ReportDownload: React.FC = () => {
           </Select>
         </Col>
         <Col className='flex gap-4'>
-          <label htmlFor='client-select' className='text-2xl'>
+          <label htmlFor='client-select' className='sf-field-label'>
             Payment Method :{' '}
           </label>
           <Select
@@ -766,7 +764,7 @@ const ReportDownload: React.FC = () => {
           </Select>
         </Col>
         <Col className='flex gap-4'>
-          <label htmlFor='client-select' className='text-2xl'>
+          <label htmlFor='client-select' className='sf-field-label'>
             {reportType === 'monthly' ? 'Month :' : reportType === 'custom' ? 'Date Range :' : 'Date :'}
           </label>
           {reportType === 'monthly' ? (
@@ -809,34 +807,27 @@ const ReportDownload: React.FC = () => {
         </Col>
       </Row>
 
-      <div className='flex gap-4'>
+      <div className='flex gap-3' style={{ marginTop: 16 }}>
         <button
+          type='button'
           onClick={fetchReport}
-          style={{ marginTop: 16 }}
-          className={`py-1 px-4 rounded ${
-            !filteredApp || !filteredPaymentMethod
-              ? 'bg-blue-300 text-white cursor-not-allowed'
-              : 'bg-blue-500 text-white hover:bg-blue-600'
-          }`}
+          className='sf-btn sf-btn-primary'
           disabled={!filteredApp || !filteredPaymentMethod || loading}
         >
           {loading ? 'Loading...' : 'Load Data'}
         </button>
 
         <button
+          type='button'
           onClick={exportToPDF}
-          style={{ marginTop: 16 }}
-          className={`py-1 px-4 rounded ${
-            !data || !data.summaries || data.summaries.length === 0
-              ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-              : 'bg-green-500 text-white hover:bg-green-600'
-          }`}
+          className='sf-btn sf-btn-ghost'
           disabled={!data || !data.summaries || data.summaries.length === 0}
         >
           Export PDF
         </button>
       </div>
-      <div style={{ padding: 24 }}>
+      </div>
+      <div className='sf-panel'>
         <Table
           bordered
           loading={loading}

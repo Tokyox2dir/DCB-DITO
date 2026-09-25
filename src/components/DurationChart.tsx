@@ -240,17 +240,17 @@ const DurationChart: React.FC = () => {
         {
           label: 'Avg Total Duration',
           data: points.map((d) => d.totalSeconds),
-          borderColor: '#6366f1',
-          backgroundColor: 'rgba(99, 102, 241, 0.08)',
+          borderColor: '#3b74f0',
+          backgroundColor: 'rgba(59, 116, 240, 0.08)',
           tension: 0.4,
           fill: true,
           borderWidth: 2.5,
           pointRadius: 3,
           pointHoverRadius: 7,
-          pointBackgroundColor: '#6366f1',
+          pointBackgroundColor: '#3b74f0',
           pointBorderColor: '#fff',
           pointBorderWidth: 2,
-          pointHoverBackgroundColor: '#6366f1',
+          pointHoverBackgroundColor: '#3b74f0',
           pointHoverBorderColor: '#fff',
           pointHoverBorderWidth: 3,
         },
@@ -311,10 +311,10 @@ const DurationChart: React.FC = () => {
         tooltip: {
           mode: 'index' as const,
           intersect: false,
-          backgroundColor: 'rgba(15, 23, 42, 0.95)',
+          backgroundColor: 'rgba(22, 24, 27, 0.95)',
           titleColor: '#e2e8f0',
           bodyColor: '#cbd5e1',
-          borderColor: 'rgba(99, 102, 241, 0.3)',
+          borderColor: 'rgba(59, 116, 240, 0.3)',
           borderWidth: 1,
           cornerRadius: 12,
           padding: 14,
@@ -437,7 +437,7 @@ const DurationChart: React.FC = () => {
       <Card
         style={{
           borderRadius: 16,
-          border: '1px solid rgba(148, 163, 184, 0.12)',
+          border: '1px solid transparent',
           boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 6px 24px rgba(0,0,0,0.03)',
         }}
         bodyStyle={{ padding: '24px' }}
@@ -459,7 +459,7 @@ const DurationChart: React.FC = () => {
                 margin: 0,
                 fontSize: 22,
                 fontWeight: 700,
-                background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                background: 'var(--sf-sky-bar)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 letterSpacing: '-0.3px',
@@ -500,9 +500,9 @@ const DurationChart: React.FC = () => {
             gap: 12,
             marginBottom: 20,
             padding: '16px',
-            background: 'rgba(148, 163, 184, 0.04)',
+            background: 'var(--sf-card-2)',
             borderRadius: 12,
-            border: '1px solid rgba(148, 163, 184, 0.08)',
+            border: '1px solid transparent',
           }}
         >
           <div style={{ flex: '1 1 200px' }}>
@@ -568,8 +568,8 @@ const DurationChart: React.FC = () => {
               style={{
                 padding: '14px 16px',
                 borderRadius: 12,
-                background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.06))',
-                border: '1px solid rgba(99,102,241,0.15)',
+                background: 'var(--sf-sky)',
+                border: '1px solid transparent',
               }}
             >
               <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--dash-accent)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -584,11 +584,11 @@ const DurationChart: React.FC = () => {
               style={{
                 padding: '14px 16px',
                 borderRadius: 12,
-                background: 'linear-gradient(135deg, rgba(239,68,68,0.08), rgba(244,63,94,0.06))',
-                border: '1px solid rgba(239,68,68,0.15)',
+                background: 'var(--sf-rose)',
+                border: '1px solid transparent',
               }}
             >
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sf-bad)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Max Duration
               </div>
               <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-danger)', marginTop: 4 }}>
@@ -600,11 +600,11 @@ const DurationChart: React.FC = () => {
               style={{
                 padding: '14px 16px',
                 borderRadius: 12,
-                background: 'linear-gradient(135deg, rgba(16,185,129,0.08), rgba(5,150,105,0.06))',
-                border: '1px solid rgba(16,185,129,0.15)',
+                background: 'color-mix(in srgb, var(--sf-good) 14%, var(--sf-card))',
+                border: '1px solid transparent',
               }}
             >
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#10b981', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sf-good)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Min Duration
               </div>
               <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-success)', marginTop: 4 }}>
@@ -616,11 +616,11 @@ const DurationChart: React.FC = () => {
               style={{
                 padding: '14px 16px',
                 borderRadius: 12,
-                background: 'linear-gradient(135deg, rgba(245,158,11,0.08), rgba(234,88,12,0.06))',
-                border: '1px solid rgba(245,158,11,0.15)',
+                background: 'var(--sf-peach)',
+                border: '1px solid transparent',
               }}
             >
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sf-warn)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Total Transactions
               </div>
               <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-warning)', marginTop: 4 }}>
@@ -632,8 +632,8 @@ const DurationChart: React.FC = () => {
               style={{
                 padding: '14px 16px',
                 borderRadius: 12,
-                background: 'linear-gradient(135deg, rgba(148,163,184,0.08), rgba(100,116,139,0.06))',
-                border: '1px solid rgba(148,163,184,0.15)',
+                background: 'var(--sf-card-2)',
+                border: '1px solid transparent',
               }}
             >
               <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--dash-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -664,7 +664,7 @@ const DurationChart: React.FC = () => {
 
         {error && (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0 8px' }}>
-            <Empty description={<span style={{ color: '#ef4444' }}>{error}</span>} />
+            <Empty description={<span style={{ color: 'var(--sf-bad)' }}>{error}</span>} />
           </div>
         )}
 
@@ -697,7 +697,7 @@ const DurationChart: React.FC = () => {
                   key={group.key}
                   style={{
                     borderRadius: 16,
-                    border: '1px solid rgba(148, 163, 184, 0.12)',
+                    border: '1px solid transparent',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 6px 24px rgba(0,0,0,0.03)',
                     height: '100%',
                   }}
@@ -752,8 +752,8 @@ const DurationChart: React.FC = () => {
                       style={{
                         padding: '12px 14px',
                         borderRadius: 12,
-                        background: 'linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.06))',
-                        border: '1px solid rgba(99,102,241,0.15)',
+                        background: 'var(--sf-sky)',
+                        border: '1px solid transparent',
                       }}
                     >
                       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--dash-accent)', textTransform: 'uppercase' }}>
@@ -768,11 +768,11 @@ const DurationChart: React.FC = () => {
                       style={{
                         padding: '12px 14px',
                         borderRadius: 12,
-                        background: 'linear-gradient(135deg, rgba(239,68,68,0.08), rgba(244,63,94,0.06))',
-                        border: '1px solid rgba(239,68,68,0.15)',
+                        background: 'var(--sf-rose)',
+                        border: '1px solid transparent',
                       }}
                     >
-                      <div style={{ fontSize: 11, fontWeight: 600, color: '#ef4444', textTransform: 'uppercase' }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sf-bad)', textTransform: 'uppercase' }}>
                         Max Duration
                       </div>
                       <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-danger)', marginTop: 4 }}>
@@ -784,11 +784,11 @@ const DurationChart: React.FC = () => {
                       style={{
                         padding: '12px 14px',
                         borderRadius: 12,
-                        background: 'linear-gradient(135deg, rgba(16,185,129,0.08), rgba(5,150,105,0.06))',
-                        border: '1px solid rgba(16,185,129,0.15)',
+                        background: 'color-mix(in srgb, var(--sf-good) 14%, var(--sf-card))',
+                        border: '1px solid transparent',
                       }}
                     >
-                      <div style={{ fontSize: 11, fontWeight: 600, color: '#10b981', textTransform: 'uppercase' }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sf-good)', textTransform: 'uppercase' }}>
                         Min Duration
                       </div>
                       <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-success)', marginTop: 4 }}>
@@ -800,11 +800,11 @@ const DurationChart: React.FC = () => {
                       style={{
                         padding: '12px 14px',
                         borderRadius: 12,
-                        background: 'linear-gradient(135deg, rgba(245,158,11,0.08), rgba(234,88,12,0.06))',
-                        border: '1px solid rgba(245,158,11,0.15)',
+                        background: 'var(--sf-peach)',
+                        border: '1px solid transparent',
                       }}
                     >
-                      <div style={{ fontSize: 11, fontWeight: 600, color: '#f59e0b', textTransform: 'uppercase' }}>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sf-warn)', textTransform: 'uppercase' }}>
                         Total Transactions
                       </div>
                       <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-warning)', marginTop: 4 }}>

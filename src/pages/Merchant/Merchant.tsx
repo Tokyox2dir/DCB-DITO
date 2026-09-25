@@ -260,25 +260,25 @@ const Merchant = () => {
         spacing={2}
         sx={{
           alignItems: 'center',
-          mx: 3,
+          mx: 0,
           pb: 5,
-          mt: { xs: 8, md: 0 },
+          mt: 0,
         }}
       >
         <Box sx={{ width: '100%', maxWidth: '96vw' }}>
-          <Typography component='h2' variant='h6' sx={{ mb: 2 }}>
+          <Typography component='h2' variant='h6' className='sf-page-title'>
             Merchant Data
           </Typography>
 
           <Space direction='vertical' style={{ width: '100%', marginBottom: 16 }}>
-            <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+            <div className='sf-toolbar'>
               <AddMerchant onSuccess={onGetMerchant} />
               <Search
                 placeholder='Cari merchant (nama, email, phone, UID, app name...)'
                 allowClear
                 enterButton={<SearchOutlined />}
                 size='middle'
-                style={{ width: 400 }}
+                className='sf-toolbar-search'
                 onSearch={handleSearch}
                 onChange={(e) => {
                   setSearchText(e.target.value)
@@ -288,7 +288,7 @@ const Merchant = () => {
                 }}
                 value={searchText}
               />
-            </Space>
+            </div>
           </Space>
 
           <Table

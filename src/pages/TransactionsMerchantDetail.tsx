@@ -372,7 +372,7 @@ const TransactionMerchantDetail: React.FC = () => {
           className='mt-3 mr-4'
           size='small'
           variant='contained'
-          color='info'
+          color='primary'
           onClick={() => navigate(-1)}
         >
           Back

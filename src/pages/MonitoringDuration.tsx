@@ -10,7 +10,6 @@ import Accordion from '@mui/material/Accordion'
 import AccordionSummary from '@mui/material/AccordionSummary'
 import AccordionDetails from '@mui/material/AccordionDetails'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import AppNavbar from '../components/AppNavbar'
 import DurationChart from '../components/DurationChart'
 import AppTheme from '../styles/theme/shared-theme/AppTheme'
 import {
@@ -32,7 +31,6 @@ export default function MonitoringDuration(props: { disableCustomTheme?: boolean
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
       <Box sx={{ display: 'flex' }}>
-        <AppNavbar />
         {/* Main content */}
         <Box
           component='main'
@@ -49,16 +47,16 @@ export default function MonitoringDuration(props: { disableCustomTheme?: boolean
               mx: 3,
               pt: 4,
               pb: 5,
-              mt: { xs: 8, md: 0 },
+              mt: 0,
               width: 'calc(100% - 24px)',
             }}
           >
             <Card
               sx={{
                 borderRadius: 3,
-                border: '1px solid rgba(99, 102, 241, 0.12)',
-                boxShadow: '0 8px 28px rgba(15, 23, 42, 0.06)',
-                background: 'linear-gradient(135deg, rgba(99,102,241,0.06), rgba(16,185,129,0.04))',
+                border: '1px solid transparent',
+                boxShadow: '0 1px 2px rgba(21, 23, 26, 0.04)',
+                background: 'var(--sf-card)',
               }}
             >
               <CardContent sx={{ p: 3 }}>

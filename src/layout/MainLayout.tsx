@@ -1,13 +1,5 @@
-import { Outlet } from 'react-router-dom'
-import TopNavBar from '../components/TopNavBar'
+import AppShell from '../components/AppShell'
 
 export default function MainLayout() {
-  return (
-    <div className='aura-v2-shell'>
-      <TopNavBar />
-      <div className='aura-v2-content'>
-        <Outlet />
-      </div>
-    </div>
-  )
+  return <AppShell />
 }

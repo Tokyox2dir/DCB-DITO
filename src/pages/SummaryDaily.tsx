@@ -220,9 +220,10 @@ const TransactionSummaryPage: React.FC = () => {
   }
 
   return (
-    <div className='p-4 sm:p-6 md:p-10'>
-      <Typography.Title level={3}>Transaction Daily Summary</Typography.Title>
+    <div className='sf-page'>
+      <h2 className='sf-page-title'>Transaction Daily Summary</h2>
 
+      <div className='sf-panel'>
       <Row gutter={[16, 8]} style={{ marginBottom: 8 }}>
         <Col xs={24} sm={12} md={12} lg={8}>
           <Text>Date Range</Text>
@@ -294,7 +295,7 @@ const TransactionSummaryPage: React.FC = () => {
 
       {/* Baris 3 */}
       <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} md={12} lg={8} className='!mb-10'>
+        <Col xs={24} sm={12} md={12} lg={8}>
           <Text>Route</Text>
           <Input placeholder='Route' value={route} onChange={(e) => setRoute(e.target.value)} />
         </Col>
@@ -308,8 +309,9 @@ const TransactionSummaryPage: React.FC = () => {
           </Space>
         </Col>
       </Row>
+      </div>
 
-      <Row justify='start' gutter={8} style={{ marginBottom: 16, marginTop: 16 }}>
+      <Row justify='start' gutter={8}>
         <Col>
           <Button variant='outlined' color='primary' onClick={() => handleExport('csv')}>
             Export CSV
@@ -322,15 +324,17 @@ const TransactionSummaryPage: React.FC = () => {
         </Col>
       </Row>
 
-      <Spin spinning={loading}>
-        <Table
-          columns={columns}
-          dataSource={data}
-          rowKey={(record, index) => `${record.date}-${record.merchant_name}-${index}`}
-          pagination={{ pageSize: 20 }}
-          scroll={{ x: 'max-content' }}
-        />
-      </Spin>
+      <div className='sf-panel'>
+        <Spin spinning={loading}>
+          <Table
+            columns={columns}
+            dataSource={data}
+            rowKey={(record, index) => `${record.date}-${record.merchant_name}-${index}`}
+            pagination={{ pageSize: 20 }}
+            scroll={{ x: 'max-content' }}
+          />
+        </Spin>
+      </div>
     </div>
   )
 }

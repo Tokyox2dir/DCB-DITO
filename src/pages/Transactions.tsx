@@ -638,15 +638,15 @@ export default function Transactions() {
         spacing={2}
         sx={{
           alignItems: 'center',
-          mx: 3,
+          mx: 0,
           pb: 5,
-          mt: { xs: 8, md: 0 },
+          mt: 0,
         }}
       >
         {/* <Header /> */}
         <Box sx={{ width: '100%', maxWidth: '96vw' }}>
           {/* cards */}
-          <Typography component='h2' variant='h6' sx={{ mb: 2 }}>
+          <Typography component='h2' variant='h6' className='sf-page-title'>
             Redpay Transactions
           </Typography>
           <Card variant='outlined' className='transaction-filter'>
@@ -877,7 +877,7 @@ export default function Transactions() {
             <Grid size={{ xs: 12, md: 6 }}>{/* <SessionsChart /> */}</Grid>
             <Grid size={{ xs: 12, md: 6 }}>{/* <PageViewsBarChart /> */}</Grid>
           </Grid>
-          <Typography component='h2' variant='h6' sx={{ mb: 2 }}>
+          <Typography component='h2' variant='h6' className='sf-section-title'>
             Transaction Details
           </Typography>
           <div className='flex items-center justify-between'>
@@ -887,7 +887,7 @@ export default function Transactions() {
                 className='border-sky-400'
                 variant='outlined'
                 disabled={loadingExport || total > 1400000}
-                color='info'
+                color='primary'
                 onClick={() => handleExport('csv')}
               >
                 {loadingExport ? 'Processing...' : 'Export CSV'}
@@ -898,7 +898,7 @@ export default function Transactions() {
                 disabled={loadingExport || total > 120000}
                 className='border-sky-400 ml-4'
                 variant='contained'
-                color='info'
+                color='primary'
                 onClick={() => handleExport('excel')}
               >
                 {loadingExport ? 'Processing...' : 'Export Excel'}

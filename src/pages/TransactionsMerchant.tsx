@@ -474,14 +474,14 @@ export default function TransactionsMerchant() {
         spacing={2}
         sx={{
           alignItems: 'center',
-          mx: 3,
+          mx: 0,
           pb: 5,
-          mt: { xs: 8, md: 0 },
+          mt: 0,
         }}
       >
         {/* <Header /> */}
         <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
-          <Typography component='h2' variant='h6' sx={{ mb: 2 }}>
+          <Typography component='h2' variant='h6' className='sf-page-title'>
             Redpay Transactions
           </Typography>
           <Card variant='outlined' className='p-3'>
@@ -693,7 +693,7 @@ export default function TransactionsMerchant() {
             <Grid size={{ xs: 12, md: 6 }}>{/* <SessionsChart /> */}</Grid>
             <Grid size={{ xs: 12, md: 6 }}>{/* <PageViewsBarChart /> */}</Grid>
           </Grid>
-          <Typography component='h2' variant='h6' sx={{ mb: 2 }}>
+          <Typography component='h2' variant='h6' className='sf-section-title'>
             Merchant Transaction Details
           </Typography>
           <div className='flex items-center justify-between'>
@@ -702,7 +702,7 @@ export default function TransactionsMerchant() {
                 size='small'
                 className='border-sky-400'
                 variant='outlined'
-                color='info'
+                color='primary'
                 onClick={() => handleExport('csv')}
                 disabled={loadingExport || total > 500000 || exportCooldown}
               >
@@ -714,7 +714,7 @@ export default function TransactionsMerchant() {
                 className='border-sky-400 ml-3'
                 variant='contained'
                 disabled={loadingExport || total > 30000 || exportCooldown}
-                color='info'
+                color='primary'
                 onClick={() => handleExport('excel')}
               >
                 {loadingExport

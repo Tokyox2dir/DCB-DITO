@@ -741,7 +741,7 @@ const TransactionDetail: React.FC = () => {
           }}
           disabled={!checkCharging}
           variant='contained'
-          color='info'
+          color='primary'
         >
           Check Charging
         </Button>
@@ -751,7 +751,7 @@ const TransactionDetail: React.FC = () => {
           className='mt-3 mr-4'
           onClick={handleManualCallback}
           variant='contained'
-          color='info'
+          color='primary'
         >
           Manual Callback
         </Button>

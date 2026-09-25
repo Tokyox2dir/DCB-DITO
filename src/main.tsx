@@ -4,6 +4,7 @@ import { StyledEngineProvider } from '@mui/material/styles'
 import './index.css'
 import './styles/sms-shell.css'
 import './styles/modern-theme.css'
+import './styles/shell-soft.css'
 import App from './App'
 import AppTheme from './styles/theme/shared-theme/AppTheme'
 

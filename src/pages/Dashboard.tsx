@@ -1,147 +1,309 @@
-import { useEffect, useMemo, useState } from 'react'
-import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
-import DnsOutlinedIcon from '@mui/icons-material/DnsOutlined'
-import SendOutlinedIcon from '@mui/icons-material/SendOutlined'
-import CellTowerOutlinedIcon from '@mui/icons-material/CellTowerOutlined'
-import axios from 'axios'
+import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { jwtDecode } from 'jwt-decode'
-import RankingCard, { RankingItem } from '../components/RankingCard'
+import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
+import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined'
+import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
+import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined'
+import SwapHorizRoundedIcon from '@mui/icons-material/SwapHorizRounded'
+import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined'
+import HourglassEmptyRoundedIcon from '@mui/icons-material/HourglassEmptyRounded'
+import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined'
+import SpeedRoundedIcon from '@mui/icons-material/SpeedRounded'
+import ScheduleRoundedIcon from '@mui/icons-material/ScheduleRounded'
+import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
+import ArrowOutwardRoundedIcon from '@mui/icons-material/ArrowOutwardRounded'
+import RankingCard from '../components/RankingCard'
+import useDashboardData, { BUCKET_MINUTES, TrafficBucket, WINDOW_HOURS } from '../hooks/useDashboardData'
 import { useAuth } from '../provider/AuthProvider'
 
-interface ApiSeriesPoint {
-  timestamp: string
-  success: number
-  pending: number
-  failed: number
-  total: number
+function formatNumber(value: number) {
+  return new Intl.NumberFormat('id-ID').format(value)
 }
 
-interface ApiSeries {
-  merchant_name: string
-  payment_method: string
-  data: ApiSeriesPoint[]
+function formatCompact(value: number) {
+  return new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(value)
 }
 
-function topN(map: Map<string, number>, n = 5): RankingItem[] {
-  return Array.from(map.entries())
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, n)
-    .map(([label, value]) => ({ label, value }))
+function percent(part: number, whole: number) {
+  return whole > 0 ? (part * 100) / whole : 0
+}
+
+function initials(name: string) {
+  const parts = name
+    .trim()
+    .split(/[\s_-]+/)
+    .filter(Boolean)
+  return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '?'
+}
+
+const METHOD_TONES = ['peach', 'sky', 'rose'] as const
+const SLOTS_PER_HOUR = 60 / BUCKET_MINUTES
+
+type HeatLevel = 'empty' | 'low' | 'mid' | 'high' | 'alert' | 'now'
+
+function heatLevel(bucket: TrafficBucket, isNow: boolean, high: number, mid: number): HeatLevel {
+  if (isNow) return 'now'
+  if (bucket.total === 0) return 'empty'
+  if (bucket.total >= 10 && bucket.failed / bucket.total >= 0.3) return 'alert'
+  if (bucket.total >= high) return 'high'
+  if (bucket.total >= mid) return 'mid'
+  return 'low'
+}
+
+function quantile(sorted: number[], q: number) {
+  if (!sorted.length) return 0
+  return sorted[Math.min(sorted.length - 1, Math.floor(q * sorted.length))]
 }
 
 export default function Dashboard() {
-  const { token, apiUrl } = useAuth()
-  const [loading, setLoading] = useState(false)
-  const [refreshKey, setRefreshKey] = useState(0)
-  const [merchants, setMerchants] = useState<RankingItem[]>([])
-  const [paymentMethods, setPaymentMethods] = useState<RankingItem[]>([])
-  const [successLeaders, setSuccessLeaders] = useState<RankingItem[]>([])
-  const [failedLeaders, setFailedLeaders] = useState<RankingItem[]>([])
-
-  const username = useMemo(() => {
-    if (!token) return 'user'
+  const { isDev, token } = useAuth()
+  const { username, role } = useMemo(() => {
     try {
-      return (jwtDecode(token) as any).username || 'user'
+      const decoded = token ? (jwtDecode(token) as any) : {}
+      return { username: (decoded.username as string) || 'user', role: (decoded.role as string) || '' }
     } catch {
-      return 'user'
+      return { username: 'user', role: '' }
     }
   }, [token])
+  const { loading, refresh, updatedAt, merchants, successLeaders, totals, methods, merchantStats, buckets } =
+    useDashboardData()
+  const isAdmin = role === 'admin' || role === 'superadmin'
 
+  const alerts = useMemo(
+    () =>
+      merchantStats
+        .filter((m) => m.failed > 0)
+        .sort((a, b) => b.failed - a.failed)
+        .slice(0, 5),
+    [merchantStats],
+  )
 
-  useEffect(() => {
-    if (!token || !apiUrl) return
-
-    const load = async () => {
-      try {
-        setLoading(true)
-        const end = dayjs().format('YYYY-MM-DDTHH:mm:ssZ')
-        const start = dayjs().subtract(8, 'hour').format('YYYY-MM-DDTHH:mm:ssZ')
-
-        const [merchantsRes, trafficRes] = await Promise.allSettled([
-          axios.get(`${apiUrl}/admin/merchants`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axios.get(`${apiUrl}/traffic/monitoring`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-            params: { start, end },
-          }),
-        ])
-
-        if (merchantsRes.status === 'fulfilled') {
-          const list = merchantsRes.value.data?.data || []
-          const ranked = [...list]
-            .map((m: any) => ({
-              label: m.client_name || m.merchant_name || m.name || m.uid || 'Merchant',
-              value: Array.isArray(m.applications)
-                ? m.applications.length
-                : typeof m.status === 'number'
-                  ? m.status
-                  : 1,
-            }))
-            .sort((a, b) => b.value - a.value)
-            .slice(0, 5)
-          setMerchants(ranked)
-        }
-
-        if (trafficRes.status === 'fulfilled') {
-          const apiData: ApiSeries[] = trafficRes.value.data?.data || []
-          const byMerchant = new Map<string, number>()
-          const byMethod = new Map<string, number>()
-          const bySuccess = new Map<string, number>()
-          const byFailed = new Map<string, number>()
-
-          apiData.forEach((series) => {
-            let total = 0
-            let success = 0
-            let failed = 0
-            series.data.forEach((p) => {
-              total += p.total ?? p.success + p.pending + p.failed
-              success += p.success
-              failed += p.failed
-            })
-            byMerchant.set(series.merchant_name, (byMerchant.get(series.merchant_name) || 0) + total)
-            byMethod.set(series.payment_method, (byMethod.get(series.payment_method) || 0) + total)
-            bySuccess.set(series.merchant_name, (bySuccess.get(series.merchant_name) || 0) + success)
-            byFailed.set(series.merchant_name, (byFailed.get(series.merchant_name) || 0) + failed)
-          })
-
-          const trafficMerchants = topN(byMerchant)
-          if (trafficMerchants.length) setMerchants(trafficMerchants)
-          setPaymentMethods(topN(byMethod))
-          setSuccessLeaders(topN(bySuccess))
-          setFailedLeaders(topN(byFailed))
-        }
-      } catch (e) {
-        console.error('Dashboard ranking fetch error:', e)
-      } finally {
-        setLoading(false)
-      }
+  const hours = useMemo(() => {
+    const volumes = buckets
+      .map((b) => b.total)
+      .filter((v) => v > 0)
+      .sort((a, b) => a - b)
+    const high = quantile(volumes, 0.75)
+    const mid = quantile(volumes, 0.4)
+    const rows: { label: string; cells: { bucket: TrafficBucket; level: HeatLevel }[] }[] = []
+    for (let h = 0; h < WINDOW_HOURS; h += 1) {
+      const slice = buckets.slice(h * SLOTS_PER_HOUR, (h + 1) * SLOTS_PER_HOUR)
+      if (!slice.length) continue
+      rows.push({
+        label: dayjs(slice[0].start).format('HH:mm'),
+        cells: slice.map((bucket, i) => ({
+          bucket,
+          level: heatLevel(bucket, h * SLOTS_PER_HOUR + i === buckets.length - 1, high, mid),
+        })),
+      })
     }
+    return rows
+  }, [buckets])
 
-    load()
-  }, [apiUrl, token, refreshKey])
+  const successRate = percent(totals.success, totals.total)
+  const shortcuts = [
+    { label: 'Refresh', icon: <RefreshRoundedIcon />, onClick: refresh },
+    { label: 'Transactions', icon: <ReceiptLongOutlinedIcon />, path: '/transactions' },
+    { label: 'Reports', icon: <DescriptionOutlinedIcon />, path: '/report' },
+    ...(isAdmin ? [{ label: 'Monitoring', icon: <MonitorHeartOutlinedIcon />, path: '/monitoring' }] : []),
+  ]
+
+  const details = [
+    { label: 'Total transactions', value: formatNumber(totals.total), icon: <SwapHorizRoundedIcon /> },
+    { label: 'Success', value: formatNumber(totals.success), icon: <TaskAltOutlinedIcon />, tone: 'good' },
+    { label: 'Pending', value: formatNumber(totals.pending), icon: <HourglassEmptyRoundedIcon />, tone: 'warn' },
+    { label: 'Failed', value: formatNumber(totals.failed), icon: <ErrorOutlineOutlinedIcon />, tone: 'bad' },
+    { label: 'Success rate', value: `${successRate.toFixed(1)}%`, icon: <SpeedRoundedIcon />, badge: totals.total > 0 },
+  ]
 
   return (
-    <section className='dash-page dashboard-overview'>
-      <header className='dash-header'>
-        <div>
-          <h1 className='dash-title'>Dashboard</h1>
-          <p className='dash-subtitle'>
-            Welcome, {username}. Transaction rankings from the last 8 hours.
-          </p>
+    <section className='sf-dash' aria-busy={loading}>
+      <article className='sf-card sf-user'>
+        <div className='sf-user-head'>
+          <span className='sf-user-avatar'>{initials(username)}</span>
+          <div>
+            <strong>{username}</strong>
+            <small>{role || 'user'}</small>
+          </div>
+          <span className={`sf-env ${isDev ? 'dev' : 'prod'}`}>{isDev ? 'Dev' : 'Prod'}</span>
         </div>
-        <button className='dash-refresh' type='button' disabled={loading} onClick={() => setRefreshKey((key) => key + 1)}>
-          {loading ? 'Refreshing…' : 'Refresh data'}
-        </button>
-      </header>
+        <div className='sf-user-actions'>
+          {shortcuts.map((s) =>
+            s.path ? (
+              <Link key={s.label} to={s.path} className='sf-round' title={s.label} aria-label={s.label}>
+                {s.icon}
+              </Link>
+            ) : (
+              <button
+                key={s.label}
+                type='button'
+                className={`sf-round${loading ? ' spin' : ''}`}
+                title={s.label}
+                aria-label={s.label}
+                onClick={s.onClick}
+                disabled={loading}
+              >
+                {s.icon}
+              </button>
+            ),
+          )}
+        </div>
+        <div className='sf-user-meta'>
+          <small>Time window</small>
+          <div>
+            <span className='sf-chip'>
+              <ScheduleRoundedIcon /> Last {WINDOW_HOURS} hours
+            </span>
+            <span className='sf-chip dark'>{updatedAt ? `Updated ${updatedAt}` : 'Loading'}</span>
+          </div>
+        </div>
+      </article>
 
-      <section className='dash-rank-grid' aria-label='Payment performance rankings'>
+      <article className='sf-card sf-details'>
+        <h2>Traffic details</h2>
+        <ul>
+          {details.map((d) => (
+            <li key={d.label}>
+              <div>
+                <small>{d.label}</small>
+                <strong className={d.tone}>{d.value}</strong>
+              </div>
+              {d.badge ? (
+                <span className={`sf-badge ${successRate >= 90 ? 'good' : successRate >= 75 ? 'warn' : 'bad'}`}>
+                  {successRate >= 90 ? 'Healthy' : successRate >= 75 ? 'Watch' : 'Low'}
+                </span>
+              ) : (
+                <span className='sf-detail-icon'>{d.icon}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </article>
+
+      <div className='sf-methods'>
+        <div className='sf-method-grid'>
+          {methods.slice(0, 3).map((m, i) => {
+            const share = percent(m.total, totals.total)
+            return (
+              <article key={m.name} className={`sf-method sf-tone-${METHOD_TONES[i]}`}>
+                <div className='sf-method-top'>
+                  <span className='sf-chip light'>#{i + 1}</span>
+                  <small>{formatNumber(m.total)} trx</small>
+                </div>
+                <h3 title={m.name}>{m.name}</h3>
+                <p>Top payment method · last {WINDOW_HOURS}h</p>
+                <div className='sf-progress-label'>
+                  <span>{share.toFixed(0)}%</span>
+                  <small>Share</small>
+                </div>
+                <div className='sf-progress'>
+                  <i style={{ width: `${share}%` }} />
+                </div>
+                <div className='sf-method-foot'>
+                  <div className='sf-avatars'>
+                    {m.merchants.slice(0, 3).map((name) => (
+                      <span key={name} title={name}>
+                        {initials(name)}
+                      </span>
+                    ))}
+                    {m.merchants.length > 3 && <span className='more'>+{m.merchants.length - 3}</span>}
+                  </div>
+                  <small>
+                    {m.merchants.length} merchant{m.merchants.length === 1 ? '' : 's'}
+                  </small>
+                </div>
+              </article>
+            )
+          })}
+          {!methods.length && (
+            <article className='sf-method sf-method-empty'>
+              {loading ? 'Loading payment methods…' : 'No traffic data yet.'}
+            </article>
+          )}
+        </div>
+      </div>
+
+      <article className='sf-card sf-heat'>
+        <header className='sf-card-head'>
+          <div>
+            <h2>Traffic heatmap</h2>
+            <small>{BUCKET_MINUTES}-minute slots</small>
+          </div>
+        </header>
+        {!hours.length && <p className='sf-heat-empty'>{loading ? 'Loading traffic…' : 'No traffic data yet.'}</p>}
+        <div className='sf-heat-grid' role='table' aria-label='Transactions per time slot'>
+          {hours.map((row) => (
+            <div key={row.label} className='sf-heat-row' role='row'>
+              <span className='sf-heat-hour' role='rowheader'>
+                {row.label}
+              </span>
+              {row.cells.map(({ bucket, level }) => (
+                <span
+                  key={bucket.start}
+                  role='cell'
+                  className={`sf-heat-cell ${level}`}
+                  title={`${dayjs(bucket.start).format('HH:mm')} · ${formatNumber(bucket.total)} trx, ${formatNumber(bucket.failed)} failed`}
+                >
+                  {bucket.total > 0 ? formatCompact(bucket.total) : ''}
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className='sf-legend'>
+          <span>
+            <i className='low' /> Low
+          </span>
+          <span>
+            <i className='mid' /> Busy
+          </span>
+          <span>
+            <i className='high' /> Peak
+          </span>
+          <span>
+            <i className='alert' /> ≥30% failed
+          </span>
+          <span>
+            <i className='now' /> Now
+          </span>
+        </div>
+      </article>
+
+      <article className='sf-card sf-inbox'>
+        <header className='sf-card-head'>
+          <div>
+            <h2>Failure alerts</h2>
+            <small>Merchants with failed transactions</small>
+          </div>
+          <Link to={isAdmin ? '/monitoring' : '/transactions'} className='sf-link'>
+            View all
+          </Link>
+        </header>
+        <ul>
+          {alerts.map((m, i) => (
+            <li key={m.name} className={i === 0 ? 'featured' : ''}>
+              <span className='sf-inbox-avatar'>{initials(m.name)}</span>
+              <div>
+                <strong>{m.name}</strong>
+                <p>
+                  {formatNumber(m.failed)} failed of {formatNumber(m.total)} · {percent(m.failed, m.total).toFixed(1)}%
+                  failure rate
+                </p>
+              </div>
+              <Link to='/transactions' className='sf-inbox-go' aria-label={`Open transactions for ${m.name}`}>
+                <ArrowOutwardRoundedIcon />
+              </Link>
+            </li>
+          ))}
+          {!alerts.length && <li className='sf-empty'>{loading ? 'Checking failures…' : 'No failed transactions.'}</li>}
+        </ul>
+      </article>
+
+      <div className='sf-ranks'>
         <RankingCard
-          title='Top 5 Merchants'
+          title='Top Merchants'
           subtitle='By transaction volume'
           variant='client'
           icon={<PeopleAltOutlinedIcon sx={{ fontSize: 18 }} />}
@@ -149,30 +311,14 @@ export default function Dashboard() {
           loading={loading && merchants.length === 0}
         />
         <RankingCard
-          title='Top 5 Payment Methods'
-          subtitle='By usage volume'
-          variant='supplier'
-          icon={<DnsOutlinedIcon sx={{ fontSize: 18 }} />}
-          items={paymentMethods}
-          loading={loading && paymentMethods.length === 0}
-        />
-        <RankingCard
-          title='Top 5 Success'
-          subtitle='By success count'
+          title='Top Success'
+          subtitle='Merchants by successful transactions'
           variant='sender'
-          icon={<SendOutlinedIcon sx={{ fontSize: 18 }} />}
+          icon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
           items={successLeaders}
           loading={loading && successLeaders.length === 0}
         />
-        <RankingCard
-          title='Top 5 Failed'
-          subtitle='By failed count'
-          variant='operator'
-          icon={<CellTowerOutlinedIcon sx={{ fontSize: 18 }} />}
-          items={failedLeaders}
-          loading={loading && failedLeaders.length === 0}
-        />
-      </section>
+      </div>
     </section>
   )
 }
