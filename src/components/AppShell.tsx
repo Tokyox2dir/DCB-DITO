@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
@@ -80,6 +80,18 @@ export default function AppShell() {
   const [openGroup, setOpenGroup] = useState<string | null>(null)
   const [userAnchor, setUserAnchor] = useState<null | HTMLElement>(null)
   const [searchOpen, setSearchOpen] = useState(false)
+  // Desktop capsule auto-hides; hovering the left edge (or focusing it) slides it in and pushes content.
+  const [railHover, setRailHover] = useState(false)
+  const railTimer = useRef<number>()
+  const showRail = () => {
+    window.clearTimeout(railTimer.current)
+    setRailHover(true)
+  }
+  const hideRail = () => {
+    window.clearTimeout(railTimer.current)
+    railTimer.current = window.setTimeout(() => setRailHover(false), 400)
+  }
+  useEffect(() => () => window.clearTimeout(railTimer.current), [])
 
   const isDark = ((mode === 'system' ? systemMode : mode) || 'dark') !== 'light'
 
@@ -104,14 +116,17 @@ export default function AppShell() {
   const closeGroup = () => {
     setGroupAnchor(null)
     setOpenGroup(null)
+    hideRail()
   }
+
+  const railOpen = railHover || Boolean(openGroup)
 
   const activeGroup = navItems.find((n) => n.type === 'dropdown' && n.label === openGroup) as
     | Extract<NavItem, { type: 'dropdown' }>
     | undefined
 
   return (
-    <div className='sf-shell'>
+    <div className={`sf-shell${railOpen ? ' rail-open' : ''}`}>
       <header className='sf-topbar'>
         <div className='sf-top-left'>
           <Link to='/' className='sf-brand sf-logo' aria-label='Redpay home'>
@@ -151,7 +166,18 @@ export default function AppShell() {
         </div>
       </header>
 
-      <nav className='sf-capsule' aria-label='Primary navigation'>
+      <div className='sf-rail-edge' aria-hidden='true' onMouseEnter={showRail} onMouseLeave={hideRail} onClick={showRail}>
+        <i />
+      </div>
+      <nav
+        className='sf-capsule'
+        aria-label='Primary navigation'
+        onMouseEnter={showRail}
+        onMouseLeave={hideRail}
+        // Keyboard focus reveals the rail; focus restored after a mouse click (e.g. closing a submenu) does not.
+        onFocus={(e) => e.target.matches(':focus-visible') && showRail()}
+        onBlur={hideRail}
+      >
         {navItems.map((item) => {
           const active = isMatch(location.pathname, item.match)
           const icon = NAV_ICONS[item.label] ?? <SpaceDashboardOutlinedIcon />

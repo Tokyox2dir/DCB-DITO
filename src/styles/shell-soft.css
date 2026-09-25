@@ -213,6 +213,45 @@ html[data-theme='dark'] .sf-logo .on-dark { display: block; }
 
 .sf-content { padding: 6px 24px 32px 88px; }
 
+/* Desktop: the capsule hides past the left edge and slides in on hover, pushing the content over. */
+.sf-rail-edge { display: none; }
+@media (min-width: 901px) {
+  .sf-rail-edge {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 18px;
+    z-index: 1149;
+    cursor: pointer;
+  }
+  .sf-rail-edge i {
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    width: 4px;
+    height: 56px;
+    border-radius: 99px;
+    transform: translateY(-50%);
+    background: color-mix(in srgb, var(--sf-ink) 22%, transparent);
+    transition: opacity 0.2s ease;
+  }
+  .sf-capsule {
+    opacity: 0;
+    transform: translate(calc(-100% - 28px), -50%);
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+  }
+  .sf-content { padding-left: 24px; transition: padding-left 0.32s cubic-bezier(0.22, 1, 0.36, 1); }
+  .sf-shell.rail-open .sf-capsule { opacity: 1; transform: translateY(-50%); }
+  .sf-shell.rail-open .sf-content { padding-left: 88px; }
+  .sf-shell.rail-open .sf-rail-edge i { opacity: 0; }
+}
+@media (min-width: 901px) and (prefers-reduced-motion: reduce) {
+  .sf-capsule,
+  .sf-content { transition: none; }
+}
+
 /* ---------- Search (Ctrl K dialog) ---------- */
 .sf-search {
   position: relative;
