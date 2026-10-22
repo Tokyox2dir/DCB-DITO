@@ -25,7 +25,7 @@ export default defineConfig({
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'https://new-payment.redision.com:4000/',
+        target: 'https://dcb-backend.fuady.web.id/api',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),

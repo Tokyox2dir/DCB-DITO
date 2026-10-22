@@ -2,8 +2,7 @@ import axios from 'axios'
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react'
 import { jwtDecode } from 'jwt-decode'
 
-const API_DEV = 'https://sandbox-payment.redision.com/api'
-const API_PROD = 'https://new-payment.redision.com/api'
+const API_URL = 'https://dcb-backend.fuady.web.id/api'
 
 interface AuthContextType {
   token: string | null
@@ -27,7 +26,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // State untuk API environment
   const [isDev, setIsDev] = useState(localStorage.getItem('api_env') !== 'prod')
-  const apiUrl = isDev ? API_DEV : API_PROD
+  const apiUrl = API_URL
 
   const toggleApi = () => {
     setIsDev((prev) => {
