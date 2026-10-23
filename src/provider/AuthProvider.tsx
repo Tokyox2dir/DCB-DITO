@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useState, ReactNode } fr
 import { jwtDecode } from 'jwt-decode'
 
 const API_DEV = 'https://sandbox-payment.redision.com/api'
-const API_PROD = 'https://dcb-backend.fuady.web.id/api'
+const API_PROD = 'https://new-payment.redision.com/api'
 
 interface AuthContextType {
   token: string | null
