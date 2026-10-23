@@ -2,7 +2,7 @@ import axios from 'axios'
 import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
 import type { MetricStatus } from '../components/VolumePerHourChart'
-import type { TrafficSeries } from '../components/VolumePerHourChart'
+import type { TrafficPoint, TrafficSeries } from '../components/VolumePerHourChart'
 
 export type LiveTrxRow = {
   u_id?: string
@@ -165,6 +165,71 @@ export function overlayTrafficWithTransactions(
   })
 
   return Array.from(map.values())
+}
+
+/**
+ * Rebuild every bucket at/after `from` from raw transactions, in the same bucket size as the
+ * aggregate. Points before `from` are kept untouched.
+ */
+export function overlayTrafficBuckets(
+  series: TrafficSeries[],
+  rows: LiveTrxRow[],
+  options: { from: Dayjs | number; bucketMinutes: number },
+): TrafficSeries[] {
+  const fromMs = dayjs(options.from).valueOf()
+  const bucketMs = options.bucketMinutes * 60_000
+  const keyOf = (merchant?: string, method?: string) => `${merchant || 'Unknown'}::${method || '-'}`
+
+  const out = series.map((item) => ({
+    ...item,
+    data: (item.data || []).filter((point) => {
+      const ts = dayjs(point.timestamp).valueOf()
+      return Number.isNaN(ts) || ts < fromMs
+    }),
+  }))
+  const indexByKey = new Map<string, number>()
+  out.forEach((item, i) => {
+    const key = keyOf(item.merchant_name || item.client_uid, item.payment_method)
+    if (!indexByKey.has(key)) indexByKey.set(key, i)
+  })
+
+  const live = new Map<string, Map<number, TrafficPoint>>()
+  rows.forEach((row) => {
+    const ts = dayjs(row.created_at).valueOf()
+    if (Number.isNaN(ts) || ts < fromMs) return
+    const key = keyOf(row.merchant_name, row.payment_method)
+    const bucketStart = Math.floor(ts / bucketMs) * bucketMs
+    if (!live.has(key)) live.set(key, new Map())
+    const byBucket = live.get(key)!
+    const point = byBucket.get(bucketStart) || {
+      timestamp: dayjs(bucketStart).format(),
+      success: 0,
+      pending: 0,
+      waiting: 0,
+      failed: 0,
+      total: 0,
+    }
+    point.total = (point.total || 0) + 1
+    const code = Number(row.status_code)
+    if (code === 1000) point.success += 1
+    else if (code === 1001) point.pending += 1
+    else if (code === 1003) point.waiting = (point.waiting || 0) + 1
+    else if (code === 1005) point.failed += 1
+    byBucket.set(bucketStart, point)
+  })
+
+  live.forEach((byBucket, key) => {
+    const points = Array.from(byBucket.values())
+    const index = indexByKey.get(key)
+    if (index === undefined) {
+      const [merchant, method] = key.split('::')
+      out.push({ merchant_name: merchant, payment_method: method, data: points })
+    } else {
+      out[index] = { ...out[index], data: [...out[index].data, ...points] }
+    }
+  })
+
+  return out
 }
 
 /** Patch hourly buckets for the last N hours from transaction rows (live chart tail). */

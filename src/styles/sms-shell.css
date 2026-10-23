@@ -1228,6 +1228,66 @@ html[data-theme='light'] .mon-kpi-card {
   overflow: auto;
 }
 
+.mon-tpc-head-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.mon-tpc-dots {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.mon-tpc-dots button {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--dash-border, #363b46);
+  cursor: pointer;
+  transition:
+    width 0.2s ease,
+    background 0.2s ease;
+}
+
+.mon-tpc-dots button.active {
+  width: 18px;
+  background: var(--dash-accent, #3b82f6);
+}
+
+.mon-tpc-dots button:focus-visible {
+  outline: 2px solid var(--dash-accent, #3b82f6);
+  outline-offset: 2px;
+}
+
+.mon-tpc-pager {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.mon-tpc-pager::-webkit-scrollbar {
+  display: none;
+}
+
+.mon-tpc-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
 .mon-tpc-table {
   width: 100%;
   border-collapse: collapse;
@@ -2010,6 +2070,10 @@ html[data-theme='light'] .mon-alert-badges .crit {
 html[data-theme='light'] .mon-alert-badges .warn {
   color: #b45309;
   background: rgba(245, 158, 11, 0.12);
+}
+
+html[data-theme='light'] .mon-tpc-dots button:not(.active) {
+  background: #d5d9e0;
 }
 
 html[data-theme='light'] .mon-tpc-table thead {
