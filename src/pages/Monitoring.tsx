@@ -43,6 +43,12 @@ const HOURLY_FULL_RESYNC_MS = 30 * 60_000
 // A slow database: when a poll's requests take longer than this, wait about as long again before the next one,
 // so slow queries don't pile up behind each other.
 const SLOW_REQUEST_MS = 15_000
+// Status counts: the whole-day counts are taken once and reused; each refresh only counts the recent
+// window and adds it on top. The whole-day counts are redone every KPI_RESYNC_MS so older transactions
+// whose status changed meanwhile (e.g. pending -> success) are picked up. The total never lags.
+const KPI_RESYNC_MS = 2 * 60_000
+const KPI_TAIL_MINUTES = 30
+const KPI_STATUSES = [1000, 1001, 1003, 1005] as const
 const MAX_BACKOFF_MS = 120_000
 
 /** The aggregate only fills a bucket once it has closed: the open bucket starts here. */
@@ -58,6 +64,9 @@ function aggregateCoverageEnd(series: TrafficSeries[]): number | null {
 }
 
 type KpiCounts = { total: number; success: number; pending: number; waiting: number; failed: number }
+type StatusCounts = [number, number, number, number] // success, pending, waiting, failed
+
+const addCounts = (a: StatusCounts, b: StatusCounts): StatusCounts => [a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]]
 
 const seriesKey = (s: TrafficSeries) => `${s.client_uid || ''}::${s.merchant_name || ''}::${s.payment_method || ''}`
 
@@ -121,6 +130,7 @@ export default function Monitoring() {
   const loadingRef = useRef(false)
   const kpiScopeRef = useRef('')
   const kpiInFlightRef = useRef<string | null>(null)
+  const kpiBaseRef = useRef<{ scope: string; at: number; boundary: number; counts: StatusCounts } | null>(null)
   const fineCacheRef = useRef<{ scope: string; data: TrafficSeries[]; fullAt: number } | null>(null)
   const hourlyCacheRef = useRef<{ scope: string; data: TrafficSeries[]; fullAt: number } | null>(null)
   const lastLoadAtRef = useRef(0)
@@ -230,12 +240,37 @@ export default function Monitoring() {
         applied.merchant,
       ])
 
-      const trxCount = async (status?: number): Promise<number> => {
+      const gmt = (t: Dayjs | number) => dayjs(t).utc().format('ddd, DD MMM YYYY HH:mm:ss [GMT]')
+      const trxCount = async (status: number, from: Dayjs | number, to: Dayjs | number): Promise<number> => {
         const res = await axios.get(`${apiUrl}/transactions`, {
           headers: authHeaders,
-          params: { page: 1, limit: 1, ...trxDateParams, status },
+          params: { page: 1, limit: 1, ...trxDateParams, start_date: gmt(from), end_date: gmt(to), status },
         })
         return Number(res.data?.pagination?.total_items) || 0
+      }
+      const countStatuses = (from: Dayjs | number, to: Dayjs | number) =>
+        Promise.all(KPI_STATUSES.map((status) => trxCount(status, from, to))) as Promise<StatusCounts>
+
+      // Today: whole-day counts from the cache plus a count of the recent window only. Otherwise (a past
+      // range, the first poll, a resync, or early in the day) count the whole range.
+      const countKpi = async (): Promise<StatusCounts> => {
+        if (!bgIsLiveRange) return countStatuses(dayStart, end)
+        const base = kpiBaseRef.current
+        const fresh =
+          !!base &&
+          base.scope === kpiScope &&
+          now.valueOf() - base.at < KPI_RESYNC_MS &&
+          base.boundary > dayStart.valueOf()
+        if (fresh && base) return addCounts(base.counts, await countStatuses(base.boundary, end))
+
+        const boundary = now.subtract(KPI_TAIL_MINUTES, 'minute')
+        if (!boundary.isAfter(dayStart)) return countStatuses(dayStart, end)
+        const [baseCounts, tailCounts] = await Promise.all([
+          countStatuses(dayStart, boundary),
+          countStatuses(boundary, end),
+        ])
+        kpiBaseRef.current = { scope: kpiScope, at: now.valueOf(), boundary: boundary.valueOf(), counts: baseCounts }
+        return addCounts(baseCounts, tailCounts)
       }
 
       // Same source as Transaction List → live KPI / Status.
@@ -255,10 +290,10 @@ export default function Monitoring() {
           : (() => {
               kpiInFlightRef.current = kpiScope
               const kpiStartedAt = Date.now()
-              return Promise.all([trxCount(), trxCount(1000), trxCount(1001), trxCount(1003), trxCount(1005)])
-                .then(([total, success, pending, waiting, failed]) => {
+              return countKpi()
+                .then(([success, pending, waiting, failed]) => {
                   if (kpiScopeRef.current !== kpiScope) return
-                  const next: KpiCounts = { total, success, pending, waiting, failed }
+                  const next: KpiCounts = { total: success + pending + waiting + failed, success, pending, waiting, failed }
                   setKpi(next)
                   setUpdatedAt(dayjs().format('HH:mm:ss'))
                 })
