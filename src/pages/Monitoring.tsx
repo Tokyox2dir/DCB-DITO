@@ -36,6 +36,14 @@ const LIVE_MAX_GAP_MINUTES = 30
 const FINE_BUCKET_MINUTES = 10
 const FINE_TAIL_MINUTES = 30
 const FINE_FULL_RESYNC_MS = 10 * 60_000
+// Hourly traffic: yesterday never changes, so after the first full fetch only the recent hours are
+// refetched, with a slower full resync.
+const HOURLY_TAIL_HOURS = 2
+const HOURLY_FULL_RESYNC_MS = 30 * 60_000
+// A slow database: when a poll's requests take longer than this, wait about as long again before the next one,
+// so slow queries don't pile up behind each other.
+const SLOW_REQUEST_MS = 15_000
+const MAX_BACKOFF_MS = 120_000
 
 /** The aggregate only fills a bucket once it has closed: the open bucket starts here. */
 function aggregateCoverageEnd(series: TrafficSeries[]): number | null {
@@ -114,6 +122,9 @@ export default function Monitoring() {
   const kpiScopeRef = useRef('')
   const kpiInFlightRef = useRef<string | null>(null)
   const fineCacheRef = useRef<{ scope: string; data: TrafficSeries[]; fullAt: number } | null>(null)
+  const hourlyCacheRef = useRef<{ scope: string; data: TrafficSeries[]; fullAt: number } | null>(null)
+  const lastLoadAtRef = useRef(0)
+  const slowUntilRef = useRef(0)
   // Raw transactions since the aggregate's last closed bucket, fetched incrementally.
   const liveRef = useRef<{
     scope: string
@@ -158,6 +169,7 @@ export default function Monitoring() {
   const load = useCallback(async () => {
     if (!token || !apiUrl || loadingRef.current) return
     loadingRef.current = true
+    lastLoadAtRef.current = Date.now()
     const gen = ++loadGenRef.current
 
     let bgAuthHeaders: Record<string, string> | null = null
@@ -242,6 +254,7 @@ export default function Monitoring() {
           ? Promise.resolve()
           : (() => {
               kpiInFlightRef.current = kpiScope
+              const kpiStartedAt = Date.now()
               return Promise.all([trxCount(), trxCount(1000), trxCount(1001), trxCount(1003), trxCount(1005)])
                 .then(([total, success, pending, waiting, failed]) => {
                   if (kpiScopeRef.current !== kpiScope) return
@@ -255,21 +268,46 @@ export default function Monitoring() {
                 })
                 .finally(() => {
                   if (kpiInFlightRef.current === kpiScope) kpiInFlightRef.current = null
+                  const took = Date.now() - kpiStartedAt
+                  if (took > SLOW_REQUEST_MS) {
+                    slowUntilRef.current = Math.max(slowUntilRef.current, Date.now() + Math.min(took, MAX_BACKOFF_MS))
+                  }
                 })
             })()
+
+      const hourlyScope = JSON.stringify([start.format('YYYY-MM-DD'), end.format('YYYY-MM-DD')])
+      const hourlyCache = hourlyCacheRef.current
+      const hourlyTailStart = now.startOf('hour').subtract(HOURLY_TAIL_HOURS - 1, 'hour')
+      const hourlyIncremental =
+        bgIsLiveRange &&
+        !!hourlyCache &&
+        hourlyCache.scope === hourlyScope &&
+        now.valueOf() - hourlyCache.fullAt < HOURLY_FULL_RESYNC_MS &&
+        hourlyTailStart.isAfter(start)
 
       const trafficPromise = axios
         .get(`${apiUrl}/traffic/monitoring/hourly`, {
           headers: authHeaders,
           params: {
-            start: start.format('YYYY-MM-DDTHH:mm:ssZ'),
+            start: (hourlyIncremental ? hourlyTailStart : start).format('YYYY-MM-DDTHH:mm:ssZ'),
             end: end.format('YYYY-MM-DDTHH:mm:ssZ'),
             _ts: now.valueOf(),
           },
         })
+        .then((res) => {
+          const fetched: TrafficSeries[] = res.data?.data || []
+          const data =
+            hourlyIncremental && hourlyCache ? mergeTrafficTail(hourlyCache.data, fetched, hourlyTailStart) : fetched
+          hourlyCacheRef.current = {
+            scope: hourlyScope,
+            data,
+            fullAt: hourlyIncremental && hourlyCache ? hourlyCache.fullAt : now.valueOf(),
+          }
+          return data
+        })
         .catch((e) => {
-          console.warn('Hourly traffic fetch failed:', e)
-          return { data: { data: [] as TrafficSeries[] } }
+          console.warn('Hourly traffic fetch failed, keeping last data:', e)
+          return hourlyCache && hourlyCache.scope === hourlyScope ? hourlyCache.data : ([] as TrafficSeries[])
         })
 
       // Fine traffic for live volume / today charts (hourly often lags current hour).
@@ -311,11 +349,15 @@ export default function Monitoring() {
           return fineCache && fineCache.scope === fineScope ? fineCache.data : null
         })
 
-      const [trafficRes, fineRes] = await Promise.all([trafficPromise, finePromise])
+      const coreStartedAt = Date.now()
+      const [hourlyData, fineRes] = await Promise.all([trafficPromise, finePromise])
+      const coreTook = Date.now() - coreStartedAt
+      if (coreTook > SLOW_REQUEST_MS) {
+        slowUntilRef.current = Math.max(slowUntilRef.current, Date.now() + Math.min(coreTook, MAX_BACKOFF_MS))
+      }
 
       if (gen !== loadGenRef.current) return
 
-      const hourlyData: TrafficSeries[] = trafficRes.data?.data || []
       const fineData: TrafficSeries[] = fineRes || hourlyData
 
       const nextToday: Record<string, number> = {}
@@ -373,6 +415,7 @@ export default function Monitoring() {
       }
       const since = live.cursor ? Math.max(live.cursor - LIVE_OVERLAP_MS, rawFrom) : rawFrom
 
+      const tailStartedAt = Date.now()
       const { activity: nextActivity, rows: newRows, complete } = await fetchTodayLastSeen(
         apiUrl,
         bgAuthHeaders,
@@ -383,6 +426,10 @@ export default function Monitoring() {
         },
         { maxPages: LIVE_MAX_PAGES, pageSize: LIVE_PAGE_SIZE },
       )
+      const tailTook = Date.now() - tailStartedAt
+      if (tailTook > SLOW_REQUEST_MS) {
+        slowUntilRef.current = Math.max(slowUntilRef.current, Date.now() + Math.min(tailTook, MAX_BACKOFF_MS))
+      }
       if (liveRef.current !== live) return
 
       let oldestFetched = Infinity
@@ -434,11 +481,26 @@ export default function Monitoring() {
   const isLiveView = !applied.dateRange?.[1] || applied.dateRange[1].isSame(dayjs(), 'day')
 
   useEffect(() => {
-    load()
+    if (document.visibilityState !== 'hidden') load()
     // A past day's data no longer changes, so only poll while viewing today.
     if (!isLiveView) return
-    const id = window.setInterval(load, REFRESH_MS)
-    return () => window.clearInterval(id)
+
+    // A tab nobody is looking at (minimized, other tab, locked screen) doesn't poll; it catches up
+    // immediately when it becomes visible again. While the database is slow, polling backs off too.
+    const tick = () => {
+      if (document.visibilityState === 'hidden') return
+      if (Date.now() < slowUntilRef.current) return
+      load()
+    }
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible' && Date.now() - lastLoadAtRef.current > REFRESH_MS / 2) load()
+    }
+    const id = window.setInterval(tick, REFRESH_MS)
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      window.clearInterval(id)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [load, isLiveView])
 
   const filteredSeries = useMemo(() => {
