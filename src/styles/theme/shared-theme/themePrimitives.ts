@@ -272,9 +272,9 @@ export const colorSchemes = {
   light: {
     palette: {
       primary: {
-        light: '#8b72ff',
-        main: '#6a47ff',
-        dark: '#4a2fd6',
+        light: '#ee6a7d',
+        main: '#dc2626',
+        dark: '#b32238',
         contrastText: '#ffffff',
       },
       secondary: {
@@ -285,7 +285,7 @@ export const colorSchemes = {
       },
       info: {
         light: '#d9e7fb',
-        main: '#5046e5',
+        main: '#2563eb',
         dark: '#2a55b8',
         contrastText: '#ffffff',
       },
@@ -307,14 +307,14 @@ export const colorSchemes = {
       grey: {
         ...gray,
       },
-      divider: '#e2e5f3',
+      divider: '#e2e8f0',
       background: {
-        default: '#f2f3fb',
+        default: '#f0f2f7',
         paper: '#ffffff',
       },
       text: {
-        primary: '#14162b',
-        secondary: '#686d92',
+        primary: '#1a202c',
+        secondary: '#4a5568',
         warning: '#e8930c',
       },
       action: {
@@ -327,9 +327,9 @@ export const colorSchemes = {
   dark: {
     palette: {
       primary: {
-        light: '#a493ff',
-        main: '#7c5cff',
-        dark: '#5a3fe0',
+        light: '#f67788',
+        main: '#ed4b5b',
+        dark: '#c23048',
         contrastText: '#ffffff',
       },
       secondary: {
@@ -340,7 +340,7 @@ export const colorSchemes = {
       },
       info: {
         light: '#1b2a3d',
-        main: '#a5b4fc',
+        main: '#60a5fa',
         dark: '#4a78d6',
         contrastText: '#121714',
       },
@@ -362,14 +362,14 @@ export const colorSchemes = {
       grey: {
         ...gray,
       },
-      divider: '#25283f',
+      divider: '#253142',
       background: {
-        default: '#0a0c16',
-        paper: '#14172a',
+        default: '#0b1017',
+        paper: '#0c111a',
       },
       text: {
-        primary: '#eceefc',
-        secondary: '#8d92b4',
+        primary: '#edf2f7',
+        secondary: '#9aa7b7',
       },
       action: {
         hover: 'rgba(235, 241, 237, 0.06)',
