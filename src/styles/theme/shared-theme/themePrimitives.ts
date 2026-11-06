@@ -272,9 +272,9 @@ export const colorSchemes = {
   light: {
     palette: {
       primary: {
-        light: '#ee6a7d',
-        main: '#dc2626',
-        dark: '#b32238',
+        light: '#3a3e44',
+        main: '#16181b',
+        dark: '#000000',
         contrastText: '#ffffff',
       },
       secondary: {
@@ -285,7 +285,7 @@ export const colorSchemes = {
       },
       info: {
         light: '#d9e7fb',
-        main: '#2563eb',
+        main: '#3b74f0',
         dark: '#2a55b8',
         contrastText: '#ffffff',
       },
@@ -307,14 +307,14 @@ export const colorSchemes = {
       grey: {
         ...gray,
       },
-      divider: '#e2e8f0',
+      divider: '#e3eae5',
       background: {
-        default: '#f0f2f7',
+        default: '#dfe9e2',
         paper: '#ffffff',
       },
       text: {
-        primary: '#1a202c',
-        secondary: '#4a5568',
+        primary: '#15171a',
+        secondary: '#69716c',
         warning: '#e8930c',
       },
       action: {
@@ -327,10 +327,10 @@ export const colorSchemes = {
   dark: {
     palette: {
       primary: {
-        light: '#f67788',
-        main: '#ed4b5b',
-        dark: '#c23048',
-        contrastText: '#ffffff',
+        light: '#ffffff',
+        main: '#ebf1ed',
+        dark: '#c9d3cc',
+        contrastText: '#121714',
       },
       secondary: {
         light: '#33291f',
@@ -340,7 +340,7 @@ export const colorSchemes = {
       },
       info: {
         light: '#1b2a3d',
-        main: '#60a5fa',
+        main: '#6c9cff',
         dark: '#4a78d6',
         contrastText: '#121714',
       },
@@ -362,14 +362,14 @@ export const colorSchemes = {
       grey: {
         ...gray,
       },
-      divider: '#253142',
+      divider: '#29312c',
       background: {
-        default: '#0b1017',
-        paper: '#0c111a',
+        default: '#0e1411',
+        paper: '#171d1a',
       },
       text: {
-        primary: '#edf2f7',
-        secondary: '#9aa7b7',
+        primary: '#ebf1ed',
+        secondary: '#9ba69f',
       },
       action: {
         hover: 'rgba(235, 241, 237, 0.06)',
