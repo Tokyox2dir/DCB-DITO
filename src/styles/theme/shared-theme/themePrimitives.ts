@@ -307,14 +307,14 @@ export const colorSchemes = {
       grey: {
         ...gray,
       },
-      divider: '#e3eae5',
+      divider: '#e4e6e8',
       background: {
-        default: '#dfe9e2',
+        default: '#f5f5f9',
         paper: '#ffffff',
       },
       text: {
-        primary: '#15171a',
-        secondary: '#69716c',
+        primary: '#384551',
+        secondary: '#646e78',
         warning: '#e8930c',
       },
       action: {
@@ -362,14 +362,14 @@ export const colorSchemes = {
       grey: {
         ...gray,
       },
-      divider: '#29312c',
+      divider: '#2e3042',
       background: {
-        default: '#0e1411',
-        paper: '#171d1a',
+        default: '#12131c',
+        paper: '#1b1c28',
       },
       text: {
-        primary: '#ebf1ed',
-        secondary: '#9ba69f',
+        primary: '#e1e2ec',
+        secondary: '#a6a8c4',
       },
       action: {
         hover: 'rgba(235, 241, 237, 0.06)',

@@ -1,0 +1,807 @@
+/* Dashboard and Monitoring look.
+   Scoped to the two pages. Layout, markup and behaviour are untouched; only surfaces, type and colour change.
+   Calm and neutral: one data hue, status colour on numbers only, no gradients, glows or glass. */
+
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap');
+
+/* Sneat admin palette (MIT, ThemeSelection). Light values are Sneat's own; dark follows Sneat's dark skin. */
+html[data-theme='light'] {
+  --lk-ground: #f5f5f9;
+  --lk-card: #ffffff;
+  --lk-tint: #f2f3f3;
+  --lk-line: #e4e6e8;
+  --lk-line-strong: #d1d4d8;
+  --lk-ink: #384551;
+  --lk-muted: #646e78;
+  --lk-faint: #a7acb2;
+  --lk-data: #696cff;
+  --lk-good: #71dd37;
+  --lk-warn: #ffab00;
+  --lk-bad: #ff3e1d;
+  --lk-info: #03c3ec;
+  --lk-shadow: 0 0.1875rem 0.5rem 0 rgba(34, 48, 62, 0.1);
+}
+
+html[data-theme='dark'] {
+  --lk-ground: #12131c;
+  --lk-card: #1b1c28;
+  --lk-tint: #242533;
+  --lk-line: #2e3042;
+  --lk-line-strong: #41435a;
+  --lk-ink: #e1e2ec;
+  --lk-muted: #a6a8c4;
+  --lk-faint: #7f81a0;
+  --lk-data: #7d80ff;
+  --lk-good: #7fd65a;
+  --lk-warn: #f5b544;
+  --lk-bad: #ff6b55;
+  --lk-info: #2fc6ea;
+  --lk-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* Old shell tokens follow the Sneat palette, so every page shares one ground, surface and ink. */
+html[data-theme='light'],
+html[data-theme='dark'] {
+  --sf-bg: var(--lk-ground);
+  --sf-card: var(--lk-card);
+  --sf-card-2: var(--lk-tint);
+  --sf-line: var(--lk-line);
+  --sf-ink: var(--lk-ink);
+  --sf-muted: var(--lk-muted);
+  --sf-heat-low: var(--lk-tint);
+  --sf-good: var(--lk-good);
+  --sf-warn: var(--lk-warn);
+  --sf-bad: var(--lk-bad);
+}
+
+/* The page ground around the two pages (the shell's own chrome keeps its colours). */
+html[data-theme]:has(.sf-shell),
+html[data-theme] .sf-shell {
+  background: var(--lk-ground);
+  font-family: 'Public Sans', system-ui, sans-serif;
+}
+
+/* Sneat navbar: a floating card under the top edge */
+html[data-theme] .sf-topbar {
+  top: 12px;
+  margin: 12px 24px 0;
+  padding: 10px 20px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--lk-card) 95%, transparent);
+  box-shadow: var(--lk-shadow);
+}
+html[data-theme] .sf-topbar .sf-title,
+html[data-theme] .sf-topbar .sf-back { color: var(--lk-ink); }
+html[data-theme] .sf-capsule-item.active { background: var(--lk-data); color: #fff; }
+html[data-theme] .sf-content { padding-top: 24px; }
+@media (max-width: 700px) {
+  html[data-theme] .sf-topbar { margin: 8px 12px 0; top: 8px; }
+}
+
+/* ---------- Dashboard ---------- */
+
+html[data-theme] .sf-dash {
+  font-family: 'Public Sans', system-ui, sans-serif;
+  color: var(--lk-ink);
+}
+
+html[data-theme] .sf-dash .sf-card {
+  padding: 22px;
+  border: 1px solid var(--lk-line);
+  border-radius: 10px;
+  background: var(--lk-card);
+  box-shadow: none;
+  color: var(--lk-ink);
+}
+
+html[data-theme] .sf-dash .sf-card-head h2,
+html[data-theme] .sf-dash .sf-details h2 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--lk-ink);
+}
+
+html[data-theme] .sf-dash .sf-card-head small,
+html[data-theme] .sf-dash .sf-user-head small,
+html[data-theme] .sf-dash .sf-user-meta small,
+html[data-theme] .sf-dash .sf-details small,
+html[data-theme] .sf-dash .sf-method p,
+html[data-theme] .sf-dash .sf-inbox p {
+  color: var(--lk-muted);
+  text-transform: none;
+}
+
+html[data-theme] .sf-dash .sf-link {
+  color: var(--lk-ink);
+  font-weight: 500;
+  text-decoration-color: var(--lk-line-strong);
+}
+
+/* User card */
+html[data-theme] .sf-dash .sf-user-avatar {
+  background: var(--lk-tint);
+  color: var(--lk-ink);
+  border: 1px solid var(--lk-line-strong);
+  border-radius: 8px;
+  font-family: 'Public Sans', system-ui, sans-serif;
+  font-weight: 500;
+}
+html[data-theme] .sf-dash .sf-user-head strong {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--lk-ink);
+}
+html[data-theme] .sf-dash .sf-round {
+  background: transparent;
+  border: 1px solid var(--lk-line-strong);
+  color: var(--lk-ink);
+  border-radius: 8px;
+}
+html[data-theme] .sf-dash .sf-round:hover {
+  background: var(--lk-tint);
+}
+html[data-theme] .sf-dash .sf-env {
+  background: transparent;
+  border: 1px solid var(--lk-line-strong);
+  color: var(--lk-muted);
+  border-radius: 6px;
+  font-family: 'Public Sans', system-ui, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+html[data-theme] .sf-dash .sf-env.prod {
+  color: var(--lk-ink);
+}
+html[data-theme] .sf-dash .sf-chip {
+  background: transparent;
+  border: 1px solid var(--lk-line);
+  color: var(--lk-muted);
+  border-radius: 6px;
+  font-family: 'Public Sans', system-ui, sans-serif;
+  font-size: 11px;
+}
+html[data-theme] .sf-dash .sf-user-meta .sf-chip:not(.dark) {
+  background: var(--lk-tint);
+  color: var(--lk-ink);
+}
+html[data-theme] .sf-dash .sf-chip.dark {
+  background: var(--lk-ink);
+  border-color: var(--lk-ink);
+  color: var(--lk-card);
+}
+
+/* Traffic details */
+html[data-theme] .sf-dash .sf-details li {
+  border-bottom: 1px solid var(--lk-line);
+}
+html[data-theme] .sf-dash .sf-details strong {
+  font-family: 'Public Sans', system-ui, sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--lk-ink);
+  letter-spacing: -0.02em;
+}
+html[data-theme] .sf-dash .sf-details strong.good { color: var(--lk-good); }
+html[data-theme] .sf-dash .sf-details strong.warn { color: var(--lk-warn); }
+html[data-theme] .sf-dash .sf-details strong.bad { color: var(--lk-bad); }
+html[data-theme] .sf-dash .sf-detail-icon {
+  color: var(--lk-faint);
+  background: transparent;
+  border: 0;
+}
+html[data-theme] .sf-dash .sf-badge {
+  background: transparent;
+  border: 1px solid var(--lk-line-strong);
+  color: var(--lk-muted);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+}
+html[data-theme] .sf-dash .sf-badge.good { color: var(--lk-good); border-color: var(--lk-good); }
+html[data-theme] .sf-dash .sf-badge.warn { color: var(--lk-warn); border-color: var(--lk-warn); }
+html[data-theme] .sf-dash .sf-badge.bad { color: var(--lk-bad); border-color: var(--lk-bad); }
+
+/* Payment methods: three equal panels, no tints */
+html[data-theme] .sf-dash .sf-method {
+  background: var(--lk-card);
+  border: 1px solid var(--lk-line);
+  border-radius: 10px;
+  color: var(--lk-ink);
+}
+html[data-theme] .sf-dash .sf-method h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--lk-ink);
+}
+html[data-theme] .sf-dash .sf-method-top small {
+  font-family: 'Public Sans', system-ui, sans-serif;
+  font-size: 12px;
+  color: var(--lk-muted);
+}
+html[data-theme] .sf-dash .sf-progress-label span {
+  font-family: 'Public Sans', system-ui, sans-serif;
+  font-size: 26px;
+  font-weight: 500;
+  color: var(--lk-ink);
+  letter-spacing: -0.02em;
+}
+html[data-theme] .sf-dash .sf-progress-label small {
+  color: var(--lk-muted);
+}
+html[data-theme] .sf-dash .sf-progress {
+  background: var(--lk-tint);
+  height: 4px;
+  border-radius: 2px;
+}
+html[data-theme] .sf-dash .sf-progress i {
+  background: var(--lk-data);
+  border-radius: 2px;
+}
+html[data-theme] .sf-dash .sf-avatars span {
+  background: var(--lk-tint);
+  color: var(--lk-ink);
+  border: 1px solid var(--lk-card);
+  font-size: 11px;
+}
+html[data-theme] .sf-dash .sf-method-foot small {
+  color: var(--lk-muted);
+}
+html[data-theme] .sf-dash .sf-method-empty {
+  border: 1px dashed var(--lk-line-strong);
+  background: transparent;
+  color: var(--lk-muted);
+}
+
+/* Failure alerts */
+html[data-theme] .sf-dash .sf-inbox li {
+  border-radius: 12px;
+}
+html[data-theme] .sf-dash .sf-inbox li:hover {
+  background: var(--lk-tint);
+}
+html[data-theme] .sf-dash .sf-inbox li.featured {
+  background: var(--lk-tint);
+  color: var(--lk-ink);
+  box-shadow: inset 2px 0 0 var(--lk-bad);
+}
+html[data-theme] .sf-dash .sf-inbox strong {
+  font-weight: 600;
+  color: var(--lk-ink);
+}
+html[data-theme] .sf-dash .sf-inbox li.featured p {
+  color: var(--lk-muted);
+}
+html[data-theme] .sf-dash .sf-inbox-avatar {
+  background: var(--lk-tint);
+  color: var(--lk-ink);
+  border: 1px solid var(--lk-line);
+  font-family: 'Public Sans', system-ui, sans-serif;
+}
+html[data-theme] .sf-dash .sf-inbox li.featured .sf-inbox-avatar {
+  background: var(--lk-tint);
+  color: var(--lk-bad);
+  border-color: var(--lk-bad);
+}
+html[data-theme] .sf-dash .sf-inbox-go {
+  color: var(--lk-muted);
+}
+html[data-theme] .sf-dash .sf-inbox-go:hover {
+  background: var(--lk-tint);
+  color: var(--lk-ink);
+}
+html[data-theme] .sf-dash .sf-empty {
+  color: var(--lk-muted);
+}
+
+/* Ranking cards */
+html[data-theme] .sf-dash .dash-rank-card {
+  background: var(--lk-card);
+  border: 1px solid var(--lk-line);
+  border-radius: 10px;
+  box-shadow: none;
+  color: var(--lk-ink);
+}
+html[data-theme] .sf-dash .dash-rank-head h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--lk-ink);
+}
+html[data-theme] .sf-dash .dash-rank-icon {
+  background: var(--lk-tint);
+  color: var(--lk-muted);
+  border: 1px solid var(--lk-line);
+  border-radius: 8px;
+}
+html[data-theme] .sf-dash .dash-rank-icon.sender {
+  background: var(--lk-tint);
+  color: var(--lk-muted);
+}
+html[data-theme] .sf-dash .dash-rank-pos {
+  background: transparent;
+  border: 1px solid var(--lk-line);
+  color: var(--lk-muted);
+  font-family: 'Public Sans', system-ui, sans-serif;
+}
+html[data-theme] .sf-dash .dash-rank-list li:first-child .dash-rank-pos {
+  background: var(--lk-ink);
+  border-color: var(--lk-ink);
+  color: var(--lk-card);
+}
+html[data-theme] .sf-dash .dash-rank-meta strong,
+html[data-theme] .sf-dash .dash-rank-meta span {
+  font-family: 'Public Sans', system-ui, sans-serif;
+  font-weight: 500;
+  color: var(--lk-ink);
+}
+html[data-theme] .sf-dash .dash-rank-bar {
+  background: var(--lk-tint);
+  border-radius: 2px;
+}
+html[data-theme] .sf-dash .dash-rank-bar i,
+html[data-theme] .sf-dash .dash-rank-bar.sender i {
+  background: var(--lk-data);
+}
+html[data-theme] .sf-dash .dash-rank-columns,
+html[data-theme] .sf-dash .dash-rank-empty,
+html[data-theme] .sf-dash .dash-rank-head small {
+  color: var(--lk-muted);
+}
+
+/* ---------- Monitoring ---------- */
+
+html[data-theme] .mon-page {
+  font-family: 'Public Sans', system-ui, sans-serif;
+  color: var(--lk-ink);
+}
+
+html[data-theme] .mon-page .dash-title {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--lk-ink);
+}
+html[data-theme] .mon-page .dash-subtitle {
+  font-size: 13px;
+  color: var(--lk-muted);
+}
+html[data-theme] .mon-page .dash-live {
+  background: transparent;
+  border: 1px solid var(--lk-line-strong);
+  color: var(--lk-muted);
+  border-radius: 6px;
+  font-family: 'Public Sans', system-ui, sans-serif;
+  font-size: 11px;
+  box-shadow: none;
+}
+
+/* Filter bar */
+html[data-theme] .mon-page .mon-filter {
+  background: var(--lk-card);
+  border: 1px solid var(--lk-line);
+  border-radius: 10px;
+  box-shadow: none;
+}
+html[data-theme] .mon-page .mon-filter-label {
+  color: var(--lk-muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+html[data-theme] .mon-page .mon-filter .ant-select-selector,
+html[data-theme] .mon-page .mon-filter .ant-picker {
+  background: var(--lk-card);
+  border-color: var(--lk-line-strong);
+  color: var(--lk-ink);
+  border-radius: 6px;
+}
+html[data-theme] .mon-page .mon-filter .ant-select-selection-placeholder,
+html[data-theme] .mon-page .mon-filter .ant-picker-input > input::placeholder {
+  color: var(--lk-faint);
+}
+html[data-theme] .mon-page .mon-filter .ant-select-arrow,
+html[data-theme] .mon-page .mon-filter .ant-picker-suffix {
+  color: var(--lk-faint);
+}
+html[data-theme] .mon-page .mon-filter button {
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+/* KPI strip: one surface per figure, status only on the figure */
+html[data-theme] .mon-page .mon-kpi-card {
+  background: var(--lk-card);
+  border: 1px solid var(--lk-line);
+  border-radius: 10px;
+  box-shadow: none;
+  color: var(--lk-ink);
+}
+html[data-theme] .mon-page .mon-kpi-card .mon-kpi-top span {
+  color: var(--lk-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+html[data-theme] .mon-page .mon-kpi-card .mon-kpi-top svg {
+  color: var(--lk-faint);
+}
+html[data-theme] .mon-page .mon-kpi-card strong {
+  font-family: 'Public Sans', system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--lk-ink);
+}
+html[data-theme] .mon-page .mon-kpi-card p {
+  color: var(--lk-muted);
+  font-size: 12px;
+  font-family: 'Public Sans', system-ui, sans-serif;
+}
+html[data-theme] .mon-page .mon-kpi-success strong { color: var(--lk-good); }
+html[data-theme] .mon-page .mon-kpi-pending strong,
+html[data-theme] .mon-page .mon-kpi-waiting strong { color: var(--lk-warn); }
+html[data-theme] .mon-page .mon-kpi-failed strong { color: var(--lk-bad); }
+html[data-theme] .mon-page .mon-kpi-card.is-live {
+  border-color: var(--lk-line-strong);
+}
+
+/* Panels */
+html[data-theme] .mon-page .mon-panel {
+  background: var(--lk-card);
+  border: 1px solid var(--lk-line);
+  border-radius: 10px;
+  box-shadow: none;
+  color: var(--lk-ink);
+}
+html[data-theme] .mon-page .mon-panel-title h4,
+html[data-theme] .mon-page .mon-panel-head h4,
+html[data-theme] .mon-page .mon-perf-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--lk-ink);
+}
+html[data-theme] .mon-page .mon-panel-meta,
+html[data-theme] .mon-page .mon-panel-empty,
+html[data-theme] .mon-page .mon-panel-foot,
+html[data-theme] .mon-page .mon-perf-legend,
+html[data-theme] .mon-page .mon-donut-legend {
+  color: var(--lk-muted);
+}
+html[data-theme] .mon-page .mon-panel-meta {
+  font-family: 'Public Sans', system-ui, sans-serif;
+  font-size: 12px;
+}
+
+/* Tables inside the panels: rules and alignment, no header bands */
+html[data-theme] .mon-page .ant-table,
+html[data-theme] .mon-page .ant-table-container,
+html[data-theme] .mon-page .ant-table-thead > tr > th,
+html[data-theme] .mon-page .ant-table-tbody > tr > td,
+html[data-theme] .mon-page .ant-table-placeholder > td,
+html[data-theme] .mon-page .ant-table-cell {
+  background: var(--lk-card);
+  color: var(--lk-ink);
+  border-color: var(--lk-line);
+}
+html[data-theme] .mon-page .ant-table-thead > tr > th {
+  color: var(--lk-muted);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+html[data-theme] .mon-page .ant-table-tbody > tr:hover > td {
+  background: var(--lk-tint);
+}
+html[data-theme] .mon-page .ant-empty-description {
+  color: var(--lk-muted);
+}
+
+/* ---------- Sneat surfaces: borderless white cards with a soft shadow ---------- */
+
+html[data-theme] .sf-dash .sf-card,
+html[data-theme] .sf-dash .dash-rank-card,
+html[data-theme] .mon-page .mon-filter,
+html[data-theme] .mon-page .mon-kpi-card,
+html[data-theme] .mon-page .mon-panel {
+  border: 0;
+  border-radius: 16px;
+  background: var(--lk-card);
+  box-shadow: var(--lk-shadow);
+}
+html[data-theme] .sf-dash .sf-card-head h2,
+html[data-theme] .sf-dash .dash-rank-head h2,
+html[data-theme] .mon-page .mon-panel-title h4,
+html[data-theme] .mon-page .mon-panel-head h4,
+html[data-theme] .mon-page .mon-perf-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--lk-ink);
+}
+html[data-theme] .mon-page .dash-title { font-weight: 500; }
+html[data-theme] .mon-page .mon-kpi-card strong { font-weight: 500; }
+html[data-theme] .mon-page .mon-filter .ant-btn-primary {
+  background: var(--lk-data);
+  border-color: var(--lk-data);
+  box-shadow: 0 0.125rem 0.25rem 0 rgba(105, 108, 255, 0.4);
+}
+html[data-theme] .sf-dash .sf-link { color: var(--lk-data); text-decoration: none; }
+html[data-theme] .sf-dash .dash-rank-list li:first-child .dash-rank-pos {
+  background: var(--lk-data);
+  border-color: var(--lk-data);
+  color: #fff;
+}
+
+/* ---------- Dashboard: Sneat layout ---------- */
+
+html[data-theme] .sf-dash.sn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  grid-template-columns: none;
+  grid-template-areas: none;
+}
+html[data-theme] .sf-dash.sn * { grid-area: auto; }
+html[data-theme] .sf-dash.sn .sn-row { display: grid; gap: 24px; align-items: stretch; }
+html[data-theme] .sf-dash.sn .sn-row > *,
+html[data-theme] .sf-dash.sn .sn-side > * { min-width: 0; }
+html[data-theme] .sf-dash.sn .sn-top,
+html[data-theme] .sf-dash.sn .sn-mid { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+html[data-theme] .sf-dash.sn .sn-bottom { grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: stretch; }
+html[data-theme] .sf-dash.sn .sn-bottom > * { height: auto; margin: 0; }
+html[data-theme] .sf-dash.sn .sn-side { display: flex; flex-direction: column; gap: 24px; }
+html[data-theme] .sf-dash.sn .sn-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
+
+/* Welcome card */
+html[data-theme] .sf-dash.sn .sn-welcome {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 24px 24px 0;
+}
+html[data-theme] .sf-dash.sn .sn-welcome-body { padding-bottom: 24px; }
+html[data-theme] .sf-dash.sn .sn-welcome h5 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--lk-data);
+}
+html[data-theme] .sf-dash.sn .sn-welcome p { margin: 0 0 8px; font-size: 15px; line-height: 1.6; color: var(--lk-muted); }
+html[data-theme] .sf-dash.sn .sn-welcome strong { font-weight: 600; }
+html[data-theme] .sf-dash.sn strong.good,
+html[data-theme] .sf-dash.sn small.good { color: var(--lk-good); }
+html[data-theme] .sf-dash.sn strong.warn,
+html[data-theme] .sf-dash.sn small.warn { color: var(--lk-warn); }
+html[data-theme] .sf-dash.sn strong.bad,
+html[data-theme] .sf-dash.sn small.bad { color: var(--lk-bad); }
+html[data-theme] .sf-dash.sn small.primary { color: var(--lk-data); }
+html[data-theme] .sf-dash.sn .sn-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 13px; }
+html[data-theme] .sf-dash.sn .sn-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+html[data-theme] .sf-dash.sn .sn-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border: 1px solid var(--lk-data);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--lk-data);
+  font: 500 13px 'Public Sans', system-ui, sans-serif;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+html[data-theme] .sf-dash.sn .sn-btn svg { font-size: 16px; }
+html[data-theme] .sf-dash.sn .sn-btn:hover { background: var(--lk-data); color: #fff; }
+html[data-theme] .sf-dash.sn .sn-btn:disabled { opacity: 0.6; cursor: default; }
+html[data-theme] .sf-dash.sn .sn-btn.spin svg { animation: sn-spin 1s linear infinite; }
+@keyframes sn-spin { to { transform: rotate(360deg); } }
+html[data-theme] .sf-dash.sn .sn-welcome-art { height: 175px; width: auto; flex: none; }
+
+/* Small stat cards */
+html[data-theme] .sf-dash.sn .sn-stat { display: flex; flex-direction: column; align-items: flex-start; }
+html[data-theme] .sf-dash.sn .sn-stat p { margin: 16px 0 4px; font-size: 15px; color: var(--lk-muted); }
+html[data-theme] .sf-dash.sn .sn-stat h4 { margin: 0 0 8px; font-size: 22px; font-weight: 500; color: var(--lk-ink); }
+html[data-theme] .sf-dash.sn .sn-stat small { font-size: 13px; font-weight: 500; }
+html[data-theme] .sf-dash.sn .sn-avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+html[data-theme] .sf-dash.sn .sn-avatar svg { font-size: 22px; }
+html[data-theme] .sf-dash.sn .sn-avatar.primary { background: color-mix(in srgb, var(--lk-data) 16%, var(--lk-card)); color: var(--lk-data); }
+html[data-theme] .sf-dash.sn .sn-avatar.good { background: color-mix(in srgb, var(--lk-good) 16%, var(--lk-card)); color: var(--lk-good); }
+html[data-theme] .sf-dash.sn .sn-avatar.warn { background: color-mix(in srgb, var(--lk-warn) 16%, var(--lk-card)); color: var(--lk-warn); }
+html[data-theme] .sf-dash.sn .sn-avatar.bad { background: color-mix(in srgb, var(--lk-bad) 16%, var(--lk-card)); color: var(--lk-bad); }
+
+/* Methods list, in the shape of Sneat's order statistics */
+html[data-theme] .sf-dash.sn .sn-methods ul { margin: 16px 0 0; padding: 0; list-style: none; }
+html[data-theme] .sf-dash.sn .sn-methods li { display: flex; align-items: center; gap: 14px; padding: 10px 0; }
+html[data-theme] .sf-dash.sn .sn-methods li > div { flex: 1; min-width: 0; }
+html[data-theme] .sf-dash.sn .sn-methods strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+  color: var(--lk-ink);
+}
+html[data-theme] .sf-dash.sn .sn-methods li small { font-size: 13px; color: var(--lk-muted); }
+html[data-theme] .sf-dash.sn .sn-methods-val { text-align: right; font-weight: 500; color: var(--lk-ink); }
+html[data-theme] .sf-dash.sn .sn-methods-val small { display: block; }
+
+/* Heatmap in Sneat primary tints; red only for failures, an outline for now */
+html[data-theme] .sf-dash.sn .sf-heat-cell {
+  border: 0;
+  border-radius: 8px;
+  box-shadow: none;
+  color: var(--lk-muted);
+  background: var(--lk-tint);
+}
+html[data-theme] .sf-dash.sn .sf-heat-cell.mid,
+html[data-theme] .sf-dash.sn .sf-legend i.mid { background: color-mix(in srgb, var(--lk-data) 28%, var(--lk-card)); color: var(--lk-ink); }
+html[data-theme] .sf-dash.sn .sf-heat-cell.high,
+html[data-theme] .sf-dash.sn .sf-legend i.high { background: var(--lk-data); color: #fff; }
+html[data-theme] .sf-dash.sn .sf-heat-cell.alert,
+html[data-theme] .sf-dash.sn .sf-legend i.alert { background: color-mix(in srgb, var(--lk-bad) 75%, var(--lk-card)); color: #fff; }
+html[data-theme] .sf-dash.sn .sf-heat-cell.now,
+html[data-theme] .sf-dash.sn .sf-legend i.now { background: transparent; box-shadow: inset 0 0 0 2px var(--lk-data); color: var(--lk-data); }
+html[data-theme] .sf-dash.sn .sf-legend i.low { background: var(--lk-tint); }
+html[data-theme] .sf-dash.sn .sf-heat-cell.empty { background: transparent; box-shadow: inset 0 0 0 1px var(--lk-line); }
+
+@media (max-width: 1200px) {
+  html[data-theme] .sf-dash.sn .sn-top,
+  html[data-theme] .sf-dash.sn .sn-mid { grid-template-columns: minmax(0, 1fr); }
+  html[data-theme] .sf-dash.sn .sn-bottom { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  html[data-theme] .sf-dash.sn,
+  html[data-theme] .sf-dash.sn .sn-row,
+  html[data-theme] .sf-dash.sn .sn-side,
+  html[data-theme] .sf-dash.sn .sn-stats { gap: 16px; }
+  html[data-theme] .sf-dash.sn .sn-bottom { grid-template-columns: minmax(0, 1fr); }
+  html[data-theme] .sf-dash.sn .sn-welcome { flex-direction: column; align-items: center; text-align: center; }
+  html[data-theme] .sf-dash.sn .sn-meta,
+  html[data-theme] .sf-dash.sn .sn-actions { justify-content: center; }
+  html[data-theme] .sf-dash.sn .sn-welcome-body { padding-bottom: 0; }
+  html[data-theme] .sf-dash.sn .sn-welcome-art { height: 140px; }
+  html[data-theme] .sf-dash.sn .sn-btn span { display: none; }
+}
+
+
+/* ---------- Menu in the top bar, centred (desktop). Phones keep the bottom capsule. ---------- */
+html[data-theme] .sf-topbar { backdrop-filter: none; }
+@media (min-width: 901px) {
+  html[data-theme] .sf-topbar { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+  html[data-theme] .sf-top-right { justify-self: end; }
+  html[data-theme] .sf-topbar .sf-capsule {
+    position: static;
+    flex-direction: row;
+    gap: 4px;
+    padding: 4px;
+    opacity: 1;
+    transform: none;
+    border-radius: 12px;
+    background: var(--lk-tint);
+    box-shadow: none;
+  }
+  html[data-theme] .sf-topbar .sf-capsule-item {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    color: var(--lk-muted);
+  }
+  html[data-theme] .sf-topbar .sf-capsule-item:hover { background: var(--lk-card); color: var(--lk-ink); }
+  html[data-theme] .sf-topbar .sf-capsule-item.active { background: var(--lk-data); color: #fff; }
+  html[data-theme] .sf-topbar .sf-capsule-item:focus-visible { outline-color: var(--lk-data); }
+  html[data-theme] .sf-topbar .sf-capsule-extra,
+  html[data-theme] .sf-topbar .sf-capsule-sep { display: none; }
+  html[data-theme] .sf-content { padding-left: 24px; }
+}
+
+/* Phone capsule in Sneat ink instead of the old green-black. */
+html[data-theme='light'] { --sf-capsule: #384551; }
+html[data-theme='dark'] { --sf-capsule: #242533; }
+
+/* Menu names next to the icons in the top bar on wide screens */
+.sf-capsule-label { display: none; }
+@media (min-width: 1420px) {
+  html[data-theme] .sf-topbar .sf-capsule-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    padding: 0 12px;
+    white-space: nowrap;
+  }
+  html[data-theme] .sf-topbar .sf-capsule-item svg { font-size: 18px; }
+  html[data-theme] .sf-topbar .sf-capsule-label {
+    display: inline;
+    font: 500 13px 'Public Sans', system-ui, sans-serif;
+  }
+  /* Groups get a small caret instead of the corner dot */
+  html[data-theme] .sf-topbar .sf-capsule-item.has-menu::after {
+    position: static;
+    width: 0;
+    height: 0;
+    margin-left: 2px;
+    border: 4px solid transparent;
+    border-top-color: currentColor;
+    border-bottom: 0;
+    border-radius: 0;
+    background: none;
+  }
+}
+
+/* One row: brand and title left, menu centred, controls right. With menu names shown, the title is
+   dropped because the highlighted menu already says where you are. */
+@media (min-width: 901px) {
+  html[data-theme] .sf-topbar .sf-capsule .sf-capsule-extra,
+  html[data-theme] .sf-topbar .sf-capsule .sf-capsule-sep { display: none; }
+}
+@media (min-width: 1420px) {
+  html[data-theme] .sf-topbar .sf-title { display: none; }
+  html[data-theme] .sf-topbar .sf-brand { border-right: 0; }
+}
+
+/* Bottom row: equal-height cards whose lists spread over the full height, so no card ends in a blank band */
+html[data-theme] .sf-dash.sn .sn-bottom > * { display: flex; flex-direction: column; }
+html[data-theme] .sf-dash.sn .sn-bottom .dash-rank-list,
+html[data-theme] .sf-dash.sn .sn-bottom .sn-methods ul {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Tighter menu items so the labelled menu fits between the brand and the controls */
+@media (min-width: 1420px) {
+  html[data-theme] .sf-topbar .sf-capsule { gap: 2px; padding: 3px; }
+  html[data-theme] .sf-topbar .sf-capsule-item { gap: 5px; height: 36px; padding: 0 9px; }
+  html[data-theme] .sf-topbar .sf-capsule-item svg { font-size: 17px; }
+}
+
+/* Dark mode: a hairline edge separates cards from the ground, where a shadow alone does not show,
+   and the heatmap peaks step up from the card instead of jumping to full violet. */
+html[data-theme='dark'] .sf-dash .sf-card,
+html[data-theme='dark'] .sf-dash .dash-rank-card,
+html[data-theme='dark'] .mon-page .mon-filter,
+html[data-theme='dark'] .mon-page .mon-kpi-card,
+html[data-theme='dark'] .mon-page .mon-panel,
+html[data-theme='dark'] .sf-topbar {
+  box-shadow: var(--lk-shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+html[data-theme='dark'] .sf-dash.sn .sf-heat-cell.mid,
+html[data-theme='dark'] .sf-dash.sn .sf-legend i.mid { background: color-mix(in srgb, var(--lk-data) 30%, var(--lk-card)); }
+html[data-theme='dark'] .sf-dash.sn .sf-heat-cell.high,
+html[data-theme='dark'] .sf-dash.sn .sf-legend i.high { background: color-mix(in srgb, var(--lk-data) 62%, var(--lk-card)); }
+html[data-theme='dark'] .sf-dash.sn .sf-heat-cell.alert,
+html[data-theme='dark'] .sf-dash.sn .sf-legend i.alert { background: color-mix(in srgb, var(--lk-bad) 55%, var(--lk-card)); }
+html[data-theme='dark'] .sf-dash.sn .sn-avatar.primary { background: color-mix(in srgb, var(--lk-data) 22%, var(--lk-card)); }
+html[data-theme='dark'] .sf-capsule-item.active,
+html[data-theme='dark'] .sf-dash .dash-rank-list li:first-child .dash-rank-pos { background: color-mix(in srgb, var(--lk-data) 85%, var(--lk-card)); }
+
+/* Monitoring status colours follow the same three status hues */
+html[data-theme] .mon-page .mon-perf-pct .g { color: var(--lk-good); }
+html[data-theme] .mon-page .mon-perf-pct .y { color: var(--lk-warn); }
+html[data-theme] .mon-page .mon-perf-pct .r { color: var(--lk-bad); }
+html[data-theme] .mon-page :is(.mon-perf-bar, .mon-perf-legend) i.g { background: var(--lk-good); }
+html[data-theme] .mon-page :is(.mon-perf-bar, .mon-perf-legend) i.y { background: var(--lk-warn); }
+html[data-theme] .mon-page :is(.mon-perf-bar, .mon-perf-legend) i.r { background: var(--lk-bad); }
+
+/* Theme switch: the browser's default cross-fade is replaced by the circle reveal in AppShell */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html.theme-reveal.theme-transitioning,
+html.theme-reveal.theme-transitioning *,
+html.theme-reveal.theme-transitioning *::before,
+html.theme-reveal.theme-transitioning *::after {
+  transition: none !important;
+}

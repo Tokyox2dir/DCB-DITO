@@ -6,14 +6,13 @@ import RefreshRoundedIcon from '@mui/icons-material/RefreshRounded'
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined'
-import SwapHorizRoundedIcon from '@mui/icons-material/SwapHorizRounded'
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined'
-import HourglassEmptyRoundedIcon from '@mui/icons-material/HourglassEmptyRounded'
-import ErrorOutlineOutlinedIcon from '@mui/icons-material/ErrorOutlineOutlined'
-import SpeedRoundedIcon from '@mui/icons-material/SpeedRounded'
-import ScheduleRoundedIcon from '@mui/icons-material/ScheduleRounded'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
 import ArrowOutwardRoundedIcon from '@mui/icons-material/ArrowOutwardRounded'
+import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
+import PendingOutlinedIcon from '@mui/icons-material/PendingOutlined'
+import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
+import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined'
 import RankingCard from '../components/RankingCard'
 import useDashboardData, { BUCKET_MINUTES, TrafficBucket, WINDOW_HOURS } from '../hooks/useDashboardData'
 import { useAuth } from '../provider/AuthProvider'
@@ -38,7 +37,6 @@ function initials(name: string) {
   return ((parts[0]?.[0] ?? '') + (parts[1]?.[0] ?? '')).toUpperCase() || '?'
 }
 
-const METHOD_TONES = ['peach', 'sky', 'rose'] as const
 const SLOTS_PER_HOUR = 60 / BUCKET_MINUTES
 
 type HeatLevel = 'empty' | 'low' | 'mid' | 'high' | 'alert' | 'now'
@@ -110,198 +108,175 @@ export default function Dashboard() {
     ...(isAdmin ? [{ label: 'Monitoring', icon: <MonitorHeartOutlinedIcon />, path: '/monitoring' }] : []),
   ]
 
-  const details = [
-    { label: 'Total transactions', value: formatNumber(totals.total), icon: <SwapHorizRoundedIcon /> },
-    { label: 'Success', value: formatNumber(totals.success), icon: <TaskAltOutlinedIcon />, tone: 'good' },
-    { label: 'Pending', value: formatNumber(totals.pending), icon: <HourglassEmptyRoundedIcon />, tone: 'warn' },
-    { label: 'Failed', value: formatNumber(totals.failed), icon: <ErrorOutlineOutlinedIcon />, tone: 'bad' },
-    { label: 'Success rate', value: `${successRate.toFixed(1)}%`, icon: <SpeedRoundedIcon />, badge: totals.total > 0 },
+  const healthy = successRate >= 90
+  const health = healthy ? 'Normal' : successRate >= 75 ? 'Perlu dipantau' : 'Kritis'
+  const healthTone = healthy ? 'good' : successRate >= 75 ? 'warn' : 'bad'
+  const stats = [
+    { label: 'Total transaksi', value: totals.total, note: `${WINDOW_HOURS} jam terakhir`, tone: 'primary', icon: <ReceiptLongOutlinedIcon /> },
+    { label: 'Success', value: totals.success, note: `${percent(totals.success, totals.total).toFixed(1)}%`, tone: 'good', icon: <CheckCircleOutlinedIcon /> },
+    { label: 'Pending', value: totals.pending, note: `${percent(totals.pending, totals.total).toFixed(1)}%`, tone: 'warn', icon: <PendingOutlinedIcon /> },
+    { label: 'Failed', value: totals.failed, note: `${percent(totals.failed, totals.total).toFixed(1)}%`, tone: 'bad', icon: <CancelOutlinedIcon /> },
   ]
+  const statCard = (s: (typeof stats)[number]) => (
+    <article key={s.label} className='sf-card sn-stat'>
+      <span className={`sn-avatar ${s.tone}`}>{s.icon}</span>
+      <p>{s.label}</p>
+      <h4>{formatNumber(s.value)}</h4>
+      <small className={s.tone}>{s.note}</small>
+    </article>
+  )
 
   return (
-    <section className='sf-dash' aria-busy={loading}>
-      <article className='sf-card sf-user'>
-        <div className='sf-user-head'>
-          <span className='sf-user-avatar'>{initials(username)}</span>
-          <div>
-            <strong>{username}</strong>
-            <small>{role || 'user'}</small>
-          </div>
-          <span className={`sf-env ${isDev ? 'dev' : 'prod'}`}>{isDev ? 'Dev' : 'Prod'}</span>
-        </div>
-        <div className='sf-user-actions'>
-          {shortcuts.map((s) =>
-            s.path ? (
-              <Link key={s.label} to={s.path} className='sf-round' title={s.label} aria-label={s.label}>
-                {s.icon}
-              </Link>
-            ) : (
-              <button
-                key={s.label}
-                type='button'
-                className={`sf-round${loading ? ' spin' : ''}`}
-                title={s.label}
-                aria-label={s.label}
-                onClick={s.onClick}
-                disabled={loading}
-              >
-                {s.icon}
-              </button>
-            ),
-          )}
-        </div>
-        <div className='sf-user-meta'>
-          <small>Time window</small>
-          <div>
-            <span className='sf-chip'>
-              <ScheduleRoundedIcon /> Last {WINDOW_HOURS} hours
-            </span>
-            <span className='sf-chip dark'>{updatedAt ? `Updated ${updatedAt}` : 'Loading'}</span>
-          </div>
-        </div>
-      </article>
-
-      <article className='sf-card sf-details'>
-        <h2>Traffic details</h2>
-        <ul>
-          {details.map((d) => (
-            <li key={d.label}>
-              <div>
-                <small>{d.label}</small>
-                <strong className={d.tone}>{d.value}</strong>
-              </div>
-              {d.badge ? (
-                <span className={`sf-badge ${successRate >= 90 ? 'good' : successRate >= 75 ? 'warn' : 'bad'}`}>
-                  {successRate >= 90 ? 'Healthy' : successRate >= 75 ? 'Watch' : 'Low'}
-                </span>
-              ) : (
-                <span className='sf-detail-icon'>{d.icon}</span>
+    <section className='sf-dash sn' aria-busy={loading}>
+      <div className='sn-row sn-top'>
+        <article className='sf-card sn-welcome'>
+          <div className='sn-welcome-body'>
+            <h5>Halo {username}! 👋</h5>
+            <p>
+              Success rate {WINDOW_HOURS} jam terakhir <strong className={healthTone}>{successRate.toFixed(1)}%</strong>, status{' '}
+              <strong className={healthTone}>{health}</strong>.
+            </p>
+            <p className='sn-meta'>
+              <span>{role || 'user'}</span>
+              <span className={`sf-env ${isDev ? 'dev' : 'prod'}`}>{isDev ? 'Dev' : 'Prod'}</span>
+              <span>{updatedAt ? `Diperbarui ${updatedAt}` : 'Memuat'}</span>
+            </p>
+            <div className='sn-actions'>
+              {shortcuts.map((s) =>
+                s.path ? (
+                  <Link key={s.label} to={s.path} className='sn-btn' title={s.label} aria-label={s.label}>
+                    {s.icon}
+                    <span>{s.label}</span>
+                  </Link>
+                ) : (
+                  <button
+                    key={s.label}
+                    type='button'
+                    className={`sn-btn${loading ? ' spin' : ''}`}
+                    title={s.label}
+                    aria-label={s.label}
+                    onClick={s.onClick}
+                    disabled={loading}
+                  >
+                    {s.icon}
+                    <span>{s.label}</span>
+                  </button>
+                ),
               )}
-            </li>
-          ))}
-        </ul>
-      </article>
+            </div>
+          </div>
+          <img src='/img/man-with-laptop.png' alt='' className='sn-welcome-art' />
+        </article>
+        <div className='sn-stats'>{stats.slice(0, 2).map(statCard)}</div>
+      </div>
 
-      <div className='sf-methods'>
-        <div className='sf-method-grid'>
-          {methods.slice(0, 3).map((m, i) => {
-            const share = percent(m.total, totals.total)
-            return (
-              <article key={m.name} className={`sf-method sf-tone-${METHOD_TONES[i]}`}>
-                <div className='sf-method-top'>
-                  <span className='sf-chip light'>#{i + 1}</span>
-                  <small>{formatNumber(m.total)} trx</small>
-                </div>
-                <h3 title={m.name}>{m.name}</h3>
-                <p>Top payment method · last {WINDOW_HOURS}h</p>
-                <div className='sf-progress-label'>
-                  <span>{share.toFixed(0)}%</span>
-                  <small>Share</small>
-                </div>
-                <div className='sf-progress'>
-                  <i style={{ width: `${share}%` }} />
-                </div>
-                <div className='sf-method-foot'>
-                  <div className='sf-avatars'>
-                    {m.merchants.slice(0, 3).map((name) => (
-                      <span key={name} title={name}>
-                        {initials(name)}
-                      </span>
-                    ))}
-                    {m.merchants.length > 3 && <span className='more'>+{m.merchants.length - 3}</span>}
+      <div className='sn-row sn-mid'>
+        <article className='sf-card sf-heat'>
+          <header className='sf-card-head'>
+            <div>
+              <h2>Traffic heatmap</h2>
+              <small>{BUCKET_MINUTES}-minute slots</small>
+            </div>
+          </header>
+          {!hours.length && <p className='sf-heat-empty'>{loading ? 'Loading traffic…' : 'No traffic data yet.'}</p>}
+          <div className='sf-heat-grid' role='table' aria-label='Transactions per time slot'>
+            {hours.map((row) => (
+              <div key={row.label} className='sf-heat-row' role='row'>
+                <span className='sf-heat-hour' role='rowheader'>
+                  {row.label}
+                </span>
+                {row.cells.map(({ bucket, level }) => (
+                  <span
+                    key={bucket.start}
+                    role='cell'
+                    className={`sf-heat-cell ${level}`}
+                    title={`${dayjs(bucket.start).format('HH:mm')} · ${formatNumber(bucket.total)} trx, ${formatNumber(bucket.failed)} failed`}
+                  >
+                    {bucket.total > 0 ? formatCompact(bucket.total) : ''}
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+          <div className='sf-legend'>
+            <span>
+              <i className='low' /> Low
+            </span>
+            <span>
+              <i className='mid' /> Busy
+            </span>
+            <span>
+              <i className='high' /> Peak
+            </span>
+            <span>
+              <i className='alert' /> ≥30% failed
+            </span>
+            <span>
+              <i className='now' /> Now
+            </span>
+          </div>
+        </article>
+
+        <div className='sn-side'>
+          <div className='sn-stats'>{stats.slice(2).map(statCard)}</div>
+          <article className='sf-card sf-inbox'>
+            <header className='sf-card-head'>
+              <div>
+                <h2>Klien bermasalah</h2>
+                <small>Merchant dengan transaksi gagal</small>
+              </div>
+              <Link to={isAdmin ? '/monitoring' : '/transactions'} className='sf-link'>
+                Lihat semua
+              </Link>
+            </header>
+            <ul>
+              {alerts.map((m, i) => (
+                <li key={m.name} className={i === 0 ? 'featured' : ''}>
+                  <span className='sf-inbox-avatar'>{initials(m.name)}</span>
+                  <div>
+                    <strong>{m.name}</strong>
+                    <p>
+                      {formatNumber(m.failed)} gagal dari {formatNumber(m.total)} · {percent(m.failed, m.total).toFixed(1)}%
+                    </p>
                   </div>
-                  <small>
-                    {m.merchants.length} merchant{m.merchants.length === 1 ? '' : 's'}
-                  </small>
-                </div>
-              </article>
-            )
-          })}
-          {!methods.length && (
-            <article className='sf-method sf-method-empty'>
-              {loading ? 'Loading payment methods…' : 'No traffic data yet.'}
-            </article>
-          )}
+                  <Link to='/transactions' className='sf-inbox-go' aria-label={`Open transactions for ${m.name}`}>
+                    <ArrowOutwardRoundedIcon />
+                  </Link>
+                </li>
+              ))}
+              {!alerts.length && <li className='sf-empty'>{loading ? 'Memeriksa kegagalan…' : 'Tidak ada transaksi gagal.'}</li>}
+            </ul>
+          </article>
         </div>
       </div>
 
-      <article className='sf-card sf-heat'>
-        <header className='sf-card-head'>
-          <div>
-            <h2>Traffic heatmap</h2>
-            <small>{BUCKET_MINUTES}-minute slots</small>
-          </div>
-        </header>
-        {!hours.length && <p className='sf-heat-empty'>{loading ? 'Loading traffic…' : 'No traffic data yet.'}</p>}
-        <div className='sf-heat-grid' role='table' aria-label='Transactions per time slot'>
-          {hours.map((row) => (
-            <div key={row.label} className='sf-heat-row' role='row'>
-              <span className='sf-heat-hour' role='rowheader'>
-                {row.label}
-              </span>
-              {row.cells.map(({ bucket, level }) => (
-                <span
-                  key={bucket.start}
-                  role='cell'
-                  className={`sf-heat-cell ${level}`}
-                  title={`${dayjs(bucket.start).format('HH:mm')} · ${formatNumber(bucket.total)} trx, ${formatNumber(bucket.failed)} failed`}
-                >
-                  {bucket.total > 0 ? formatCompact(bucket.total) : ''}
-                </span>
-              ))}
+      <div className='sn-row sn-bottom'>
+        <article className='sf-card sn-methods'>
+          <header className='sf-card-head'>
+            <div>
+              <h2>Metode pembayaran</h2>
+              <small>{formatNumber(totals.total)} transaksi · {WINDOW_HOURS} jam</small>
             </div>
-          ))}
-        </div>
-        <div className='sf-legend'>
-          <span>
-            <i className='low' /> Low
-          </span>
-          <span>
-            <i className='mid' /> Busy
-          </span>
-          <span>
-            <i className='high' /> Peak
-          </span>
-          <span>
-            <i className='alert' /> ≥30% failed
-          </span>
-          <span>
-            <i className='now' /> Now
-          </span>
-        </div>
-      </article>
-
-      <article className='sf-card sf-inbox'>
-        <header className='sf-card-head'>
-          <div>
-            <h2>Failure alerts</h2>
-            <small>Merchants with failed transactions</small>
-          </div>
-          <Link to={isAdmin ? '/monitoring' : '/transactions'} className='sf-link'>
-            View all
-          </Link>
-        </header>
-        <ul>
-          {alerts.map((m, i) => (
-            <li key={m.name} className={i === 0 ? 'featured' : ''}>
-              <span className='sf-inbox-avatar'>{initials(m.name)}</span>
-              <div>
-                <strong>{m.name}</strong>
-                <p>
-                  {formatNumber(m.failed)} failed of {formatNumber(m.total)} · {percent(m.failed, m.total).toFixed(1)}%
-                  failure rate
-                </p>
-              </div>
-              <Link to='/transactions' className='sf-inbox-go' aria-label={`Open transactions for ${m.name}`}>
-                <ArrowOutwardRoundedIcon />
-              </Link>
-            </li>
-          ))}
-          {!alerts.length && <li className='sf-empty'>{loading ? 'Checking failures…' : 'No failed transactions.'}</li>}
-        </ul>
-      </article>
-
-      <div className='sf-ranks'>
+          </header>
+          <ul>
+            {methods.map((m) => (
+              <li key={m.name}>
+                <span className='sn-avatar primary'>
+                  <PaymentsOutlinedIcon />
+                </span>
+                <div>
+                  <strong title={m.name}>{m.name}</strong>
+                  <small>{m.merchants.length} merchant</small>
+                </div>
+                <span className='sn-methods-val'>
+                  {formatNumber(m.total)}
+                  <small>{percent(m.total, totals.total).toFixed(0)}%</small>
+                </span>
+              </li>
+            ))}
+            {!methods.length && <li className='sf-empty'>{loading ? 'Memuat metode pembayaran…' : 'Belum ada data traffic.'}</li>}
+          </ul>
+        </article>
         <RankingCard
           title='Top Merchants'
           subtitle='By transaction volume'

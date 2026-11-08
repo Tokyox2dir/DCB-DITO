@@ -1,4 +1,5 @@
-import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
@@ -57,8 +58,10 @@ export default function AppShell() {
   const navigate = useNavigate()
   const { token, setToken } = useAuth()
   const { mode, systemMode, setMode } = useColorScheme()
-  // The capsule docks to the bottom on small screens, so submenus open upwards there.
+  // The menu sits in the top bar on desktop and docks to the bottom on small screens, so submenus open upwards there.
   const capsuleAtBottom = useMediaQuery('(max-width: 900px)')
+  // Wide screens show each menu name next to its icon, so the tooltip is only needed below that.
+  const showLabels = useMediaQuery('(min-width: 1420px)')
   const decoded: any = token ? jwtDecode(token) : {}
   const role = decoded.role || ''
   const username = decoded.username || 'user'
@@ -80,19 +83,6 @@ export default function AppShell() {
   const [openGroup, setOpenGroup] = useState<string | null>(null)
   const [userAnchor, setUserAnchor] = useState<null | HTMLElement>(null)
   const [searchOpen, setSearchOpen] = useState(false)
-  // Desktop capsule auto-hides; hovering the left edge (or focusing it) slides it in and pushes content.
-  const [railHover, setRailHover] = useState(false)
-  const railTimer = useRef<number>()
-  const showRail = () => {
-    window.clearTimeout(railTimer.current)
-    setRailHover(true)
-  }
-  const hideRail = () => {
-    window.clearTimeout(railTimer.current)
-    railTimer.current = window.setTimeout(() => setRailHover(false), 400)
-  }
-  useEffect(() => () => window.clearTimeout(railTimer.current), [])
-
   const isDark = ((mode === 'system' ? systemMode : mode) || 'dark') !== 'light'
 
   useEffect(() => {
@@ -106,6 +96,34 @@ export default function AppShell() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
+  // The new theme spreads out as a circle from the toggle. Browsers without View Transitions,
+  // or with reduced motion on, just switch.
+  const toggleTheme = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const next = isDark ? 'light' : 'dark'
+    const doc = document as Document & { startViewTransition?: (cb: () => void) => { ready: Promise<void>; finished: Promise<void> } }
+    if (!doc.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setMode?.(next)
+      return
+    }
+    // Centre of the button, so keyboard activation (no pointer position) starts from the same spot.
+    const box = e.currentTarget.getBoundingClientRect()
+    const x = box.left + box.width / 2
+    const y = box.top + box.height / 2
+    const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y))
+    // The circle carries the change, so the colour fades on every element are switched off meanwhile.
+    const root = document.documentElement
+    root.classList.add('theme-reveal')
+    const transition = doc.startViewTransition(() => flushSync(() => setMode?.(next)))
+    transition.finished.finally(() => root.classList.remove('theme-reveal')).catch(() => {})
+    // ready rejects when the browser skips the transition (e.g. a hidden tab); the theme has still changed.
+    transition.ready.then(() => {
+      document.documentElement.animate(
+        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
+        { duration: 550, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', pseudoElement: '::view-transition-new(root)' },
+      )
+    }).catch(() => {})
+  }
+
   const handleLogout = () => {
     setUserAnchor(null)
     setToken(null)
@@ -116,17 +134,14 @@ export default function AppShell() {
   const closeGroup = () => {
     setGroupAnchor(null)
     setOpenGroup(null)
-    hideRail()
   }
-
-  const railOpen = railHover || Boolean(openGroup)
 
   const activeGroup = navItems.find((n) => n.type === 'dropdown' && n.label === openGroup) as
     | Extract<NavItem, { type: 'dropdown' }>
     | undefined
 
   return (
-    <div className={`sf-shell${railOpen ? ' rail-open' : ''}`}>
+    <div className='sf-shell'>
       <header className='sf-topbar'>
         <div className='sf-top-left'>
           <Link to='/' className='sf-brand sf-logo' aria-label='Redpay home'>
@@ -144,6 +159,61 @@ export default function AppShell() {
           </div>
         </div>
 
+          <nav
+            className='sf-capsule'
+            aria-label='Primary navigation'
+          >
+            {navItems.map((item) => {
+              const active = isMatch(location.pathname, item.match)
+              const icon = NAV_ICONS[item.label] ?? <SpaceDashboardOutlinedIcon />
+              if (item.type === 'link') {
+                return (
+                  <Tooltip key={item.label} title={showLabels ? '' : item.label} placement={capsuleAtBottom ? 'top' : 'bottom'} arrow>
+                    <Link
+                      to={item.path}
+                      className={`sf-capsule-item${active ? ' active' : ''}`}
+                      aria-label={item.label}
+                      aria-current={active ? 'page' : undefined}
+                    >
+                      {icon}
+                      <span className='sf-capsule-label'>{item.label}</span>
+                    </Link>
+                  </Tooltip>
+                )
+              }
+              const open = openGroup === item.label
+              return (
+                <Tooltip key={item.label} title={open || showLabels ? '' : item.label} placement={capsuleAtBottom ? 'top' : 'bottom'} arrow>
+                  <button
+                    type='button'
+                    className={`sf-capsule-item has-menu${active || open ? ' active' : ''}`}
+                    aria-label={item.label}
+                    aria-haspopup='menu'
+                    aria-expanded={open}
+                    onClick={(e) => {
+                      setGroupAnchor(e.currentTarget)
+                      setOpenGroup(item.label)
+                    }}
+                  >
+                    {icon}
+                    <span className='sf-capsule-label'>{item.label}</span>
+                  </button>
+                </Tooltip>
+              )
+            })}
+            <i className='sf-capsule-sep' />
+            <Tooltip title='Search' placement='bottom' arrow>
+              <button type='button' className='sf-capsule-item sf-capsule-extra' aria-label='Search pages' onClick={() => setSearchOpen(true)}>
+                <SearchRoundedIcon />
+              </button>
+            </Tooltip>
+            <Tooltip title='Logout' placement='bottom' arrow>
+              <button type='button' className='sf-capsule-item sf-capsule-extra' aria-label='Logout' onClick={handleLogout}>
+                <LogoutRoundedIcon />
+              </button>
+            </Tooltip>
+          </nav>
+
         <div className='sf-top-right'>
           <button type='button' className='sf-icon' aria-label='Search pages (Ctrl K)' title='Search (Ctrl K)' onClick={() => setSearchOpen(true)}>
             <SearchRoundedIcon />
@@ -153,7 +223,7 @@ export default function AppShell() {
             className='sf-icon'
             aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
             title={isDark ? 'Light mode' : 'Dark mode'}
-            onClick={() => setMode?.(isDark ? 'light' : 'dark')}
+            onClick={toggleTheme}
           >
             {isDark ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
           </button>
@@ -166,66 +236,6 @@ export default function AppShell() {
         </div>
       </header>
 
-      <div className='sf-rail-edge' aria-hidden='true' onMouseEnter={showRail} onMouseLeave={hideRail} onClick={showRail}>
-        <i />
-      </div>
-      <nav
-        className='sf-capsule'
-        aria-label='Primary navigation'
-        onMouseEnter={showRail}
-        onMouseLeave={hideRail}
-        // Keyboard focus reveals the rail; focus restored after a mouse click (e.g. closing a submenu) does not.
-        onFocus={(e) => e.target.matches(':focus-visible') && showRail()}
-        onBlur={hideRail}
-      >
-        {navItems.map((item) => {
-          const active = isMatch(location.pathname, item.match)
-          const icon = NAV_ICONS[item.label] ?? <SpaceDashboardOutlinedIcon />
-          if (item.type === 'link') {
-            return (
-              <Tooltip key={item.label} title={item.label} placement={capsuleAtBottom ? 'top' : 'right'} arrow>
-                <Link
-                  to={item.path}
-                  className={`sf-capsule-item${active ? ' active' : ''}`}
-                  aria-label={item.label}
-                  aria-current={active ? 'page' : undefined}
-                >
-                  {icon}
-                </Link>
-              </Tooltip>
-            )
-          }
-          const open = openGroup === item.label
-          return (
-            <Tooltip key={item.label} title={open ? '' : item.label} placement={capsuleAtBottom ? 'top' : 'right'} arrow>
-              <button
-                type='button'
-                className={`sf-capsule-item has-menu${active || open ? ' active' : ''}`}
-                aria-label={item.label}
-                aria-haspopup='menu'
-                aria-expanded={open}
-                onClick={(e) => {
-                  setGroupAnchor(e.currentTarget)
-                  setOpenGroup(item.label)
-                }}
-              >
-                {icon}
-              </button>
-            </Tooltip>
-          )
-        })}
-        <i className='sf-capsule-sep' />
-        <Tooltip title='Search' placement='right' arrow>
-          <button type='button' className='sf-capsule-item sf-capsule-extra' aria-label='Search pages' onClick={() => setSearchOpen(true)}>
-            <SearchRoundedIcon />
-          </button>
-        </Tooltip>
-        <Tooltip title='Logout' placement='right' arrow>
-          <button type='button' className='sf-capsule-item sf-capsule-extra' aria-label='Logout' onClick={handleLogout}>
-            <LogoutRoundedIcon />
-          </button>
-        </Tooltip>
-      </nav>
 
       <main className='sf-content'>
         <Outlet />
@@ -245,10 +255,10 @@ export default function AppShell() {
         anchorEl={groupAnchor}
         open={Boolean(groupAnchor) && Boolean(activeGroup)}
         onClose={closeGroup}
-        anchorOrigin={capsuleAtBottom ? { vertical: 'top', horizontal: 'center' } : { vertical: 'center', horizontal: 'right' }}
-        transformOrigin={capsuleAtBottom ? { vertical: 'bottom', horizontal: 'center' } : { vertical: 'center', horizontal: 'left' }}
+        anchorOrigin={capsuleAtBottom ? { vertical: 'top', horizontal: 'center' } : { vertical: 'bottom', horizontal: 'center' }}
+        transformOrigin={capsuleAtBottom ? { vertical: 'bottom', horizontal: 'center' } : { vertical: 'top', horizontal: 'center' }}
         sx={{ zIndex: 2100 }}
-        PaperProps={{ sx: { ...menuPaperSx, mt: capsuleAtBottom ? -1.5 : 0, ml: capsuleAtBottom ? 0 : 1.75 } }}
+        PaperProps={{ sx: { ...menuPaperSx, mt: capsuleAtBottom ? -1.5 : 1.25 } }}
       >
         <div className='sf-menu-title'>{activeGroup?.label}</div>
         {activeGroup?.children.map((child) => (
