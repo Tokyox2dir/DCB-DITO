@@ -78,6 +78,40 @@ export function buildClientStopAlerts(options: {
   return rows.sort((a, b) => b.lastTs - a.lastTs)
 }
 
+export type ClientDownAlert = {
+  client: string
+  detail: string
+  since: string
+  lastTs: number
+}
+
+/** Client down = every product the client had traffic on today is in the stop list. */
+export function buildClientDownAlerts(stops: ClientStopAlert[], todayCounts: TodayCountMap = {}): ClientDownAlert[] {
+  const productsToday = new Map<string, number>()
+  Object.keys(todayCounts).forEach((key) => {
+    if ((todayCounts[key] || 0) < 1) return
+    const { client } = parseKey(key)
+    productsToday.set(client, (productsToday.get(client) || 0) + 1)
+  })
+
+  const stopped = new Map<string, ClientStopAlert[]>()
+  stops.forEach((s) => stopped.set(s.client, [...(stopped.get(s.client) || []), s]))
+
+  const out: ClientDownAlert[] = []
+  stopped.forEach((rows, client) => {
+    if (rows.length < (productsToday.get(client) || 0)) return
+    const lastTs = Math.max(...rows.map((r) => r.lastTs))
+    const since = formatLastSeen(lastTs)
+    out.push({
+      client,
+      detail: `Client stop total — ${rows.length} produk berhenti, terakhir ${since}`,
+      since,
+      lastTs,
+    })
+  })
+  return out.sort((a, b) => b.lastTs - a.lastTs)
+}
+
 export function buildFailedSpikeAlertsFromTransactions(
   rows: Array<{ payment_method?: string; created_at?: string; status_code?: number }>,
   options: {
@@ -166,13 +200,16 @@ export default function AlertMonitor({
     [failedRows, referenceNow],
   )
 
+  const clientDowns = useMemo(() => buildClientDownAlerts(clientStops, todayCounts), [clientStops, todayCounts])
+  const incidentCount = clientDowns.length + incidents.length
+
   return (
     <div className='mon-panel mon-panel-alert'>
       <div className='mon-alert-head'>
         <h4>Alert Monitor</h4>
         <div className='mon-alert-badges'>
           <span className='crit'>{clientStops.length} stop</span>
-          <span className='warn'>{incidents.length} incident</span>
+          <span className='warn'>{incidentCount} incident</span>
         </div>
       </div>
 
@@ -216,20 +253,32 @@ export default function AlertMonitor({
       <div className='mon-alert-section'>
         <div className='mon-alert-section-title warn'>Incidents</div>
         <div className='mon-alert-scroll'>
-          {loading && incidents.length === 0 ? (
+          {loading && incidentCount === 0 ? (
             <div className='mon-panel-empty'>Loading incidents…</div>
-          ) : incidents.length === 0 ? (
-            <div className='mon-panel-empty'>Tidak ada failed spike (5 menit)</div>
+          ) : incidentCount === 0 ? (
+            <div className='mon-panel-empty'>Tidak ada client stop total / failed spike (5 menit)</div>
           ) : (
             <table className='mon-alert-table'>
               <thead>
                 <tr>
-                  <th>Product</th>
+                  <th>Client / Product</th>
                   <th>Detail</th>
                   <th>Since</th>
                 </tr>
               </thead>
               <tbody>
+                {clientDowns.map((r) => (
+                  <tr key={`down-${r.client}`}>
+                    <td>
+                      <span className='mon-alert-client'>
+                        <i className='dot crit' />
+                        {r.client}
+                      </span>
+                    </td>
+                    <td className='detail'>{r.detail}</td>
+                    <td className='since'>{r.since}</td>
+                  </tr>
+                ))}
                 {incidents.map((r) => (
                   <tr key={r.product}>
                     <td>
