@@ -34,7 +34,7 @@ export default function StatusBreakdown({ kpi, loading }: Props) {
     datasets: [
       {
         data: sum ? [totals.success, totals.pending, totals.failed] : [1],
-        backgroundColor: sum ? ['#71dd37', '#ffab00', '#ff3e1d'] : [isDark ? '#242533' : '#f2f3f3'],
+        backgroundColor: sum ? (isDark ? ['#3fc07a', '#e8a93c', '#ef6a74'] : ['#1e7b4f', '#c98a1a', '#c4242a']) : [isDark ? '#1d1d1c' : '#f6f6f5'],
         borderWidth: 0,
         hoverOffset: 4,
       },
@@ -75,7 +75,7 @@ export default function StatusBreakdown({ kpi, loading }: Props) {
           <div className='mon-donut-wrap'>
             <Doughnut data={data} options={options} />
             <div className='mon-donut-center'>
-              <strong style={{ color: successPct > 0 ? '#71dd37' : isDark ? '#a6a8c4' : '#646e78' }}>
+              <strong style={{ color: successPct > 0 ? 'var(--positive)' : 'var(--muted)' }}>
                 {successPct.toFixed(1)}%
               </strong>
               <span>Success Rate</span>
@@ -85,13 +85,13 @@ export default function StatusBreakdown({ kpi, loading }: Props) {
       </div>
       <div className='mon-donut-legend'>
         <span>
-          <i style={{ background: '#71dd37' }} /> {successPct.toFixed(1)}% Success
+          <i style={{ background: 'var(--positive)' }} /> {successPct.toFixed(1)}% Success
         </span>
         <span>
-          <i style={{ background: '#ffab00' }} /> {pendingPct.toFixed(1)}% Pending
+          <i style={{ background: 'var(--warning)' }} /> {pendingPct.toFixed(1)}% Pending
         </span>
         <span>
-          <i style={{ background: '#ff3e1d' }} /> {failedPct.toFixed(1)}% Failed
+          <i style={{ background: 'var(--negative)' }} /> {failedPct.toFixed(1)}% Failed
         </span>
       </div>
     </div>

@@ -9,10 +9,6 @@ import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined'
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
 import ArrowOutwardRoundedIcon from '@mui/icons-material/ArrowOutwardRounded'
-import CheckCircleOutlinedIcon from '@mui/icons-material/CheckCircleOutlined'
-import PendingOutlinedIcon from '@mui/icons-material/PendingOutlined'
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined'
-import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined'
 import RankingCard from '../components/RankingCard'
 import useDashboardData, { BUCKET_MINUTES, TrafficBucket, WINDOW_HOURS } from '../hooks/useDashboardData'
 import { useAuth } from '../provider/AuthProvider'
@@ -111,74 +107,81 @@ export default function Dashboard() {
   const healthy = successRate >= 90
   const health = healthy ? 'Normal' : successRate >= 75 ? 'Perlu dipantau' : 'Kritis'
   const healthTone = healthy ? 'good' : successRate >= 75 ? 'warn' : 'bad'
-  const stats = [
-    { label: 'Total transaksi', value: totals.total, note: `${WINDOW_HOURS} jam terakhir`, tone: 'primary', icon: <ReceiptLongOutlinedIcon /> },
-    { label: 'Success', value: totals.success, note: `${percent(totals.success, totals.total).toFixed(1)}%`, tone: 'good', icon: <CheckCircleOutlinedIcon /> },
-    { label: 'Pending', value: totals.pending, note: `${percent(totals.pending, totals.total).toFixed(1)}%`, tone: 'warn', icon: <PendingOutlinedIcon /> },
-    { label: 'Failed', value: totals.failed, note: `${percent(totals.failed, totals.total).toFixed(1)}%`, tone: 'bad', icon: <CancelOutlinedIcon /> },
+  const failedRate = percent(totals.failed, totals.total)
+  const kpis = [
+    { label: 'Success', value: totals.success, share: percent(totals.success, totals.total), tone: '' },
+    { label: 'Pending', value: totals.pending, share: percent(totals.pending, totals.total), tone: '' },
+    { label: 'Failed', value: totals.failed, share: failedRate, tone: failedRate >= 5 ? 'bad' : '' },
   ]
-  const statCard = (s: (typeof stats)[number]) => (
-    <article key={s.label} className='sf-card sn-stat'>
-      <span className={`sn-avatar ${s.tone}`}>{s.icon}</span>
-      <p>{s.label}</p>
-      <h4>{formatNumber(s.value)}</h4>
-      <small className={s.tone}>{s.note}</small>
-    </article>
-  )
 
   return (
-    <section className='sf-dash sn' aria-busy={loading}>
-      <div className='sn-row sn-top'>
-        <article className='sf-card sn-welcome'>
-          <div className='sn-welcome-body'>
-            <h5>Halo {username}! 👋</h5>
-            <p>
-              Success rate {WINDOW_HOURS} jam terakhir <strong className={healthTone}>{successRate.toFixed(1)}%</strong>, status{' '}
-              <strong className={healthTone}>{health}</strong>.
-            </p>
-            <p className='sn-meta'>
-              <span>{role || 'user'}</span>
-              <span className={`sf-env ${isDev ? 'dev' : 'prod'}`}>{isDev ? 'Dev' : 'Prod'}</span>
-              <span>{updatedAt ? `Diperbarui ${updatedAt}` : 'Memuat'}</span>
-            </p>
-            <div className='sn-actions'>
-              {shortcuts.map((s) =>
-                s.path ? (
-                  <Link key={s.label} to={s.path} className='sn-btn' title={s.label} aria-label={s.label}>
-                    {s.icon}
-                    <span>{s.label}</span>
-                  </Link>
-                ) : (
-                  <button
-                    key={s.label}
-                    type='button'
-                    className={`sn-btn${loading ? ' spin' : ''}`}
-                    title={s.label}
-                    aria-label={s.label}
-                    onClick={s.onClick}
-                    disabled={loading}
-                  >
-                    {s.icon}
-                    <span>{s.label}</span>
-                  </button>
-                ),
-              )}
-            </div>
+    <section className='ov' aria-busy={loading}>
+      <header className='ov-head'>
+        <div>
+          <h2>Overview</h2>
+          <p>
+            Success rate <strong className={healthTone}>{successRate.toFixed(1)}%</strong> dalam {WINDOW_HOURS} jam terakhir ·{' '}
+            {formatNumber(totals.failed)} gagal · status <strong className={healthTone}>{health}</strong>
+          </p>
+        </div>
+        <div className='ov-actions'>
+          <span className='ov-stamp'>
+            <span className={`sf-env ${isDev ? 'dev' : 'prod'}`}>{isDev ? 'Dev' : 'Prod'}</span>
+            {updatedAt ? `Diperbarui ${updatedAt}` : 'Memuat…'} · {username}
+            {role ? ` (${role})` : ''}
+          </span>
+          {shortcuts.map((s) =>
+            s.path ? (
+              <Link key={s.label} to={s.path} className='rp-btn'>
+                {s.icon}
+                <span>{s.label}</span>
+              </Link>
+            ) : (
+              <button
+                key={s.label}
+                type='button'
+                className={`rp-btn primary${loading ? ' spin' : ''}`}
+                onClick={s.onClick}
+                disabled={loading}
+              >
+                {s.icon}
+                <span>{s.label}</span>
+              </button>
+            ),
+          )}
+        </div>
+      </header>
+
+      <div className='ov-kpis' role='list'>
+        <div className='ov-kpi lead' role='listitem'>
+          <span>Total transaksi · {WINDOW_HOURS} jam</span>
+          <strong>{formatNumber(totals.total)}</strong>
+        </div>
+        {kpis.map((k) => (
+          <div key={k.label} className='ov-kpi' role='listitem'>
+            <span>{k.label}</span>
+            <strong>{formatNumber(k.value)}</strong>
+            <small className={k.tone}>{totals.total ? `${k.share.toFixed(1)}% dari total` : '—'}</small>
           </div>
-          <img src='/img/man-with-laptop.png' alt='' className='sn-welcome-art' />
-        </article>
-        <div className='sn-stats'>{stats.slice(0, 2).map(statCard)}</div>
+        ))}
       </div>
 
-      <div className='sn-row sn-mid'>
-        <article className='sf-card sf-heat'>
-          <header className='sf-card-head'>
+      <div className='ov-row ov-main'>
+        <article className='rp-card sf-heat'>
+          <header className='rp-card-head'>
             <div>
-              <h2>Traffic heatmap</h2>
-              <small>{BUCKET_MINUTES}-minute slots</small>
+              <h3>Traffic per {BUCKET_MINUTES} menit</h3>
+              <small>Setiap kotak = satu slot {BUCKET_MINUTES} menit, angka = jumlah transaksi</small>
+            </div>
+            <div className='sf-legend'>
+              <span><i className='low' /> Sepi</span>
+              <span><i className='mid' /> Ramai</span>
+              <span><i className='high' /> Puncak</span>
+              <span><i className='alert' /> ≥30% gagal</span>
+              <span><i className='now' /> Sekarang</span>
             </div>
           </header>
-          {!hours.length && <p className='sf-heat-empty'>{loading ? 'Loading traffic…' : 'No traffic data yet.'}</p>}
+          {!hours.length && <p className='sf-heat-empty'>{loading ? 'Memuat traffic…' : 'Belum ada data traffic.'}</p>}
           <div className='sf-heat-grid' role='table' aria-label='Transactions per time slot'>
             {hours.map((row) => (
               <div key={row.label} className='sf-heat-row' role='row'>
@@ -198,96 +201,97 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-          <div className='sf-legend'>
-            <span>
-              <i className='low' /> Low
-            </span>
-            <span>
-              <i className='mid' /> Busy
-            </span>
-            <span>
-              <i className='high' /> Peak
-            </span>
-            <span>
-              <i className='alert' /> ≥30% failed
-            </span>
-            <span>
-              <i className='now' /> Now
-            </span>
-          </div>
         </article>
 
-        <div className='sn-side'>
-          <div className='sn-stats'>{stats.slice(2).map(statCard)}</div>
-          <article className='sf-card sf-inbox'>
-            <header className='sf-card-head'>
-              <div>
-                <h2>Klien bermasalah</h2>
-                <small>Merchant dengan transaksi gagal</small>
-              </div>
-              <Link to={isAdmin ? '/monitoring' : '/transactions'} className='sf-link'>
-                Lihat semua
-              </Link>
-            </header>
-            <ul>
-              {alerts.map((m, i) => (
-                <li key={m.name} className={i === 0 ? 'featured' : ''}>
-                  <span className='sf-inbox-avatar'>{initials(m.name)}</span>
+        <article className='rp-card ov-issues'>
+          <header className='rp-card-head'>
+            <div>
+              <h3>Klien bermasalah</h3>
+              <small>Merchant dengan transaksi gagal terbanyak</small>
+            </div>
+            <Link to={isAdmin ? '/monitoring' : '/transactions'} className='rp-link'>
+              Lihat semua
+            </Link>
+          </header>
+          <ul>
+            {alerts.map((m) => {
+              const rate = percent(m.failed, m.total)
+              return (
+                <li key={m.name}>
+                  <span className='ov-avatar'>{initials(m.name)}</span>
                   <div>
-                    <strong>{m.name}</strong>
-                    <p>
-                      {formatNumber(m.failed)} gagal dari {formatNumber(m.total)} · {percent(m.failed, m.total).toFixed(1)}%
-                    </p>
+                    <strong title={m.name}>{m.name}</strong>
+                    <small>
+                      {formatNumber(m.failed)} gagal dari {formatNumber(m.total)}
+                    </small>
                   </div>
-                  <Link to='/transactions' className='sf-inbox-go' aria-label={`Open transactions for ${m.name}`}>
+                  <span className={`ov-rate${rate >= 5 ? ' bad' : ''}`}>{rate.toFixed(1)}%</span>
+                  <Link to='/transactions' className='ov-go' aria-label={`Open transactions for ${m.name}`}>
                     <ArrowOutwardRoundedIcon />
                   </Link>
                 </li>
-              ))}
-              {!alerts.length && <li className='sf-empty'>{loading ? 'Memeriksa kegagalan…' : 'Tidak ada transaksi gagal.'}</li>}
-            </ul>
-          </article>
-        </div>
+              )
+            })}
+            {!alerts.length && <li className='ov-empty'>{loading ? 'Memeriksa kegagalan…' : 'Tidak ada transaksi gagal.'}</li>}
+          </ul>
+        </article>
       </div>
 
-      <div className='sn-row sn-bottom'>
-        <article className='sf-card sn-methods'>
-          <header className='sf-card-head'>
+      <div className='ov-row ov-bottom'>
+        <article className='rp-card ov-methods'>
+          <header className='rp-card-head'>
             <div>
-              <h2>Metode pembayaran</h2>
+              <h3>Metode pembayaran</h3>
               <small>{formatNumber(totals.total)} transaksi · {WINDOW_HOURS} jam</small>
             </div>
           </header>
-          <ul>
-            {methods.map((m) => (
-              <li key={m.name}>
-                <span className='sn-avatar primary'>
-                  <PaymentsOutlinedIcon />
-                </span>
-                <div>
-                  <strong title={m.name}>{m.name}</strong>
-                  <small>{m.merchants.length} merchant</small>
-                </div>
-                <span className='sn-methods-val'>
-                  {formatNumber(m.total)}
-                  <small>{percent(m.total, totals.total).toFixed(0)}%</small>
-                </span>
-              </li>
-            ))}
-            {!methods.length && <li className='sf-empty'>{loading ? 'Memuat metode pembayaran…' : 'Belum ada data traffic.'}</li>}
-          </ul>
+          <table>
+            <thead>
+              <tr>
+                <th>Metode</th>
+                <th className='num'>Merchant</th>
+                <th className='num'>Transaksi</th>
+                <th className='num'>Porsi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {methods.map((m) => {
+                const share = percent(m.total, totals.total)
+                return (
+                  <tr key={m.name}>
+                    <td>
+                      <strong title={m.name}>{m.name}</strong>
+                      <span className='ov-share' aria-hidden='true'>
+                        <i style={{ width: `${share}%` }} />
+                      </span>
+                    </td>
+                    <td className='num'>{m.merchants.length}</td>
+                    <td className='num'>{formatNumber(m.total)}</td>
+                    <td className='num'>{share.toFixed(0)}%</td>
+                  </tr>
+                )
+              })}
+              {!methods.length && (
+                <tr>
+                  <td colSpan={4} className='ov-empty'>
+                    {loading ? 'Memuat metode pembayaran…' : 'Belum ada data traffic.'}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </article>
         <RankingCard
-          title='Top Merchants'
-          subtitle='By transaction volume'
+          title='Top merchants'
+          subtitle='Berdasarkan volume transaksi'
           variant='client'
           icon={<PeopleAltOutlinedIcon sx={{ fontSize: 18 }} />}
           items={merchants}
           loading={loading && merchants.length === 0}
         />
         <RankingCard
-          title='Top Success'
-          subtitle='Merchants by successful transactions'
+          title='Top success'
+          subtitle='Merchant dengan transaksi sukses terbanyak'
           variant='sender'
           icon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
           items={successLeaders}

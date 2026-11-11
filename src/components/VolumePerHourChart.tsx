@@ -160,9 +160,9 @@ export default function VolumePerHourChart({
     [series, fineSeries, hourPatch, referenceNow, status],
   )
 
-  const todayColor = isDark ? '#6c9cff' : '#3b74f0'
-  const yestColor = isDark ? '#4a534d' : '#b9c2bc'
-  const tickColor = isDark ? '#9ba69f' : '#69716c'
+  const todayColor = isDark ? '#4fb3c9' : '#1b6c80'
+  const yestColor = isDark ? '#464643' : '#cfcecb'
+  const tickColor = isDark ? '#b4b2ae' : '#5c5b58'
   const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
 
   const data = {
@@ -172,11 +172,11 @@ export default function VolumePerHourChart({
         label: 'Today',
         data: volume.today,
         borderColor: todayColor,
-        backgroundColor: `${todayColor}22`,
-        tension: 0.4,
+        backgroundColor: `${todayColor}1f`,
+        tension: 0,
         fill: true,
-        pointRadius: 3,
-        pointHoverRadius: 6,
+        pointRadius: 0,
+        pointHoverRadius: 4,
         borderWidth: 2,
       },
       {
@@ -184,11 +184,11 @@ export default function VolumePerHourChart({
         data: volume.yesterday,
         borderColor: yestColor,
         backgroundColor: 'transparent',
-        tension: 0.4,
+        tension: 0,
         fill: false,
         borderDash: [5, 4],
-        pointRadius: 2,
-        pointHoverRadius: 5,
+        pointRadius: 0,
+        pointHoverRadius: 4,
         borderWidth: 1.5,
       },
     ],

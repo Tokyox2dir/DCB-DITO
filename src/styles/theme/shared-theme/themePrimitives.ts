@@ -212,7 +212,7 @@ export const getDesignTokens = (mode: PaletteMode) => {
       },
     },
     typography: {
-      fontFamily: ['"Inter", "sans-serif"'].join(','),
+      fontFamily: ['"IBM Plex Sans"', '"Inter"', 'sans-serif'].join(','),
       h1: {
         fontSize: defaultTheme.typography.pxToRem(48),
         fontWeight: 600,
@@ -272,9 +272,9 @@ export const colorSchemes = {
   light: {
     palette: {
       primary: {
-        light: '#3a3e44',
-        main: '#16181b',
-        dark: '#000000',
+        light: '#3f8ea2',
+        main: '#1b6c80',
+        dark: '#134e5d',
         contrastText: '#ffffff',
       },
       secondary: {
@@ -307,14 +307,14 @@ export const colorSchemes = {
       grey: {
         ...gray,
       },
-      divider: '#e4e6e8',
+      divider: '#e7e6e3',
       background: {
-        default: '#f5f5f9',
+        default: '#f4f3f1',
         paper: '#ffffff',
       },
       text: {
-        primary: '#384551',
-        secondary: '#646e78',
+        primary: '#141413',
+        secondary: '#5c5b58',
         warning: '#e8930c',
       },
       action: {
@@ -327,10 +327,10 @@ export const colorSchemes = {
   dark: {
     palette: {
       primary: {
-        light: '#ffffff',
-        main: '#ebf1ed',
-        dark: '#c9d3cc',
-        contrastText: '#121714',
+        light: '#7cc8d9',
+        main: '#4fb3c9',
+        dark: '#2f8ea4',
+        contrastText: '#0e0e0d',
       },
       secondary: {
         light: '#33291f',
@@ -362,14 +362,14 @@ export const colorSchemes = {
       grey: {
         ...gray,
       },
-      divider: '#2e3042',
+      divider: '#2a2a28',
       background: {
-        default: '#12131c',
-        paper: '#1b1c28',
+        default: '#0e0e0d',
+        paper: '#171716',
       },
       text: {
-        primary: '#e1e2ec',
-        secondary: '#a6a8c4',
+        primary: '#f3f2f0',
+        secondary: '#b4b2ae',
       },
       action: {
         hover: 'rgba(235, 241, 237, 0.06)',
@@ -381,7 +381,7 @@ export const colorSchemes = {
 }
 
 export const typography = {
-  fontFamily: ['"Inter", "sans-serif"'].join(','),
+  fontFamily: ['"IBM Plex Sans"', '"Inter"', 'sans-serif'].join(','),
   h1: {
     fontSize: defaultTheme.typography.pxToRem(48),
     fontWeight: 600,

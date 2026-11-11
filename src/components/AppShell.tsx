@@ -1,12 +1,16 @@
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
 import Dialog from '@mui/material/Dialog'
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
+import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined'
+import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined'
+import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import Tooltip from '@mui/material/Tooltip'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import SpaceDashboardOutlinedIcon from '@mui/icons-material/SpaceDashboardOutlined'
 import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined'
 import ReceiptLongOutlinedIcon from '@mui/icons-material/ReceiptLongOutlined'
@@ -15,17 +19,13 @@ import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import PercentOutlinedIcon from '@mui/icons-material/PercentOutlined'
 import TrafficOutlinedIcon from '@mui/icons-material/TrafficOutlined'
 import StorefrontOutlinedIcon from '@mui/icons-material/StorefrontOutlined'
-import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
-import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined'
-import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined'
-import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded'
-import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import { useColorScheme } from '@mui/material/styles'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import { jwtDecode } from 'jwt-decode'
 import { useAuth } from '../provider/AuthProvider'
 import ApiSwitcher from './ApiSwitcher'
 import PageSearch from './PageSearch'
-import { NavItem, buildNav, flattenNav, isMatch } from './navConfig'
+import { buildNav, flattenNav, isMatch } from './navConfig'
 
 const NAV_ICONS: Record<string, ReactNode> = {
   Dashboard: <SpaceDashboardOutlinedIcon />,
@@ -40,13 +40,13 @@ const NAV_ICONS: Record<string, ReactNode> = {
 
 const menuPaperSx = {
   mt: 0.75,
-  minWidth: 200,
-  borderRadius: '14px',
-  bgcolor: 'var(--sf-card)',
-  border: '1px solid var(--sf-line)',
+  minWidth: 220,
+  borderRadius: '16px',
+  bgcolor: 'var(--surface)',
+  border: '1px solid var(--border)',
   backgroundImage: 'none',
-  color: 'var(--sf-ink)',
-  boxShadow: '0 16px 40px rgba(21, 23, 26, 0.16)',
+  color: 'var(--text)',
+  boxShadow: '0 12px 32px rgba(0, 0, 0, 0.14)',
 }
 
 function isOn(pathname: string, path: string) {
@@ -58,10 +58,6 @@ export default function AppShell() {
   const navigate = useNavigate()
   const { token, setToken } = useAuth()
   const { mode, systemMode, setMode } = useColorScheme()
-  // The menu sits in the top bar on desktop and docks to the bottom on small screens, so submenus open upwards there.
-  const capsuleAtBottom = useMediaQuery('(max-width: 900px)')
-  // Wide screens show each menu name next to its icon, so the tooltip is only needed below that.
-  const showLabels = useMediaQuery('(min-width: 1420px)')
   const decoded: any = token ? jwtDecode(token) : {}
   const role = decoded.role || ''
   const username = decoded.username || 'user'
@@ -79,11 +75,34 @@ export default function AppShell() {
     return { page, group: group?.type === 'dropdown' ? group.label : null }
   }, [flatLinks, navItems, location.pathname])
 
+  // Floating icon capsule: on the left edge on desktop, docked to the bottom on phones (submenus open upwards there).
+  const docked = useMediaQuery('(max-width: 900px)')
   const [groupAnchor, setGroupAnchor] = useState<null | HTMLElement>(null)
   const [openGroup, setOpenGroup] = useState<string | null>(null)
   const [userAnchor, setUserAnchor] = useState<null | HTMLElement>(null)
   const [searchOpen, setSearchOpen] = useState(false)
   const isDark = ((mode === 'system' ? systemMode : mode) || 'dark') !== 'light'
+
+  // Desktop: the capsule hides past the left edge and slides in when the pointer nears that edge
+  // (or a key moves focus into it); it slides away shortly after the pointer leaves.
+  const [railOpen, setRailOpen] = useState(false)
+  const hideTimer = useRef<number>()
+  const showRail = () => {
+    window.clearTimeout(hideTimer.current)
+    setRailOpen(true)
+  }
+  const hideRail = () => {
+    window.clearTimeout(hideTimer.current)
+    hideTimer.current = window.setTimeout(() => setRailOpen(false), 450)
+  }
+  useEffect(() => () => window.clearTimeout(hideTimer.current), [])
+
+  const closeGroup = () => {
+    setGroupAnchor(null)
+    setOpenGroup(null)
+    hideRail()
+  }
+  const activeGroup = navItems.find((n) => n.type === 'dropdown' && n.label === openGroup)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -131,114 +150,108 @@ export default function AppShell() {
     navigate('/login', { replace: true })
   }
 
-  const closeGroup = () => {
-    setGroupAnchor(null)
-    setOpenGroup(null)
-  }
-
-  const activeGroup = navItems.find((n) => n.type === 'dropdown' && n.label === openGroup) as
-    | Extract<NavItem, { type: 'dropdown' }>
-    | undefined
-
   return (
-    <div className='sf-shell'>
-      <header className='sf-topbar'>
-        <div className='sf-top-left'>
-          <Link to='/' className='sf-brand sf-logo' aria-label='Redpay home'>
-            <img className='on-light' src='/logo.png' alt='Redpay' />
-            <img className='on-dark' src='/logo-white.png' alt='' />
-          </Link>
-          <div className='sf-title'>
-            <button type='button' className='sf-back' aria-label='Go back' onClick={() => navigate(-1)}>
-              <ArrowBackRoundedIcon />
-            </button>
-            <h1>
-              {pageTitle.group && <span>{pageTitle.group}</span>}
-              {pageTitle.page}
-            </h1>
-          </div>
+    <div className={`sf-shell rp-frame${railOpen || openGroup ? ' rail-open' : ''}`}>
+      <div className='rp-rail-edge' aria-hidden='true' onMouseEnter={showRail}>
+        <i />
+      </div>
+      <nav
+        className='sf-capsule rp-rail'
+        aria-label='Primary navigation'
+        onMouseEnter={showRail}
+        onMouseLeave={hideRail}
+        onFocus={showRail}
+        onBlur={hideRail}
+      >
+        <Link to='/' className='rp-rail-mark' aria-label='Redpay home'>
+          <img src='/logo-white.png' alt='' />
+        </Link>
+        {navItems.map((item) => {
+          const active = isMatch(location.pathname, item.match)
+          const icon = NAV_ICONS[item.label] ?? <SpaceDashboardOutlinedIcon />
+          if (item.type === 'link') {
+            return (
+              <Tooltip key={item.label} title={item.label} placement={docked ? 'top' : 'right'} arrow>
+                <Link
+                  to={item.path}
+                  className={`sf-capsule-item${active ? ' active' : ''}`}
+                  aria-label={item.label}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {icon}
+                </Link>
+              </Tooltip>
+            )
+          }
+          const open = openGroup === item.label
+          return (
+            <Tooltip key={item.label} title={open ? '' : item.label} placement={docked ? 'top' : 'right'} arrow>
+              <button
+                type='button'
+                className={`sf-capsule-item has-menu${active || open ? ' active' : ''}`}
+                aria-label={item.label}
+                aria-haspopup='menu'
+                aria-expanded={open}
+                onClick={(e) => {
+                  setGroupAnchor(e.currentTarget)
+                  setOpenGroup(item.label)
+                }}
+              >
+                {icon}
+              </button>
+            </Tooltip>
+          )
+        })}
+        <i className='sf-capsule-sep' />
+        <Tooltip title='Logout' placement={docked ? 'top' : 'right'} arrow>
+          <button type='button' className='sf-capsule-item rp-rail-logout' aria-label='Logout' onClick={handleLogout}>
+            <LogoutRoundedIcon />
+          </button>
+        </Tooltip>
+      </nav>
+
+      <header className='rp-bar'>
+        <Link to='/' className='rp-brand' aria-label='Redpay home'>
+          <img className='on-light' src='/logo.png' alt='Redpay' />
+          <img className='on-dark' src='/logo-white.png' alt='' />
+        </Link>
+        <div className='rp-crumbs'>
+          <button type='button' className='rp-back' aria-label='Go back' onClick={() => navigate(-1)}>
+            <ArrowBackRoundedIcon />
+          </button>
+          <h1>
+            {pageTitle.group && <span>{pageTitle.group}</span>}
+            {pageTitle.page}
+          </h1>
         </div>
-
-          <nav
-            className='sf-capsule'
-            aria-label='Primary navigation'
-          >
-            {navItems.map((item) => {
-              const active = isMatch(location.pathname, item.match)
-              const icon = NAV_ICONS[item.label] ?? <SpaceDashboardOutlinedIcon />
-              if (item.type === 'link') {
-                return (
-                  <Tooltip key={item.label} title={showLabels ? '' : item.label} placement={capsuleAtBottom ? 'top' : 'bottom'} arrow>
-                    <Link
-                      to={item.path}
-                      className={`sf-capsule-item${active ? ' active' : ''}`}
-                      aria-label={item.label}
-                      aria-current={active ? 'page' : undefined}
-                    >
-                      {icon}
-                      <span className='sf-capsule-label'>{item.label}</span>
-                    </Link>
-                  </Tooltip>
-                )
-              }
-              const open = openGroup === item.label
-              return (
-                <Tooltip key={item.label} title={open || showLabels ? '' : item.label} placement={capsuleAtBottom ? 'top' : 'bottom'} arrow>
-                  <button
-                    type='button'
-                    className={`sf-capsule-item has-menu${active || open ? ' active' : ''}`}
-                    aria-label={item.label}
-                    aria-haspopup='menu'
-                    aria-expanded={open}
-                    onClick={(e) => {
-                      setGroupAnchor(e.currentTarget)
-                      setOpenGroup(item.label)
-                    }}
-                  >
-                    {icon}
-                    <span className='sf-capsule-label'>{item.label}</span>
-                  </button>
-                </Tooltip>
-              )
-            })}
-            <i className='sf-capsule-sep' />
-            <Tooltip title='Search' placement='bottom' arrow>
-              <button type='button' className='sf-capsule-item sf-capsule-extra' aria-label='Search pages' onClick={() => setSearchOpen(true)}>
-                <SearchRoundedIcon />
-              </button>
-            </Tooltip>
-            <Tooltip title='Logout' placement='bottom' arrow>
-              <button type='button' className='sf-capsule-item sf-capsule-extra' aria-label='Logout' onClick={handleLogout}>
-                <LogoutRoundedIcon />
-              </button>
-            </Tooltip>
-          </nav>
-
-        <div className='sf-top-right'>
-          <button type='button' className='sf-icon' aria-label='Search pages (Ctrl K)' title='Search (Ctrl K)' onClick={() => setSearchOpen(true)}>
+        <div className='rp-bar-right'>
+          <button type='button' className='rp-search' aria-label='Search pages (Ctrl K)' onClick={() => setSearchOpen(true)}>
             <SearchRoundedIcon />
+            <span>Search</span>
+            <kbd>Ctrl K</kbd>
           </button>
           <button
             type='button'
-            className='sf-icon'
+            className='rp-icon'
             aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
             title={isDark ? 'Light mode' : 'Dark mode'}
             onClick={toggleTheme}
           >
             {isDark ? <LightModeOutlinedIcon /> : <DarkModeOutlinedIcon />}
           </button>
-          <div className='sf-api'>
+          <div className='rp-env'>
             <ApiSwitcher />
           </div>
-          <button type='button' className='sf-avatar' aria-label='Account menu' onClick={(e) => setUserAnchor(e.currentTarget)}>
+          <button type='button' className='rp-avatar' aria-label='Account menu' onClick={(e) => setUserAnchor(e.currentTarget)}>
             {initial}
           </button>
         </div>
       </header>
 
-
-      <main className='sf-content'>
-        <Outlet />
+      <main className='sf-content rp-sheet'>
+        <div className='rp-page' key={location.pathname}>
+          <Outlet />
+        </div>
       </main>
 
       <Dialog
@@ -255,25 +268,26 @@ export default function AppShell() {
         anchorEl={groupAnchor}
         open={Boolean(groupAnchor) && Boolean(activeGroup)}
         onClose={closeGroup}
-        anchorOrigin={capsuleAtBottom ? { vertical: 'top', horizontal: 'center' } : { vertical: 'bottom', horizontal: 'center' }}
-        transformOrigin={capsuleAtBottom ? { vertical: 'bottom', horizontal: 'center' } : { vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={docked ? { vertical: 'top', horizontal: 'center' } : { vertical: 'center', horizontal: 'right' }}
+        transformOrigin={docked ? { vertical: 'bottom', horizontal: 'center' } : { vertical: 'center', horizontal: 'left' }}
         sx={{ zIndex: 2100 }}
-        PaperProps={{ sx: { ...menuPaperSx, mt: capsuleAtBottom ? -1.5 : 1.25 } }}
+        PaperProps={{ className: 'rp-menu', sx: { ...menuPaperSx, mt: docked ? -1.5 : 0, ml: docked ? 0 : 1.5 } }}
       >
         <div className='sf-menu-title'>{activeGroup?.label}</div>
-        {activeGroup?.children.map((child) => (
-          <MenuItem
-            key={child.path + child.label}
-            selected={isOn(location.pathname, child.path)}
-            onClick={() => {
-              closeGroup()
-              navigate(child.path)
-            }}
-            sx={{ fontSize: 13, borderRadius: '8px', mx: 0.75 }}
-          >
-            {child.label}
-          </MenuItem>
-        ))}
+        {activeGroup?.type === 'dropdown' &&
+          activeGroup.children.map((child) => (
+            <MenuItem
+              key={child.path + child.label}
+              selected={isOn(location.pathname, child.path)}
+              onClick={() => {
+                closeGroup()
+                navigate(child.path)
+              }}
+              sx={{ fontSize: 14, borderRadius: '10px', mx: 0.75, minHeight: 36 }}
+            >
+              {child.label}
+            </MenuItem>
+          ))}
       </Menu>
 
       <Menu
@@ -283,7 +297,7 @@ export default function AppShell() {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         sx={{ zIndex: 2100 }}
-        PaperProps={{ sx: menuPaperSx }}
+        PaperProps={{ className: 'rp-menu', sx: menuPaperSx }}
       >
         <div className='sf-menu-user'>
           <strong>{username}</strong>
