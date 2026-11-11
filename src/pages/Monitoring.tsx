@@ -23,6 +23,9 @@ const { RangePicker } = DatePicker
 const { Option } = Select
 
 const REFRESH_MS = 30_000
+// A request the server never answers would hold the panels on "Loading" and block every later refresh,
+// so each one gives up after this long; the panel keeps its last data and the next refresh retries.
+const REQUEST_TIMEOUT_MS = 20_000
 const LIVE_PAGE_SIZE = 500
 const LIVE_MAX_PAGES = 6
 // Re-read slightly behind the newest row seen, for rows committed late; duplicates are merged by u_id.
@@ -110,6 +113,7 @@ export default function Monitoring() {
   const [kpi, setKpi] = useState({ total: 0, success: 0, pending: 0, waiting: 0, failed: 0 })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [trafficTimedOut, setTrafficTimedOut] = useState(false)
   const [updatedAt, setUpdatedAt] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
   const [referenceNow, setReferenceNow] = useState<Dayjs>(() => dayjs())
@@ -231,6 +235,7 @@ export default function Monitoring() {
       const trxCount = async (status: number, from: Dayjs | number, to: Dayjs | number): Promise<number> => {
         const res = await axios.get(`${apiUrl}/transactions`, {
           headers: authHeaders,
+          timeout: REQUEST_TIMEOUT_MS,
           params: { page: 1, limit: 1, ...trxDateParams, start_date: gmt(from), end_date: gmt(to), status },
         })
         return Number(res.data?.pagination?.total_items) || 0
@@ -280,9 +285,11 @@ export default function Monitoring() {
         now.valueOf() - hourlyCache.fullAt < HOURLY_FULL_RESYNC_MS &&
         hourlyTailStart.isAfter(start)
 
+      let trafficFailed = false
       const trafficPromise = axios
         .get(`${apiUrl}/traffic/monitoring/hourly`, {
           headers: authHeaders,
+          timeout: REQUEST_TIMEOUT_MS,
           params: {
             start: (hourlyIncremental ? hourlyTailStart : start).format('YYYY-MM-DDTHH:mm:ssZ'),
             end: end.format('YYYY-MM-DDTHH:mm:ssZ'),
@@ -302,6 +309,7 @@ export default function Monitoring() {
         })
         .catch((e) => {
           console.warn('Hourly traffic fetch failed, keeping last data:', e)
+          trafficFailed = true
           return hourlyCache && hourlyCache.scope === hourlyScope ? hourlyCache.data : ([] as TrafficSeries[])
         })
 
@@ -323,6 +331,7 @@ export default function Monitoring() {
       const finePromise = axios
         .get(`${apiUrl}/traffic/monitoring`, {
           headers: authHeaders,
+          timeout: REQUEST_TIMEOUT_MS,
           params: {
             start: fineStart.format('YYYY-MM-DDTHH:mm:ssZ'),
             end: end.format('YYYY-MM-DDTHH:mm:ssZ'),
@@ -341,12 +350,14 @@ export default function Monitoring() {
         })
         .catch((e) => {
           console.warn('Fine traffic monitoring fetch failed, keeping last data:', e)
+          trafficFailed = true
           return fineCache && fineCache.scope === fineScope ? fineCache.data : null
         })
 
       const [hourlyData, fineRes] = await Promise.all([trafficPromise, finePromise])
 
       if (gen !== loadGenRef.current) return
+      setTrafficTimedOut(trafficFailed)
 
       const fineData: TrafficSeries[] = fineRes || hourlyData
 
@@ -613,6 +624,12 @@ export default function Monitoring() {
       </div>
 
       {error && <div className='mon-error'>{error}</div>}
+      {trafficTimedOut && (
+        <div className='mon-error'>
+          Server traffic tidak menjawab dalam {REQUEST_TIMEOUT_MS / 1000} detik. Grafik menampilkan data terakhir yang berhasil dimuat
+          dan dicoba lagi otomatis setiap {REFRESH_MS / 1000} detik.
+        </div>
+      )}
 
       <MonitoringKpiCards kpi={kpi} loading={loading} onSelectStatus={handleKpiStatus} />
 

@@ -55,6 +55,8 @@ export async function fetchTodayLastSeen(
     try {
       const res = await axios.get(`${apiUrl}/transactions`, {
         headers: authHeaders,
+        // A hung page would block the alert feed for every later refresh.
+        timeout: 20_000,
         params: {
           page,
           limit: pageSize,

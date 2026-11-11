@@ -236,6 +236,7 @@ export default function MonitoringTransactionList({
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
+          timeout: 20_000,
           params: {
             page: pageNum,
             limit,
