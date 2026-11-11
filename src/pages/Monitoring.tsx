@@ -40,16 +40,7 @@ const FINE_FULL_RESYNC_MS = 10 * 60_000
 // refetched, with a slower full resync.
 const HOURLY_TAIL_HOURS = 2
 const HOURLY_FULL_RESYNC_MS = 30 * 60_000
-// A slow database: when a poll's requests take longer than this, wait about as long again before the next one,
-// so slow queries don't pile up behind each other.
-const SLOW_REQUEST_MS = 15_000
-// Status counts: the whole-day counts are taken once and reused; each refresh only counts the recent
-// window and adds it on top. The whole-day counts are redone every KPI_RESYNC_MS so older transactions
-// whose status changed meanwhile (e.g. pending -> success) are picked up. The total never lags.
-const KPI_RESYNC_MS = 2 * 60_000
-const KPI_TAIL_MINUTES = 30
 const KPI_STATUSES = [1000, 1001, 1003, 1005] as const
-const MAX_BACKOFF_MS = 120_000
 
 /** The aggregate only fills a bucket once it has closed: the open bucket starts here. */
 function aggregateCoverageEnd(series: TrafficSeries[]): number | null {
@@ -65,8 +56,6 @@ function aggregateCoverageEnd(series: TrafficSeries[]): number | null {
 
 type KpiCounts = { total: number; success: number; pending: number; waiting: number; failed: number }
 type StatusCounts = [number, number, number, number] // success, pending, waiting, failed
-
-const addCounts = (a: StatusCounts, b: StatusCounts): StatusCounts => [a[0] + b[0], a[1] + b[1], a[2] + b[2], a[3] + b[3]]
 
 const seriesKey = (s: TrafficSeries) => `${s.client_uid || ''}::${s.merchant_name || ''}::${s.payment_method || ''}`
 
@@ -130,11 +119,9 @@ export default function Monitoring() {
   const loadingRef = useRef(false)
   const kpiScopeRef = useRef('')
   const kpiInFlightRef = useRef<string | null>(null)
-  const kpiBaseRef = useRef<{ scope: string; at: number; boundary: number; counts: StatusCounts } | null>(null)
   const fineCacheRef = useRef<{ scope: string; data: TrafficSeries[]; fullAt: number } | null>(null)
   const hourlyCacheRef = useRef<{ scope: string; data: TrafficSeries[]; fullAt: number } | null>(null)
   const lastLoadAtRef = useRef(0)
-  const slowUntilRef = useRef(0)
   // Raw transactions since the aggregate's last closed bucket, fetched incrementally.
   const liveRef = useRef<{
     scope: string
@@ -251,28 +238,6 @@ export default function Monitoring() {
       const countStatuses = (from: Dayjs | number, to: Dayjs | number) =>
         Promise.all(KPI_STATUSES.map((status) => trxCount(status, from, to))) as Promise<StatusCounts>
 
-      // Today: whole-day counts from the cache plus a count of the recent window only. Otherwise (a past
-      // range, the first poll, a resync, or early in the day) count the whole range.
-      const countKpi = async (): Promise<StatusCounts> => {
-        if (!bgIsLiveRange) return countStatuses(dayStart, end)
-        const base = kpiBaseRef.current
-        const fresh =
-          !!base &&
-          base.scope === kpiScope &&
-          now.valueOf() - base.at < KPI_RESYNC_MS &&
-          base.boundary > dayStart.valueOf()
-        if (fresh && base) return addCounts(base.counts, await countStatuses(base.boundary, end))
-
-        const boundary = now.subtract(KPI_TAIL_MINUTES, 'minute')
-        if (!boundary.isAfter(dayStart)) return countStatuses(dayStart, end)
-        const [baseCounts, tailCounts] = await Promise.all([
-          countStatuses(dayStart, boundary),
-          countStatuses(boundary, end),
-        ])
-        kpiBaseRef.current = { scope: kpiScope, at: now.valueOf(), boundary: boundary.valueOf(), counts: baseCounts }
-        return addCounts(baseCounts, tailCounts)
-      }
-
       // Same source as Transaction List → live KPI / Status.
       // The counts can take longer than REFRESH_MS, so a batch is never discarded just because a newer
       // refresh started (that left the cards stuck on stale numbers), and a new batch is only sent once
@@ -289,8 +254,7 @@ export default function Monitoring() {
           ? Promise.resolve()
           : (() => {
               kpiInFlightRef.current = kpiScope
-              const kpiStartedAt = Date.now()
-              return countKpi()
+              return countStatuses(dayStart, end)
                 .then(([success, pending, waiting, failed]) => {
                   if (kpiScopeRef.current !== kpiScope) return
                   const next: KpiCounts = { total: success + pending + waiting + failed, success, pending, waiting, failed }
@@ -303,10 +267,6 @@ export default function Monitoring() {
                 })
                 .finally(() => {
                   if (kpiInFlightRef.current === kpiScope) kpiInFlightRef.current = null
-                  const took = Date.now() - kpiStartedAt
-                  if (took > SLOW_REQUEST_MS) {
-                    slowUntilRef.current = Math.max(slowUntilRef.current, Date.now() + Math.min(took, MAX_BACKOFF_MS))
-                  }
                 })
             })()
 
@@ -384,12 +344,7 @@ export default function Monitoring() {
           return fineCache && fineCache.scope === fineScope ? fineCache.data : null
         })
 
-      const coreStartedAt = Date.now()
       const [hourlyData, fineRes] = await Promise.all([trafficPromise, finePromise])
-      const coreTook = Date.now() - coreStartedAt
-      if (coreTook > SLOW_REQUEST_MS) {
-        slowUntilRef.current = Math.max(slowUntilRef.current, Date.now() + Math.min(coreTook, MAX_BACKOFF_MS))
-      }
 
       if (gen !== loadGenRef.current) return
 
@@ -450,7 +405,6 @@ export default function Monitoring() {
       }
       const since = live.cursor ? Math.max(live.cursor - LIVE_OVERLAP_MS, rawFrom) : rawFrom
 
-      const tailStartedAt = Date.now()
       const { activity: nextActivity, rows: newRows, complete } = await fetchTodayLastSeen(
         apiUrl,
         bgAuthHeaders,
@@ -461,10 +415,6 @@ export default function Monitoring() {
         },
         { maxPages: LIVE_MAX_PAGES, pageSize: LIVE_PAGE_SIZE },
       )
-      const tailTook = Date.now() - tailStartedAt
-      if (tailTook > SLOW_REQUEST_MS) {
-        slowUntilRef.current = Math.max(slowUntilRef.current, Date.now() + Math.min(tailTook, MAX_BACKOFF_MS))
-      }
       if (liveRef.current !== live) return
 
       let oldestFetched = Infinity
@@ -521,10 +471,9 @@ export default function Monitoring() {
     if (!isLiveView) return
 
     // A tab nobody is looking at (minimized, other tab, locked screen) doesn't poll; it catches up
-    // immediately when it becomes visible again. While the database is slow, polling backs off too.
+    // immediately when it becomes visible again.
     const tick = () => {
       if (document.visibilityState === 'hidden') return
-      if (Date.now() < slowUntilRef.current) return
       load()
     }
     const onVisibility = () => {
