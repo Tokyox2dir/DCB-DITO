@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Table, DatePicker, Row, Col, Button, Typography as AntTypography, Card, message } from 'antd'
+import { Table, DatePicker, Button, message } from 'antd'
 import type { TableColumnsType } from 'antd'
 import axios from 'axios'
 import dayjs, { Dayjs } from 'dayjs'
 import { useAuth } from '../provider/AuthProvider'
 import formatRupiah from '../utils/FormatRupiah'
 
-const { Title, Text } = AntTypography
+const tone = (v: number) => (v < 0 ? 'rpt-num rpt-neg' : 'rpt-num rpt-pos')
 
 interface MarginSummaryItem {
   merchant_name: string
@@ -61,7 +61,7 @@ const columns: TableColumnsType<PaymentMethodAggregate> = [
     title: 'Payment Method',
     dataIndex: 'payment_method',
     key: 'payment_method',
-    render: (value: string) => value?.replace(/_/g, ' ').toUpperCase(),
+    render: (value: string) => <span className='rpt-strong'>{value?.replace(/_/g, ' ').toUpperCase()}</span>,
   },
   {
     title: '#Trx',
@@ -86,7 +86,7 @@ const columns: TableColumnsType<PaymentMethodAggregate> = [
     align: 'right',
     width: 200,
     render: (value: number) => (
-      <span className={value < 0 ? 'text-red-600' : 'text-emerald-700'}>{formatRupiah(value || 0)}</span>
+      <span className={tone(value)}>{formatRupiah(value || 0)}</span>
     ),
   },
   {
@@ -96,7 +96,7 @@ const columns: TableColumnsType<PaymentMethodAggregate> = [
     width: 100,
     render: (_, r) => {
       const per = r.total_amount ? (r.total_margin / r.total_amount) * 100 : 0
-      return <span className={per < 0 ? 'text-red-600' : 'text-emerald-700'}>{per.toFixed(2)}%</span>
+      return <span className={tone(per)}>{per.toFixed(2)}%</span>
     },
   },
 ]
@@ -119,7 +119,7 @@ const ReportMarginPaymentMethod: React.FC = () => {
       setRaw(res.data)
     } catch (error) {
       console.error(error)
-      message.error('Gagal mengambil data report margin per payment method')
+      message.error('Could not load report margin per payment method')
     } finally {
       setLoading(false)
     }
@@ -178,7 +178,7 @@ const ReportMarginPaymentMethod: React.FC = () => {
     <Table.Summary fixed>
       <Table.Summary.Row>
         <Table.Summary.Cell index={0}>
-          <strong>Total</strong>
+          <span className='rpt-total-label'>Total</span>
         </Table.Summary.Cell>
         <Table.Summary.Cell index={1} align='right'>
           <strong>{totals.count.toLocaleString('id-ID')}</strong>
@@ -193,7 +193,7 @@ const ReportMarginPaymentMethod: React.FC = () => {
           <strong>
             {(() => {
               const per = totals.amount ? (totals.margin / totals.amount) * 100 : 0
-              return <span className={per < 0 ? 'text-red-600' : 'text-emerald-700'}>{per.toFixed(2)}%</span>
+              return <span className={tone(per)}>{per.toFixed(2)}%</span>
             })()}
           </strong>
         </Table.Summary.Cell>
@@ -206,74 +206,80 @@ const ReportMarginPaymentMethod: React.FC = () => {
     data: PaymentMethodAggregate[],
     totals: { count: number; amount: number; margin: number },
   ) => (
-    <Card bordered={false} className='shadow-sm'>
-      <div className='flex flex-col gap-2 mb-4'>
-        <Title level={5} style={{ marginBottom: 0 }}>
-          {title}
-        </Title>
-        <Text type='secondary'>
-          {data.length} payment method • Total margin {formatRupiah(totals.margin)} • Total trx{' '}
-          {totals.count.toLocaleString('id-ID')}
-        </Text>
+    <section className='rpt-card rpt-card-flush'>
+      <div className='rp-card-head'>
+        <div>
+          <h3>{title}</h3>
+          <small>
+            {data.length} payment method • Total margin {formatRupiah(totals.margin)} • Total trx{' '}
+            {totals.count.toLocaleString('id-ID')}
+          </small>
+        </div>
       </div>
-      <Table<PaymentMethodAggregate>
-        bordered
-        loading={loading}
-        columns={columns}
-        dataSource={data}
-        pagination={false}
-        rowKey={(record) => record.payment_method}
-        summary={() => renderSummary(totals)}
-        scroll={{ x: true }}
-      />
-    </Card>
+      <div className='rpt-table'>
+        <Table<PaymentMethodAggregate>
+          loading={loading}
+          columns={columns}
+          dataSource={data}
+          pagination={false}
+          rowKey={(record) => record.payment_method}
+          summary={() => renderSummary(totals)}
+          scroll={{ x: true }}
+        />
+      </div>
+    </section>
+  )
+
+  const marginPer = (t: { amount: number; margin: number }) => (t.amount ? (t.margin / t.amount) * 100 : 0)
+  const hasData = aggregates.length > 0
+
+  const kpi = (label: string, dot: string, value: React.ReactNode, sub: string) => (
+    <div className='rpt-kpi'>
+      <span className='rpt-kpi-label'>
+        {dot && <i className={`rpt-dot ${dot}`} />}
+        {label}
+      </span>
+      <span className={`rpt-kpi-value${hasData ? '' : ' is-empty'}`}>{hasData ? value : '—'}</span>
+      <span className='rpt-kpi-sub'>{sub}</span>
+    </div>
   )
 
   return (
-    <div className='flex flex-col p-6 gap-4'>
-      <style>{`
-        .report-margin-payment-method .ant-table-thead > tr > th {
-          background-color: var(--dash-surface-2);
-          color: var(--dash-text);
-          font-weight: 600;
-        }
-        .report-margin-payment-method .ant-table-tbody > tr > td {
-          font-size: 14px;
-        }
-        /* Thick borders override */
-        .report-margin-payment-method .ant-table-container {
-          border-inline-start: 1.5px solid var(--dash-border) !important;
-          border-top: 1.5px solid var(--dash-border) !important;
-        }
-        .report-margin-payment-method .ant-table-thead > tr > th,
-        .report-margin-payment-method .ant-table-tbody > tr > td,
-        .report-margin-payment-method .ant-table-summary > tr > td {
-          border-bottom: 1.5px solid var(--dash-border) !important;
-          border-inline-end: 1.5px solid var(--dash-border) !important;
-        }
-      `}</style>
-      <Title level={4} style={{ marginBottom: 4 }}>
-        Report Margin per Payment Method
-      </Title>
-      {/* <Text type='secondary'>Menampilkan total margin seluruh channel, dipisahkan antara Telco dan Non-Telco.</Text> */}
-
-      <Row gutter={12}>
-        <Col>
+    <div className='rpt-page'>
+      <div className='rpt-head'>
+        <div className='rpt-actions'>
           <DatePicker
             picker='month'
             value={month as any}
             onChange={(value) => value && setMonth(value as any)}
             allowClear={false}
+            style={{ width: 140 }}
           />
-        </Col>
-        <Col>
           <Button type='primary' onClick={fetchData} loading={loading}>
             Load
           </Button>
-        </Col>
-      </Row>
+        </div>
+      </div>
+      {/* <Text type='secondary'>Menampilkan total margin seluruh channel, dipisahkan antara Telco dan Non-Telco.</Text> */}
 
-      <div className='report-margin-payment-method flex flex-col gap-6'>
+      <div className='rpt-kpis'>
+        {kpi('Telco sales', 'data', formatRupiah(telcoTotals.amount), `${telcoTotals.count.toLocaleString('id-ID')} trx`)}
+        {kpi(
+          'Telco margin',
+          telcoTotals.margin < 0 ? 'negative' : 'positive',
+          formatRupiah(telcoTotals.margin),
+          `${marginPer(telcoTotals).toFixed(2)}% of sales`,
+        )}
+        {kpi('Non-Telco sales', 'data-2', formatRupiah(nonTelcoTotals.amount), `${nonTelcoTotals.count.toLocaleString('id-ID')} trx`)}
+        {kpi(
+          'Non-Telco margin',
+          nonTelcoTotals.margin < 0 ? 'negative' : 'positive',
+          formatRupiah(nonTelcoTotals.margin),
+          `${marginPer(nonTelcoTotals).toFixed(2)}% of sales`,
+        )}
+      </div>
+
+      <div className='report-margin-payment-method rpt-page'>
         {renderCard('Telco Payment Methods', telcoData, telcoTotals)}
         {renderCard('Non-Telco Payment Methods', nonTelcoData, nonTelcoTotals)}
       </div>

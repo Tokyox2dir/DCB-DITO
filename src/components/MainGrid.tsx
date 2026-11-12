@@ -1,7 +1,6 @@
 import Grid from '@mui/material/Grid2'
 import Box from '@mui/material/Box'
 // import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
 import Copyright from './Copyright'
 // import ChartUserByCountry from './ChartUserByCountry'
 // import CustomizedTreeView from './CustomizedTreeView'
@@ -46,11 +45,9 @@ const data: StatCardProps[] = [
 
 export default function MainGrid() {
   return (
-    <Box sx={{ width: '100%', maxWidth: { sm: '100%', md: '1700px' } }}>
+    <Box className='dm-grid' sx={{ width: '100%' }}>
       {/* cards */}
-      <Typography component='h2' variant='h6' sx={{ mb: 2 }}>
-        Overview
-      </Typography>
+      <h3 className='dm-section'>Overview</h3>
       <Grid container spacing={2} columns={12} sx={{ mb: (theme) => theme.spacing(2) }}>
         {data.map((card, index) => (
           <Grid key={index} size={{ xs: 12, sm: 6, lg: 3 }}>
@@ -65,9 +62,7 @@ export default function MainGrid() {
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>{/* <PageViewsBarChart /> */}</Grid>
       </Grid>
-      <Typography component='h2' variant='h6' sx={{ mb: 2 }}>
-        Details
-      </Typography>
+      <h3 className='dm-section'>Details</h3>
       <Grid container spacing={2} columns={2}>
         <Grid size={{ xs: 12, lg: 9 }}>
           <CustomizedDataGrid />
@@ -79,7 +74,7 @@ export default function MainGrid() {
           </Stack>
         </Grid> */}
       </Grid>
-      <Copyright sx={{ my: 4 }} />
+      <Copyright sx={{ my: 4, color: 'var(--faint)' }} />
     </Box>
   )
 }

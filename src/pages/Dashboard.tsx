@@ -35,10 +35,9 @@ function initials(name: string) {
 
 const SLOTS_PER_HOUR = 60 / BUCKET_MINUTES
 
-type HeatLevel = 'empty' | 'low' | 'mid' | 'high' | 'alert' | 'now'
+type HeatLevel = 'empty' | 'low' | 'mid' | 'high' | 'alert'
 
-function heatLevel(bucket: TrafficBucket, isNow: boolean, high: number, mid: number): HeatLevel {
-  if (isNow) return 'now'
+function heatLevel(bucket: TrafficBucket, high: number, mid: number): HeatLevel {
   if (bucket.total === 0) return 'empty'
   if (bucket.total >= 10 && bucket.failed / bucket.total >= 0.3) return 'alert'
   if (bucket.total >= high) return 'high'
@@ -52,16 +51,16 @@ function quantile(sorted: number[], q: number) {
 }
 
 export default function Dashboard() {
-  const { isDev, token } = useAuth()
-  const { username, role } = useMemo(() => {
+  const { token } = useAuth()
+  const role = useMemo(() => {
     try {
       const decoded = token ? (jwtDecode(token) as any) : {}
-      return { username: (decoded.username as string) || 'user', role: (decoded.role as string) || '' }
+      return (decoded.role as string) || ''
     } catch {
-      return { username: 'user', role: '' }
+      return ''
     }
   }, [token])
-  const { loading, refresh, updatedAt, merchants, successLeaders, totals, methods, merchantStats, buckets } =
+  const { loading, refresh, merchants, successLeaders, totals, methods, merchantStats, buckets } =
     useDashboardData()
   const isAdmin = role === 'admin' || role === 'superadmin'
 
@@ -81,7 +80,7 @@ export default function Dashboard() {
       .sort((a, b) => a - b)
     const high = quantile(volumes, 0.75)
     const mid = quantile(volumes, 0.4)
-    const rows: { label: string; cells: { bucket: TrafficBucket; level: HeatLevel }[] }[] = []
+    const rows: { label: string; cells: { bucket: TrafficBucket; level: HeatLevel; isNow: boolean }[] }[] = []
     for (let h = 0; h < WINDOW_HOURS; h += 1) {
       const slice = buckets.slice(h * SLOTS_PER_HOUR, (h + 1) * SLOTS_PER_HOUR)
       if (!slice.length) continue
@@ -89,14 +88,14 @@ export default function Dashboard() {
         label: dayjs(slice[0].start).format('HH:mm'),
         cells: slice.map((bucket, i) => ({
           bucket,
-          level: heatLevel(bucket, h * SLOTS_PER_HOUR + i === buckets.length - 1, high, mid),
+          level: heatLevel(bucket, high, mid),
+          isNow: h * SLOTS_PER_HOUR + i === buckets.length - 1,
         })),
       })
     }
     return rows
   }, [buckets])
 
-  const successRate = percent(totals.success, totals.total)
   const shortcuts = [
     { label: 'Refresh', icon: <RefreshRoundedIcon />, onClick: refresh },
     { label: 'Transactions', icon: <ReceiptLongOutlinedIcon />, path: '/transactions' },
@@ -104,64 +103,67 @@ export default function Dashboard() {
     ...(isAdmin ? [{ label: 'Monitoring', icon: <MonitorHeartOutlinedIcon />, path: '/monitoring' }] : []),
   ]
 
-  const healthy = successRate >= 90
-  const health = healthy ? 'Normal' : successRate >= 75 ? 'Perlu dipantau' : 'Kritis'
-  const healthTone = healthy ? 'good' : successRate >= 75 ? 'warn' : 'bad'
   const failedRate = percent(totals.failed, totals.total)
   const kpis = [
-    { label: 'Success', value: totals.success, share: percent(totals.success, totals.total), tone: '' },
-    { label: 'Pending', value: totals.pending, share: percent(totals.pending, totals.total), tone: '' },
-    { label: 'Failed', value: totals.failed, share: failedRate, tone: failedRate >= 5 ? 'bad' : '' },
+    { label: 'Success', dot: 'good', value: totals.success, share: percent(totals.success, totals.total), tone: '' },
+    { label: 'Pending', dot: 'warn', value: totals.pending, share: percent(totals.pending, totals.total), tone: '' },
+    { label: 'Failed', dot: 'bad', value: totals.failed, share: failedRate, tone: failedRate >= 5 ? 'bad' : '' },
   ]
+  const slotOffsets = Array.from({ length: SLOTS_PER_HOUR }, (_, i) => `+${String(i * BUCKET_MINUTES).padStart(2, '0')}`)
 
   return (
     <section className='ov' aria-busy={loading}>
       <header className='ov-head'>
-        <div>
-          <h2>Overview</h2>
-          <p>
-            Success rate <strong className={healthTone}>{successRate.toFixed(1)}%</strong> dalam {WINDOW_HOURS} jam terakhir ·{' '}
-            {formatNumber(totals.failed)} gagal · status <strong className={healthTone}>{health}</strong>
-          </p>
-        </div>
         <div className='ov-actions'>
-          <span className='ov-stamp'>
-            <span className={`sf-env ${isDev ? 'dev' : 'prod'}`}>{isDev ? 'Dev' : 'Prod'}</span>
-            {updatedAt ? `Diperbarui ${updatedAt}` : 'Memuat…'} · {username}
-            {role ? ` (${role})` : ''}
-          </span>
-          {shortcuts.map((s) =>
-            s.path ? (
-              <Link key={s.label} to={s.path} className='rp-btn'>
-                {s.icon}
-                <span>{s.label}</span>
-              </Link>
-            ) : (
-              <button
-                key={s.label}
-                type='button'
-                className={`rp-btn primary${loading ? ' spin' : ''}`}
-                onClick={s.onClick}
-                disabled={loading}
-              >
-                {s.icon}
-                <span>{s.label}</span>
-              </button>
-            ),
-          )}
+          <div className='ov-buttons'>
+            {shortcuts.map((s) =>
+              s.path ? (
+                <Link key={s.label} to={s.path} className='rp-btn'>
+                  {s.icon}
+                  <span>{s.label}</span>
+                </Link>
+              ) : (
+                <button
+                  key={s.label}
+                  type='button'
+                  className={`rp-btn primary${loading ? ' spin' : ''}`}
+                  onClick={s.onClick}
+                  disabled={loading}
+                >
+                  {s.icon}
+                  <span>{s.label}</span>
+                </button>
+              ),
+            )}
+          </div>
         </div>
       </header>
 
       <div className='ov-kpis' role='list'>
         <div className='ov-kpi lead' role='listitem'>
-          <span>Total transaksi · {WINDOW_HOURS} jam</span>
+          <span>Total transactions</span>
           <strong>{formatNumber(totals.total)}</strong>
+          <small>Last {WINDOW_HOURS} hours</small>
         </div>
         {kpis.map((k) => (
           <div key={k.label} className='ov-kpi' role='listitem'>
-            <span>{k.label}</span>
+            <span>
+              <i className={`ov-dot ${k.dot}`} aria-hidden='true' />
+              {k.label}
+            </span>
             <strong>{formatNumber(k.value)}</strong>
-            <small className={k.tone}>{totals.total ? `${k.share.toFixed(1)}% dari total` : '—'}</small>
+            <small className={k.tone}>
+              {totals.total ? (
+                <>
+                  <b className='mono'>{k.share.toFixed(1)}%</b> of total
+                </>
+              ) : (
+                '—'
+              )}
+            </small>
+            <span className={`ov-kpi-bar ${k.dot}`} aria-hidden='true'>
+              <i style={{ width: `${Math.min(k.share, 100)}%` }} />
+            </span>
           </div>
         ))}
       </div>
@@ -170,49 +172,68 @@ export default function Dashboard() {
         <article className='rp-card sf-heat'>
           <header className='rp-card-head'>
             <div>
-              <h3>Traffic per {BUCKET_MINUTES} menit</h3>
-              <small>Setiap kotak = satu slot {BUCKET_MINUTES} menit, angka = jumlah transaksi</small>
+              <h3>Traffic per {BUCKET_MINUTES} minutes</h3>
+              <small>Each cell = one {BUCKET_MINUTES}-minute slot, number = transaction count</small>
             </div>
             <div className='sf-legend'>
               <span><i className='low' /> Sepi</span>
               <span><i className='mid' /> Ramai</span>
               <span><i className='high' /> Puncak</span>
-              <span><i className='alert' /> ≥30% gagal</span>
+              <span><i className='alert' /> ≥30% failed</span>
               <span><i className='now' /> Sekarang</span>
             </div>
           </header>
-          {!hours.length && <p className='sf-heat-empty'>{loading ? 'Memuat traffic…' : 'Belum ada data traffic.'}</p>}
-          <div className='sf-heat-grid' role='table' aria-label='Transactions per time slot'>
-            {hours.map((row) => (
-              <div key={row.label} className='sf-heat-row' role='row'>
-                <span className='sf-heat-hour' role='rowheader'>
-                  {row.label}
-                </span>
-                {row.cells.map(({ bucket, level }) => (
-                  <span
-                    key={bucket.start}
-                    role='cell'
-                    className={`sf-heat-cell ${level}`}
-                    title={`${dayjs(bucket.start).format('HH:mm')} · ${formatNumber(bucket.total)} trx, ${formatNumber(bucket.failed)} failed`}
-                  >
-                    {bucket.total > 0 ? formatCompact(bucket.total) : ''}
+          {!hours.length && <p className='sf-heat-empty'>{loading ? 'Loading traffic…' : 'No traffic data yet.'}</p>}
+          {hours.length > 0 && (
+            <div
+              className='sf-heat-grid'
+              role='table'
+              aria-label='Transactions per time slot'
+              style={{ ['--heat-cols' as string]: hours.length, ['--heat-rows' as string]: SLOTS_PER_HOUR }}
+            >
+              <div className='sf-heat-row sf-heat-axis' aria-hidden='true'>
+                <span className='sf-heat-hour' />
+                {slotOffsets.map((o) => (
+                  <span key={o} className='sf-heat-offset'>
+                    {o}
                   </span>
                 ))}
               </div>
-            ))}
-          </div>
+              {hours.map((row) => (
+                <div key={row.label} className='sf-heat-row' role='row'>
+                  <span className='sf-heat-hour' role='rowheader'>
+                    {row.label}
+                  </span>
+                  {row.cells.map(({ bucket, level, isNow }) => (
+                    <span
+                      key={bucket.start}
+                      role='cell'
+                      className={`sf-heat-cell ${level}${isNow ? ' now' : ''}`}
+                      title={`${dayjs(bucket.start).format('HH:mm')} · ${formatNumber(bucket.total)} trx, ${formatNumber(bucket.failed)} failed${isNow ? ' · now' : ''}`}
+                    >
+                      {bucket.total > 0 ? formatCompact(bucket.total) : ''}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
         </article>
 
         <article className='rp-card ov-issues'>
           <header className='rp-card-head'>
             <div>
               <h3>Klien bermasalah</h3>
-              <small>Merchant dengan transaksi gagal terbanyak</small>
+              <small>Merchants with the most failed transactions</small>
             </div>
             <Link to={isAdmin ? '/monitoring' : '/transactions'} className='rp-link'>
-              Lihat semua
+              View all
             </Link>
           </header>
+          <div className='ov-issues-cols' aria-hidden='true'>
+            <span>Merchant</span>
+            <span>Failed</span>
+          </div>
           <ul>
             {alerts.map((m) => {
               const rate = percent(m.failed, m.total)
@@ -222,7 +243,8 @@ export default function Dashboard() {
                   <div>
                     <strong title={m.name}>{m.name}</strong>
                     <small>
-                      {formatNumber(m.failed)} gagal dari {formatNumber(m.total)}
+                      <b className='mono'>{formatNumber(m.failed)}</b> failed of{' '}
+                      <b className='mono'>{formatNumber(m.total)}</b>
                     </small>
                   </div>
                   <span className={`ov-rate${rate >= 5 ? ' bad' : ''}`}>{rate.toFixed(1)}%</span>
@@ -232,7 +254,7 @@ export default function Dashboard() {
                 </li>
               )
             })}
-            {!alerts.length && <li className='ov-empty'>{loading ? 'Memeriksa kegagalan…' : 'Tidak ada transaksi gagal.'}</li>}
+            {!alerts.length && <li className='ov-empty'>{loading ? 'Checking failures…' : 'No failed transactions.'}</li>}
           </ul>
         </article>
       </div>
@@ -241,49 +263,53 @@ export default function Dashboard() {
         <article className='rp-card ov-methods'>
           <header className='rp-card-head'>
             <div>
-              <h3>Metode pembayaran</h3>
-              <small>{formatNumber(totals.total)} transaksi · {WINDOW_HOURS} jam</small>
+              <h3>Payment methods</h3>
+              <small>
+                {formatNumber(totals.total)} transactions · {WINDOW_HOURS}h
+              </small>
             </div>
           </header>
-          <table>
-            <thead>
-              <tr>
-                <th>Metode</th>
-                <th className='num'>Merchant</th>
-                <th className='num'>Transaksi</th>
-                <th className='num'>Porsi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {methods.map((m) => {
-                const share = percent(m.total, totals.total)
-                return (
-                  <tr key={m.name}>
-                    <td>
-                      <strong title={m.name}>{m.name}</strong>
-                      <span className='ov-share' aria-hidden='true'>
-                        <i style={{ width: `${share}%` }} />
-                      </span>
-                    </td>
-                    <td className='num'>{m.merchants.length}</td>
-                    <td className='num'>{formatNumber(m.total)}</td>
-                    <td className='num'>{share.toFixed(0)}%</td>
-                  </tr>
-                )
-              })}
-              {!methods.length && (
+          <div className='ov-table'>
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan={4} className='ov-empty'>
-                    {loading ? 'Memuat metode pembayaran…' : 'Belum ada data traffic.'}
-                  </td>
+                  <th>Method</th>
+                  <th className='num'>Merchant</th>
+                  <th className='num'>Transactions</th>
+                  <th className='num'>Porsi</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {methods.map((m) => {
+                  const share = percent(m.total, totals.total)
+                  return (
+                    <tr key={m.name}>
+                      <td>
+                        <strong title={m.name}>{m.name}</strong>
+                        <span className='ov-share' aria-hidden='true'>
+                          <i style={{ width: `${share}%` }} />
+                        </span>
+                      </td>
+                      <td className='num'>{m.merchants.length}</td>
+                      <td className='num'>{formatNumber(m.total)}</td>
+                      <td className='num'>{share.toFixed(0)}%</td>
+                    </tr>
+                  )
+                })}
+                {!methods.length && (
+                  <tr>
+                    <td colSpan={4} className='ov-empty'>
+                      {loading ? 'Loading payment methods…' : 'No traffic data yet.'}
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </article>
         <RankingCard
           title='Top merchants'
-          subtitle='Berdasarkan volume transaksi'
+          subtitle='By transaction volume'
           variant='client'
           icon={<PeopleAltOutlinedIcon sx={{ fontSize: 18 }} />}
           items={merchants}
@@ -291,7 +317,7 @@ export default function Dashboard() {
         />
         <RankingCard
           title='Top success'
-          subtitle='Merchant dengan transaksi sukses terbanyak'
+          subtitle='Merchants with the most successful transactions'
           variant='sender'
           icon={<TaskAltOutlinedIcon sx={{ fontSize: 18 }} />}
           items={successLeaders}

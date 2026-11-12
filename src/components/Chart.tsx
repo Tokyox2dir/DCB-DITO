@@ -54,6 +54,7 @@ function Chart({ data = [], height = 360, title }: ChartProps) {
           grid={{ horizontal: true }}
           slotProps={{
             legend: {
+              position: { vertical: 'top', horizontal: 'left' },
               labelStyle: {
                 fontSize: 14,
               },

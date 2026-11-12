@@ -6,6 +6,7 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { SparkLineChart } from '@mui/x-charts/SparkLineChart'
 import { areaElementClasses } from '@mui/x-charts/LineChart'
+import { useTheme } from '@mui/material/styles'
 
 export type StatCardProps = {
   title: string
@@ -44,10 +45,12 @@ function AreaGradient({ color, id }: { color: string; id: string }) {
 export default function StatCard({ title, value, interval, trend, data }: StatCardProps) {
   const daysInWeek = getDaysInMonth(4, 2024)
 
+  // x-charts derives the area shade from this value, so it must be a real colour, not a CSS variable.
+  const theme = useTheme()
   const trendColors = {
-    up: 'var(--theme-success)',
-    down: 'var(--theme-danger)',
-    neutral: 'var(--dash-muted)',
+    up: theme.palette.success.main,
+    down: theme.palette.error.main,
+    neutral: theme.palette.text.secondary,
   }
 
   const labelColors = {

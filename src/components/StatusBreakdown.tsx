@@ -1,9 +1,8 @@
 import { useMemo } from 'react'
 import { Doughnut } from 'react-chartjs-2'
 import { ArcElement, Chart as ChartJS, Legend, Tooltip } from 'chart.js'
-import DonutLargeOutlinedIcon from '@mui/icons-material/DonutLargeOutlined'
-import { useColorScheme } from '@mui/material/styles'
 import type { LiveKpi } from './MonitoringKpiCards'
+import { chartTooltip, useChartTokens } from './VolumePerHourChart'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
@@ -13,8 +12,7 @@ type Props = {
 }
 
 export default function StatusBreakdown({ kpi, loading }: Props) {
-  const { mode, systemMode } = useColorScheme()
-  const isDark = ((mode === 'system' ? systemMode : mode) || 'dark') !== 'light'
+  const t = useChartTokens()
 
   const totals = useMemo(
     () => ({
@@ -34,9 +32,10 @@ export default function StatusBreakdown({ kpi, loading }: Props) {
     datasets: [
       {
         data: sum ? [totals.success, totals.pending, totals.failed] : [1],
-        backgroundColor: sum ? (isDark ? ['#3fc07a', '#e8a93c', '#ef6a74'] : ['#1e7b4f', '#c98a1a', '#c4242a']) : [isDark ? '#1d1d1c' : '#f6f6f5'],
-        borderWidth: 0,
-        hoverOffset: 4,
+        backgroundColor: sum ? [t.positive, t.warning, t.negative] : [t.raised],
+        borderColor: t.surface,
+        borderWidth: sum ? 2 : 0,
+        hoverOffset: 3,
       },
     ],
   }
@@ -44,10 +43,11 @@ export default function StatusBreakdown({ kpi, loading }: Props) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '72%',
+    cutout: '78%',
     plugins: {
       legend: { display: false },
       tooltip: {
+        ...chartTooltip(t),
         enabled: Boolean(sum),
         callbacks: {
           label: (ctx: any) => {
@@ -64,8 +64,8 @@ export default function StatusBreakdown({ kpi, loading }: Props) {
     <div className='mon-panel mon-panel-donut'>
       <div className='mon-panel-head'>
         <div className='mon-panel-title'>
-          <DonutLargeOutlinedIcon sx={{ fontSize: 18 }} />
           <h4>Status Breakdown</h4>
+          <small>Success, pending and failed</small>
         </div>
       </div>
       <div className='mon-donut-body'>
@@ -75,9 +75,7 @@ export default function StatusBreakdown({ kpi, loading }: Props) {
           <div className='mon-donut-wrap'>
             <Doughnut data={data} options={options} />
             <div className='mon-donut-center'>
-              <strong style={{ color: successPct > 0 ? 'var(--positive)' : 'var(--muted)' }}>
-                {successPct.toFixed(1)}%
-              </strong>
+              <strong className={successPct > 0 ? 'good' : ''}>{successPct.toFixed(1)}%</strong>
               <span>Success Rate</span>
             </div>
           </div>
@@ -85,13 +83,13 @@ export default function StatusBreakdown({ kpi, loading }: Props) {
       </div>
       <div className='mon-donut-legend'>
         <span>
-          <i style={{ background: 'var(--positive)' }} /> {successPct.toFixed(1)}% Success
+          <i className='g' /> Success <b>{successPct.toFixed(1)}%</b>
         </span>
         <span>
-          <i style={{ background: 'var(--warning)' }} /> {pendingPct.toFixed(1)}% Pending
+          <i className='y' /> Pending <b>{pendingPct.toFixed(1)}%</b>
         </span>
         <span>
-          <i style={{ background: 'var(--negative)' }} /> {failedPct.toFixed(1)}% Failed
+          <i className='r' /> Failed <b>{failedPct.toFixed(1)}%</b>
         </span>
       </div>
     </div>

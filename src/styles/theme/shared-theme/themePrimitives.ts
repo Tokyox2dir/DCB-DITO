@@ -212,7 +212,7 @@ export const getDesignTokens = (mode: PaletteMode) => {
       },
     },
     typography: {
-      fontFamily: ['"IBM Plex Sans"', '"Inter"', 'sans-serif'].join(','),
+      fontFamily: ['"Geist"', '"Inter"', 'system-ui', 'sans-serif'].join(','),
       h1: {
         fontSize: defaultTheme.typography.pxToRem(48),
         fontWeight: 600,
@@ -267,121 +267,44 @@ export const getDesignTokens = (mode: PaletteMode) => {
   }
 }
 
-// Soft palette: mint surfaces with ink primary (keep in sync with src/styles/shell-soft.css).
+// Ops Console palette (keep in sync with the tokens in src/styles/console/core.css).
 export const colorSchemes = {
   light: {
     palette: {
-      primary: {
-        light: '#3f8ea2',
-        main: '#1b6c80',
-        dark: '#134e5d',
-        contrastText: '#ffffff',
-      },
-      secondary: {
-        light: '#fde8d2',
-        main: '#f08a24',
-        dark: '#b8620f',
-        contrastText: '#ffffff',
-      },
-      info: {
-        light: '#d9e7fb',
-        main: '#3b74f0',
-        dark: '#2a55b8',
-        contrastText: '#ffffff',
-      },
-      warning: {
-        light: '#fbe3b5',
-        main: '#e8930c',
-        dark: '#a86400',
-      },
-      error: {
-        light: '#fbdfe3',
-        main: '#e5484d',
-        dark: '#b3262b',
-      },
-      success: {
-        light: '#cdeedb',
-        main: '#12a15a',
-        dark: '#0b7440',
-      },
-      grey: {
-        ...gray,
-      },
-      divider: '#e7e6e3',
-      background: {
-        default: '#f4f3f1',
-        paper: '#ffffff',
-      },
-      text: {
-        primary: '#141413',
-        secondary: '#5c5b58',
-        warning: '#e8930c',
-      },
-      action: {
-        hover: 'rgba(21, 23, 26, 0.05)',
-        selected: 'rgba(21, 23, 26, 0.08)',
-      },
-      baseShadow: '0 1px 2px rgba(21, 23, 26, 0.04)',
+      primary: { light: '#6f8be6', main: '#3d63dd', dark: '#2a4bb5', contrastText: '#ffffff' },
+      secondary: { light: '#f3a3aa', main: '#cc2030', dark: '#9c1824', contrastText: '#ffffff' },
+      info: { light: '#eaf2fe', main: '#1570ef', dark: '#1849a9', contrastText: '#ffffff' },
+      warning: { light: '#fef4e6', main: '#b54708', dark: '#93370d' },
+      error: { light: '#fdeceb', main: '#d92d20', dark: '#b42318' },
+      success: { light: '#e7f6ec', main: '#067647', dark: '#05603a' },
+      grey: { ...gray },
+      divider: '#e2e5ea',
+      background: { default: '#f4f5f7', paper: '#ffffff' },
+      text: { primary: '#0f1728', secondary: '#475467', warning: '#b54708' },
+      action: { hover: 'rgba(15, 23, 40, 0.04)', selected: 'rgba(15, 23, 40, 0.07)' },
+      baseShadow: '0 1px 2px rgba(15, 23, 40, 0.05)',
     },
   },
   dark: {
     palette: {
-      primary: {
-        light: '#7cc8d9',
-        main: '#4fb3c9',
-        dark: '#2f8ea4',
-        contrastText: '#0e0e0d',
-      },
-      secondary: {
-        light: '#33291f',
-        main: '#f5a55a',
-        dark: '#c77a2c',
-        contrastText: '#121714',
-      },
-      info: {
-        light: '#1b2a3d',
-        main: '#6c9cff',
-        dark: '#4a78d6',
-        contrastText: '#121714',
-      },
-      warning: {
-        light: '#3a2f18',
-        main: '#f0b43c',
-        dark: '#c28a14',
-      },
-      error: {
-        light: '#3a2226',
-        main: '#f47a7e',
-        dark: '#c9484d',
-      },
-      success: {
-        light: '#173326',
-        main: '#3fcf86',
-        dark: '#23a262',
-      },
-      grey: {
-        ...gray,
-      },
-      divider: '#2a2a28',
-      background: {
-        default: '#0e0e0d',
-        paper: '#171716',
-      },
-      text: {
-        primary: '#f3f2f0',
-        secondary: '#b4b2ae',
-      },
-      action: {
-        hover: 'rgba(235, 241, 237, 0.06)',
-        selected: 'rgba(235, 241, 237, 0.1)',
-      },
-      baseShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+      primary: { light: '#9cb0ff', main: '#7391ff', dark: '#4f6ee0', contrastText: '#0a0d14' },
+      secondary: { light: '#f7888f', main: '#f0444f', dark: '#c22a35', contrastText: '#0a0d14' },
+      info: { light: '#102340', main: '#53b1fd', dark: '#2e90fa', contrastText: '#0a0d14' },
+      warning: { light: '#2d2010', main: '#f5a524', dark: '#dc8a0c' },
+      error: { light: '#2f1517', main: '#f97066', dark: '#e04f44' },
+      success: { light: '#0f2a1d', main: '#3ccb7f', dark: '#22a565' },
+      grey: { ...gray },
+      divider: '#212938',
+      background: { default: '#0a0d14', paper: '#10141d' },
+      text: { primary: '#e7eaf1', secondary: '#a5adbe' },
+      action: { hover: 'rgba(231, 234, 241, 0.05)', selected: 'rgba(231, 234, 241, 0.09)' },
+      baseShadow: '0 1px 2px rgba(0, 0, 0, 0.35)',
     },
   },
 }
 
 export const typography = {
-  fontFamily: ['"IBM Plex Sans"', '"Inter"', 'sans-serif'].join(','),
+  fontFamily: ['"Geist"', '"Inter"', 'system-ui', 'sans-serif'].join(','),
   h1: {
     fontSize: defaultTheme.typography.pxToRem(48),
     fontWeight: 600,

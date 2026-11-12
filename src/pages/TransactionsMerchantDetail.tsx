@@ -4,10 +4,27 @@ import { useParams } from 'react-router-dom'
 import Button from '@mui/material/Button'
 import axios from 'axios'
 import dayjs from 'dayjs'
-import { Typography, Card, CircularProgress, Box } from '@mui/material'
+import { CircularProgress } from '@mui/material'
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import { useAuth } from '../provider/AuthProvider'
 import { useNavigate } from 'react-router-dom'
 import formatRupiah from '../utils/FormatRupiah'
+import Badge, { type BadgeProps } from '../components/Badge'
+
+// One key-value pair in a detail card.
+const KV: React.FC<{ label: string; mono?: boolean; amount?: boolean; children?: React.ReactNode }> = ({
+  label,
+  mono,
+  amount,
+  children,
+}) => (
+  <div>
+    <dt>{label}</dt>
+    <dd className={amount ? 'amount' : mono ? 'mono' : undefined}>
+      {children === undefined || children === null || children === '' ? <span className='tx-empty'>-</span> : children}
+    </dd>
+  </div>
+)
 
 interface Transaction {
   u_id: string
@@ -150,11 +167,19 @@ const TransactionMerchantDetail: React.FC = () => {
   }, [id, token])
 
   if (loading) {
-    return <CircularProgress />
+    return (
+      <div className='tx-page'>
+        <CircularProgress size={22} />
+      </div>
+    )
   }
 
   if (!transaction) {
-    return <Typography variant='h6'>Transaction not found</Typography>
+    return (
+      <div className='tx-page'>
+        <h2 className='tx-title'>Transaction not found</h2>
+      </div>
+    )
   }
 
   failReason = transaction.fail_reason ? `(${transaction.fail_reason})` : ''
@@ -198,240 +223,140 @@ const TransactionMerchantDetail: React.FC = () => {
       break
   }
 
+  const statusTone: BadgeProps['color'] =
+    transaction.status_code === 1000 ? 'success' : transaction.status_code === 1005 ? 'error' : 'pending'
+  const fmt = (d: Date | string | number) => dayjs(d).format('YYYY-MM-DD HH:mm:ss')
+
   return (
-    <div>
-      <Card className='transaction-detail-surface' sx={{ padding: 2 }}>
-        <Typography variant='h5' sx={{ mb: 2 }}>
-          Transaction Detail
-        </Typography>
-        <Box display='flex' flexDirection='column' gap={2}>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Merchant Transaction ID:</strong>
-              </div>
-              <div>{transaction.merchant_transaction_id}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>User MDN:</strong>
-              </div>
-              <div>{transaction.user_mdn}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong> User ID:</strong>
-              </div>
-              <div> {transaction.user_id}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong> Payment Method:</strong>
-              </div>
-              <div> {paymentMethod}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Currency:</strong>
-              </div>
-              <div>{transaction.currency}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Status:</strong>
-              </div>
-              <div>
-                {status} {failReason}
-              </div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong> Amount :</strong>
-              </div>
-              <div> {formatRupiah(transaction.amount)}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Item Name:</strong>
-              </div>
-              <div>{transaction.item_name}</div>
-            </div>
-          </Box>
-
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Testing :</strong>
-              </div>
-              <div> {transaction.testing ? 'True' : 'False'}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Price:</strong>
-              </div>
-              <div>{formatRupiah(transaction.price)}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Route :</strong>
-              </div>
-              <div> {transaction.payment_method}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>App Name:</strong>
-              </div>
-              <div>{transaction.app_name}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Created At:</strong>
-              </div>
-              <div>{dayjs(transaction.created_at).format('YYYY-MM-DD HH:mm:ss')}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Updated At:</strong>
-              </div>
-              <div> {dayjs(transaction.updated_at).format('YYYY-MM-DD HH:mm:ss')}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Request Date:</strong>
-              </div>
-              <div> {dayjs(transaction.timestamp_request_date).format('YYYY-MM-DD HH:mm:ss')} </div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Callback Date:</strong>
-              </div>
-              <div>
-                {transaction.timestamp_callback_date
-                  ? dayjs(transaction.timestamp_callback_date).format('YYYY-MM-DD HH:mm:ss')
-                  : '-'}{' '}
-              </div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Callback result:</strong>
-              </div>
-              <div>{transaction.timestamp_callback_result}</div>
-            </div>
-            {transaction.payment_method === 'telkomsel_airtime' ? (
-              <div className='w-full flex'>
-                <div className='w-1/4'>
-                  <strong>SMS Code:</strong>
-                </div>
-                <div>{transaction.otp}</div>
-              </div>
-            ) : transaction.payment_method === 'va_bca' ? (
-              <div className='w-full flex'>
-                <div className='w-1/4'>
-                  <strong>VA BCA:</strong>
-                </div>
-                <div>{transaction.va_bca}</div>
-              </div>
-            ) : (
-              <div className='w-full flex'></div>
+    <div className='tx-page'>
+      <header className='tx-head'>
+        <div className='tx-head-main'>
+          <span className='tx-eyebrow'>Merchant transaction</span>
+          <h2 className='tx-title'>
+            <span className='tx-id'>{transaction.merchant_transaction_id}</span>
+            <Badge color={statusTone} text={status} />
+          </h2>
+          <p className='tx-sub'>
+            {transaction.app_name}
+            <span className='sep'>·</span>
+            <span className='tx-mono dim'>{fmt(transaction.created_at)}</span>
+            {failReason && (
+              <>
+                <span className='sep'>·</span>
+                <span className='tx-fail'>{failReason}</span>
+              </>
             )}
-          </Box>
-        </Box>
-      </Card>
-      {/* <div className='flex pl-4 pt-2'>
-        <Button
-          type='button'
-          className='mt-3 mr-4'
-          size='small'
-          variant='contained'
-          color='info'
-          onClick={() => navigate(-1)}
-        >
-          Back
-        </Button>
-        <Button type='button' disabled className='mt-3 mr-4' variant='contained' color='success'>
-          Make Success
-        </Button>
-      </div> */}
-      <div className='flex pl-4 pt-2'>
-        <Button
-          type='button'
-          className='mt-3 mr-4'
-          size='small'
-          variant='contained'
-          color='primary'
-          onClick={() => navigate(-1)}
-        >
-          Back
-        </Button>
-
-        {transaction.status_code === 1000 || transaction.status_code === 1003 ? (
-          <Button
-            type='button'
-            className='mt-3 mr-4'
-            variant='contained'
-            color='success'
-            size='small'
-            onClick={handleResendCallback}
-            disabled={resendDisabled || resendLoading}
-            sx={{
-              backgroundColor: '#4caf50',
-              color: 'white',
-              '&:hover': {
-                backgroundColor: '#45a049',
-              },
-              '&:disabled': {
-                backgroundColor: '#cccccc',
-                color: '#666666',
-              },
-            }}
-          >
-            {resendLoading ? 'Sending...' : resendDisabled ? `Resend (${countdown}s)` : 'Resend Callback'}
+          </p>
+        </div>
+        <div className='tx-actions'>
+          <Button type='button' variant='outlined' startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate(-1)}>
+            Back
           </Button>
-        ) : null}
 
-        {isDev && (
-          <>
-            {transaction.status_code !== 1000 && (
-              <Button
-                type='button'
-                className='mt-3 mr-4'
-                variant='contained'
-                color='success'
-                size='small'
-                onClick={handleMarkSuccess}
-              >
-                Mark Success
-              </Button>
-            )}
+          {isDev && (
+            <>
+              {transaction.status_code !== 1000 && (
+                <Button type='button' variant='outlined' color='success' onClick={handleMarkSuccess}>
+                  Mark Success
+                </Button>
+              )}
 
-            {transaction.status_code !== 1005 && (
-              <Button
-                type='button'
-                className='mt-3 mr-4'
-                variant='contained'
-                color='error'
-                size='small'
-                onClick={handleMarkFailed}
-              >
-                Mark Failed
-              </Button>
+              {transaction.status_code !== 1005 && (
+                <Button type='button' variant='outlined' color='error' onClick={handleMarkFailed}>
+                  Mark Failed
+                </Button>
+              )}
+            </>
+          )}
+
+          {transaction.status_code === 1000 || transaction.status_code === 1003 ? (
+            <Button
+              type='button'
+              variant='contained'
+              onClick={handleResendCallback}
+              disabled={resendDisabled || resendLoading}
+            >
+              {resendLoading ? 'Sending...' : resendDisabled ? `Resend (${countdown}s)` : 'Resend Callback'}
+            </Button>
+          ) : null}
+        </div>
+      </header>
+
+      <div className='tx-detail-grid'>
+        <section className='tx-card'>
+          <div className='tx-card-head'>
+            <h3>Payment</h3>
+          </div>
+          <dl className='tx-kv'>
+            <KV label='Amount' amount>
+              {formatRupiah(transaction.amount)}
+            </KV>
+            <KV label='Price' amount>
+              {formatRupiah(transaction.price)}
+            </KV>
+            <KV label='Status'>
+              <Badge color={statusTone} text={status} /> {failReason && <span className='tx-fail'>{failReason}</span>}
+            </KV>
+            <KV label='Currency'>{transaction.currency}</KV>
+            <KV label='Payment Method'>{paymentMethod}</KV>
+            <KV label='Route' mono>
+              {transaction.payment_method}
+            </KV>
+            <KV label='Item Name'>{transaction.item_name}</KV>
+            <KV label='Testing'>{transaction.testing ? 'True' : 'False'}</KV>
+            {transaction.payment_method === 'telkomsel_airtime' && (
+              <KV label='SMS Code' mono>
+                {transaction.otp}
+              </KV>
             )}
-          </>
-        )}
+            {transaction.payment_method === 'va_bca' && (
+              <KV label='VA BCA' mono>
+                {transaction.va_bca}
+              </KV>
+            )}
+          </dl>
+        </section>
+
+        <section className='tx-card'>
+          <div className='tx-card-head'>
+            <h3>Customer</h3>
+          </div>
+          <dl className='tx-kv'>
+            <KV label='Merchant Transaction ID' mono>
+              {transaction.merchant_transaction_id}
+            </KV>
+            <KV label='App Name'>{transaction.app_name}</KV>
+            <KV label='User MDN' mono>
+              {transaction.user_mdn}
+            </KV>
+            <KV label='User ID' mono>
+              {transaction.user_id}
+            </KV>
+          </dl>
+        </section>
+
+        <section className='tx-card span-2'>
+          <div className='tx-card-head'>
+            <h3>Timeline</h3>
+          </div>
+          <dl className='tx-kv cols-3'>
+            <KV label='Created At' mono>
+              {fmt(transaction.created_at)}
+            </KV>
+            <KV label='Request Date' mono>
+              {fmt(transaction.timestamp_request_date)}
+            </KV>
+            <KV label='Updated At' mono>
+              {fmt(transaction.updated_at)}
+            </KV>
+            <KV label='Callback Date' mono>
+              {transaction.timestamp_callback_date ? fmt(transaction.timestamp_callback_date) : '-'}
+            </KV>
+            <KV label='Callback result' mono>
+              {transaction.timestamp_callback_result}
+            </KV>
+          </dl>
+        </section>
       </div>
     </div>
   )

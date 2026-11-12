@@ -1,17 +1,7 @@
 import React, { useState, ChangeEvent } from 'react'
 import {
   Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Avatar,
   Chip,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
   Button,
   Dialog,
   DialogTitle,
@@ -19,23 +9,10 @@ import {
   DialogActions,
   Alert,
   CircularProgress,
-  Stack,
   TextField,
 } from '@mui/material'
 import { Input } from 'antd'
-import {
-  Business,
-  Phone,
-  Email,
-  Language,
-  Apps,
-  Payment,
-  AccountBalance,
-  Edit,
-  Save,
-  Cancel,
-  LocationOn,
-} from '@mui/icons-material'
+import { Business, Phone, Email, Language, Apps, Payment, Edit, Save, Cancel, LocationOn } from '@mui/icons-material'
 import { useClient } from '../context/ClientContext'
 import { useAuth } from '../provider/AuthProvider'
 
@@ -237,459 +214,298 @@ const MerchantProfile: React.FC = () => {
   }
 
   return (
-    <Box p={3}>
-      <Grid container spacing={3}>
-        {/* Header */}
-        <Grid item xs={12}>
-          <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-            <Typography variant='h4' component='h1' fontWeight='bold'>
-              Merchant Profile
-            </Typography>
-          </Box>
-        </Grid>
+    <div className='tx-page'>
+      {/* Header */}
+      <header className='tx-head'>
+        <div className='tx-identity'>
+          <span className='tx-avatar' aria-hidden='true'>
+            {client.client_name?.charAt(0).toUpperCase()}
+          </span>
+          <div className='tx-head-main'>
+            <span className='tx-eyebrow'>Merchant Profile</span>
+            <h2 className='tx-title'>
+              {client.client_name}
+              <Chip
+                label={getStatusText(client.client_status)}
+                color={getStatusColor(client.client_status)}
+                size='small'
+              />
+            </h2>
+          </div>
+        </div>
+        <div className='tx-actions'>
+          {!editMode && (
+            <Button variant='contained' startIcon={<Edit />} onClick={() => handleEdit()}>
+              Edit
+            </Button>
+          )}
+        </div>
+      </header>
 
-        {/* Alert Messages */}
-        {updateError && (
-          <Grid item xs={12}>
-            <Alert severity='error' onClose={() => setUpdateError(null)}>
-              {updateError}
-            </Alert>
-          </Grid>
-        )}
+      {/* Alert Messages */}
+      {updateError && (
+        <Alert severity='error' onClose={() => setUpdateError(null)}>
+          {updateError}
+        </Alert>
+      )}
 
-        {updateSuccess && (
-          <Grid item xs={12}>
-            <Alert severity='success' onClose={() => setUpdateSuccess(false)}>
-              Profile updated successfully!
-            </Alert>
-          </Grid>
-        )}
+      {updateSuccess && (
+        <Alert severity='success' onClose={() => setUpdateSuccess(false)}>
+          Profile updated successfully!
+        </Alert>
+      )}
 
+      <div className='tx-detail-grid side'>
         {/* Profile Card */}
-        <Grid item xs={12} md={8}>
-          <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
-            <CardContent sx={{ p: 4 }}>
-              <Box display='flex' justifyContent='space-between' alignItems='center' mb={3}>
-                <Box display='flex' alignItems='center'>
-                  <Avatar
-                    sx={{
-                      width: 80,
-                      height: 80,
-                      bgcolor: 'primary.main',
-                      fontSize: '2rem',
-                      mr: 3,
+        <section className='tx-card'>
+          <div className='tx-card-body'>
+            {/* Basic Information */}
+            <div className='tx-form-section'>
+              <h4 className='tx-section-label'>Basic Information</h4>
+              <div className='tx-form-grid'>
+                <div className='tx-field'>
+                  <label>Merchant Name</label>
+                  <Input value={client.client_name} disabled prefix={<Business className='tx-input-icon' />} />
+                </div>
+                <div className='tx-field'>
+                  <label>Mobile</label>
+                  <Input value={client.mobile} disabled prefix={<Phone className='tx-input-icon' />} />
+                </div>
+                <div className='tx-field'>
+                  <label>Phone</label>
+                  <Input value={client.phone} disabled prefix={<Phone className='tx-input-icon' />} />
+                </div>
+                <div className='tx-field'>
+                  <label>Email</label>
+                  <Input
+                    value={editMode ? formData.email : client.email}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('email', e.target.value)}
+                    disabled={!editMode}
+                    prefix={<Email className='tx-input-icon' />}
+                  />
+                </div>
+                <div className='tx-field span-2'>
+                  <label>Address</label>
+                  <TextField
+                    value={editMode ? formData.address : client.address || ''}
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                    disabled={!editMode}
+                    fullWidth
+                    multiline
+                    rows={3}
+                    variant='outlined'
+                    InputProps={{
+                      startAdornment: <LocationOn className='tx-input-icon' style={{ marginRight: 8 }} />,
                     }}
-                  >
-                    {client.client_name?.charAt(0).toUpperCase()}
-                  </Avatar>
-                  <Box>
-                    <Typography variant='h5' fontWeight='bold' gutterBottom>
-                      {client.client_name}
-                    </Typography>
-                    <Chip
-                      label={getStatusText(client.client_status)}
-                      color={getStatusColor(client.client_status)}
-                      size='small'
-                    />
-                  </Box>
-                </Box>
-                <Box>
-                  {!editMode && (
-                    <Button
-                      variant='contained'
-                      startIcon={<Edit />}
-                      onClick={() => handleEdit()}
-                      sx={{ borderRadius: 2 }}
-                    >
-                      Edit
-                    </Button>
-                  )}
-                </Box>
-              </Box>
+                  />
+                </div>
+              </div>
+            </div>
 
-              <Divider sx={{ my: 3 }} />
-
-              {/* Basic Information */}
-              <Typography variant='h6' fontWeight='bold' mb={3}>
-                Informasi Dasar
-              </Typography>
-              <Grid container spacing={3} mb={4}>
-                <Grid item xs={12} sm={6}>
-                  <Box sx={{ mb: 3 }}>
-                    <Typography
-                      variant='body2'
-                      sx={{ mb: 1, fontWeight: 600, fontSize: '1rem', color: 'text.primary' }}
-                    >
-                      Nama Merchant
-                    </Typography>
-                    <Input
-                      value={client.client_name}
-                      disabled
-                      prefix={<Business style={{ color: 'var(--dash-muted)' }} />}
-                      size='large'
-                      style={{ borderRadius: 8 }}
-                    />
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box sx={{ mb: 3 }}>
-                    <Typography
-                      variant='body2'
-                      sx={{ mb: 1, fontWeight: 600, fontSize: '1rem', color: 'text.primary' }}
-                    >
-                      Mobile
-                    </Typography>
-                    <Input
-                      value={client.mobile}
-                      disabled
-                      prefix={<Phone style={{ color: 'var(--dash-muted)' }} />}
-                      size='large'
-                      style={{ borderRadius: 8 }}
-                    />
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box sx={{ mb: 3 }}>
-                    <Typography
-                      variant='body2'
-                      sx={{ mb: 1, fontWeight: 600, fontSize: '1rem', color: 'text.primary' }}
-                    >
-                      Telepon
-                    </Typography>
-                    <Input
-                      value={client.phone}
-                      disabled
-                      prefix={<Phone style={{ color: 'var(--dash-muted)' }} />}
-                      size='large'
-                      style={{ borderRadius: 8 }}
-                    />
-                  </Box>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <Box sx={{ mb: 3 }}>
-                    <Typography
-                      variant='body2'
-                      sx={{ mb: 1, fontWeight: 600, fontSize: '1rem', color: 'text.primary' }}
-                    >
-                      Email
-                    </Typography>
-                    <Input
-                      value={editMode ? formData.email : client.email}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('email', e.target.value)}
-                      disabled={!editMode}
-                      prefix={<Email style={{ color: 'var(--dash-muted)' }} />}
-                      size='large'
-                      style={{ borderRadius: 8 }}
-                    />
-                  </Box>
-                </Grid>
-                <Grid item xs={12}>
-                  <Box sx={{ mb: 3 }}>
-                    <Typography
-                      variant='body2'
-                      sx={{ mb: 1, fontWeight: 600, fontSize: '1rem', color: 'text.primary' }}
-                    >
-                      Alamat
-                    </Typography>
-                    <TextField
-                      value={editMode ? formData.address : client.address || ''}
-                      onChange={(e) => handleInputChange('address', e.target.value)}
-                      disabled={!editMode}
-                      fullWidth
-                      multiline
-                      rows={3}
-                      variant='outlined'
-                      InputProps={{
-                        startAdornment: <LocationOn style={{ color: 'var(--dash-muted)', marginRight: 8 }} />,
-                      }}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          borderRadius: 2,
-                        },
-                      }}
-                    />
-                  </Box>
-                </Grid>
-              </Grid>
-
-              {/* Callback URLs */}
-              <Typography variant='h6' fontWeight='bold' mb={3}>
-                URL Callback
-              </Typography>
+            {/* Callback URLs */}
+            <div className='tx-form-section'>
+              <h4 className='tx-section-label'>URL Callback</h4>
               {client.apps && client.apps.length > 0 ? (
-                <Box>
-                  {client.apps.map((app) => (
-                    <Card key={app.id} sx={{ mb: 2, borderRadius: 2, boxShadow: 1 }}>
-                      <CardContent sx={{ p: 3 }}>
-                        <Box display='flex' justifyContent='space-between' alignItems='center' mb={2}>
-                          <Typography variant='subtitle1' fontWeight='bold' color='primary.main'>
-                            {app.app_name}
-                          </Typography>
-                        </Box>
-                        <Grid container spacing={2}>
-                          <Grid item xs={12}>
-                            <Box sx={{ mb: 2 }}>
-                              <Typography
-                                variant='body2'
-                                sx={{ mb: 1, fontWeight: 600, fontSize: '0.9rem', color: 'text.primary' }}
-                              >
-                                Success Callback URL
-                              </Typography>
-                              <Input
-                                value={editMode ? appFormData[app.id]?.callback_url || '' : app.callback_url || ''}
-                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                  handleAppInputChange(app.id, 'callback_url', e.target.value)
-                                }
-                                disabled={!editMode}
-                                prefix={<Language style={{ color: 'var(--dash-muted)' }} />}
-                                size='large'
-                                style={{ borderRadius: 8 }}
-                              />
-                            </Box>
-                          </Grid>
-                          {app.fail_callback === '1' && (
-                            <Grid item xs={12}>
-                              <Box sx={{ mb: 2 }}>
-                                <Typography
-                                  variant='body2'
-                                  sx={{ mb: 1, fontWeight: 600, fontSize: '0.9rem', color: 'text.primary' }}
-                                >
-                                  Fail Callback URL
-                                </Typography>
-                                <Input
-                                  value={editMode ? appFormData[app.id]?.fail_callback || '' : app.fail_callback || ''}
-                                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                    handleAppInputChange(app.id, 'fail_callback', e.target.value)
-                                  }
-                                  disabled={!editMode}
-                                  prefix={<Language style={{ color: 'var(--dash-muted)' }} />}
-                                  size='large'
-                                  style={{ borderRadius: 8 }}
-                                />
-                              </Box>
-                            </Grid>
-                          )}
-                          <Grid item xs={12}>
-                            <Box sx={{ mb: 2 }}>
-                              <Typography
-                                variant='body2'
-                                sx={{ mb: 1, fontWeight: 600, fontSize: '0.9rem', color: 'text.primary' }}
-                              >
-                                Mobile
-                              </Typography>
-                              <Input
-                                value={editMode ? appFormData[app.id]?.mobile || '' : app.mobile || ''}
-                                onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                  handleAppInputChange(app.id, 'mobile', e.target.value)
-                                }
-                                disabled={!editMode}
-                                prefix={<Phone style={{ color: 'var(--dash-muted)' }} />}
-                                size='large'
-                                style={{ borderRadius: 8 }}
-                              />
-                            </Box>
-                          </Grid>
-                        </Grid>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </Box>
+                client.apps.map((app) => (
+                  <div key={app.id} className='tx-app-block'>
+                    <h4>{app.app_name}</h4>
+                    <div className='tx-form-grid'>
+                      <div className='tx-field span-2'>
+                        <label>Success Callback URL</label>
+                        <Input
+                          value={editMode ? appFormData[app.id]?.callback_url || '' : app.callback_url || ''}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            handleAppInputChange(app.id, 'callback_url', e.target.value)
+                          }
+                          disabled={!editMode}
+                          prefix={<Language className='tx-input-icon' />}
+                        />
+                      </div>
+                      {app.fail_callback === '1' && (
+                        <div className='tx-field span-2'>
+                          <label>Fail Callback URL</label>
+                          <Input
+                            value={editMode ? appFormData[app.id]?.fail_callback || '' : app.fail_callback || ''}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                              handleAppInputChange(app.id, 'fail_callback', e.target.value)
+                            }
+                            disabled={!editMode}
+                            prefix={<Language className='tx-input-icon' />}
+                          />
+                        </div>
+                      )}
+                      <div className='tx-field'>
+                        <label>Mobile</label>
+                        <Input
+                          value={editMode ? appFormData[app.id]?.mobile || '' : app.mobile || ''}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                            handleAppInputChange(app.id, 'mobile', e.target.value)
+                          }
+                          disabled={!editMode}
+                          prefix={<Phone className='tx-input-icon' />}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))
               ) : (
-                <Typography variant='body1' color='text.secondary' textAlign='center' py={3}>
-                  No registered applications
-                </Typography>
+                <span className='tx-empty'>No registered applications</span>
               )}
+            </div>
+          </div>
 
-              {/* Save/Cancel Buttons */}
-              {editMode && (
-                <Box display='flex' gap={2} mt={3} justifyContent='flex-end'>
-                  <Button variant='outlined' startIcon={<Cancel />} onClick={handleCancel} sx={{ borderRadius: 2 }}>
-                    Cancel
-                  </Button>
-                  <Button
-                    variant='contained'
-                    startIcon={<Save />}
-                    onClick={handleSaveProfile}
-                    disabled={updateLoading}
-                    sx={{ borderRadius: 2 }}
-                  >
-                    {updateLoading ? <CircularProgress size={16} /> : 'Save'}
-                  </Button>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
-        </Grid>
+          {/* Save/Cancel Buttons */}
+          {editMode && (
+            <div className='tx-form-footer'>
+              <Button variant='outlined' startIcon={<Cancel />} onClick={handleCancel}>
+                Cancel
+              </Button>
+              <Button variant='contained' startIcon={<Save />} onClick={handleSaveProfile} disabled={updateLoading}>
+                {updateLoading ? <CircularProgress size={16} /> : 'Save'}
+              </Button>
+            </div>
+          )}
+        </section>
 
         {/* Sidebar */}
-        <Grid item xs={12} md={4}>
-          <Stack spacing={3}>
-            {/* Apps Summary */}
-            <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box display='flex' alignItems='center' mb={2}>
-                  <Apps sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant='h6' fontWeight='bold'>
-                    Applications
-                  </Typography>
-                </Box>
-                <Typography variant='h4' fontWeight='bold' color='primary.main'>
-                  {client.apps?.length || 0}
-                </Typography>
-                <Typography variant='body2' color='text.secondary'>
-                  Total registered applications
-                </Typography>
-                <Button variant='text' size='small' onClick={() => setOpenDialog(true)} sx={{ mt: 1 }}>
+        <section className='tx-card'>
+          <div className='tx-card-head'>
+            <h3>Summary</h3>
+          </div>
+          <div className='tx-stat-list'>
+            <div className='tx-stat'>
+              <span className='label'>Applications</span>
+              <span className='value'>{client.apps?.length || 0}</span>
+              <span className='sub'>
+                Total registered applications ·{' '}
+                <button type='button' className='rp-link' onClick={() => setOpenDialog(true)}>
                   View Details
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Payment Methods Summary */}
-            <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box display='flex' alignItems='center' mb={2}>
-                  <Payment sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant='h6' fontWeight='bold'>
-                    Payment Methods
-                  </Typography>
-                </Box>
-                <Typography variant='h4' fontWeight='bold' color='primary.main'>
-                  {client.payment_methods?.length || 0}
-                </Typography>
-                <Typography variant='body2' color='text.secondary'>
-                  Active payment methods
-                </Typography>
-                <Button variant='text' size='small' onClick={() => setOpenPaymentDialog(true)} sx={{ mt: 1 }}>
+                </button>
+              </span>
+            </div>
+            <div className='tx-stat'>
+              <span className='label'>Payment Methods</span>
+              <span className='value'>{client.payment_methods?.length || 0}</span>
+              <span className='sub'>
+                Active payment methods ·{' '}
+                <button type='button' className='rp-link' onClick={() => setOpenPaymentDialog(true)}>
                   View Details
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Settlement Summary */}
-            <Card sx={{ borderRadius: 3, boxShadow: 3 }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box display='flex' alignItems='center' mb={2}>
-                  <AccountBalance sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant='h6' fontWeight='bold'>
-                    Settlement
-                  </Typography>
-                </Box>
-                <Typography variant='h4' fontWeight='bold' color='primary.main'>
-                  {client.settlements?.length || 0}
-                </Typography>
-                <Typography variant='body2' color='text.secondary'>
-                  Akun settlement terdaftar
-                </Typography>
-              </CardContent>
-            </Card>
-          </Stack>
-        </Grid>
-      </Grid>
+                </button>
+              </span>
+            </div>
+            <div className='tx-stat'>
+              <span className='label'>Settlement</span>
+              <span className='value'>{client.settlements?.length || 0}</span>
+              <span className='sub'>Registered settlement accounts</span>
+            </div>
+          </div>
+        </section>
+      </div>
 
       {/* Apps Detail Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth='md' fullWidth>
+      <Dialog className='tx-dialog' open={openDialog} onClose={() => setOpenDialog(false)} maxWidth='sm' fullWidth>
         <DialogTitle>
-          <Box display='flex' alignItems='center'>
-            <Apps sx={{ mr: 1 }} />
-            Detail Aplikasi
-          </Box>
+          <Apps />
+          Application Details
         </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
+        <DialogContent>
           {client.apps && client.apps.length > 0 ? (
-            <List>
-              {client.apps.map((app, index) => (
-                <React.Fragment key={app.id}>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Apps />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={app.app_name}
-                      secondary={
-                        <Box>
-                          <Typography variant='body2'>App ID: {app.appid}</Typography>
-                          <Typography variant='body2'>Status: {app.status === 1 ? 'Aktif' : 'Tidak Aktif'}</Typography>
-                          <Typography variant='body2'>Testing: {app.testing === 1 ? 'Ya' : 'Tidak'}</Typography>
-                          <Typography variant='body2'>Mobile: {app.mobile}</Typography>
-                        </Box>
-                      }
-                    />
-                  </ListItem>
-                  {index < client.apps.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
-            </List>
+            client.apps.map((app) => (
+              <div key={app.id} className='tx-dialog-item'>
+                <h4>{app.app_name}</h4>
+                <dl className='tx-dialog-kv'>
+                  <div>
+                    <dt>App ID</dt>
+                    <dd>{app.appid}</dd>
+                  </div>
+                  <div>
+                    <dt>Status</dt>
+                    <dd>{app.status === 1 ? 'Active' : 'Inactive'}</dd>
+                  </div>
+                  <div>
+                    <dt>Testing</dt>
+                    <dd>{app.testing === 1 ? 'Yes' : 'No'}</dd>
+                  </div>
+                  <div>
+                    <dt>Mobile</dt>
+                    <dd>{app.mobile}</dd>
+                  </div>
+                </dl>
+              </div>
+            ))
           ) : (
-            <Typography variant='body1' color='text.secondary' textAlign='center' py={3}>
-              Tidak ada aplikasi terdaftar
-            </Typography>
+            <div className='tx-dialog-empty'>No registered applications</div>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Tutup</Button>
+          <Button variant='outlined' onClick={() => setOpenDialog(false)}>
+            Close
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Payment Methods Detail Dialog */}
-      <Dialog open={openPaymentDialog} onClose={() => setOpenPaymentDialog(false)} maxWidth='md' fullWidth>
+      <Dialog
+        className='tx-dialog'
+        open={openPaymentDialog}
+        onClose={() => setOpenPaymentDialog(false)}
+        maxWidth='sm'
+        fullWidth
+      >
         <DialogTitle>
-          <Box display='flex' alignItems='center'>
-            <Payment sx={{ mr: 1 }} />
-            Detail Metode Pembayaran
-          </Box>
+          <Payment />
+          Payment Method Details
         </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
+        <DialogContent>
           {client.payment_methods && client.payment_methods.length > 0 ? (
-            <List>
-              {client.payment_methods.map((method, index) => (
-                <React.Fragment key={method.id}>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Payment />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={method.name}
-                      secondary={
-                        <Box>
-                          <Typography variant='body2'>ID: {method.id}</Typography>
-                          <Typography variant='body2'>
-                            Status: {method.status === 1 ? 'Aktif' : 'Tidak Aktif'}
-                          </Typography>
-                          <Typography variant='body2'>Flexible: {method.flexible ? 'Ya' : 'Tidak'}</Typography>
-                          <Typography variant='body2'>MSISDN: {method.msisdn}</Typography>
-                          <Typography variant='body2'>Client ID: {method.client_id}</Typography>
-                          {method.route && Object.keys(method.route).length > 0 && (
-                            <Box mt={1}>
-                              <Typography variant='body2' fontWeight='bold'>
-                                Routes:
-                              </Typography>
-                              {Object.entries(method.route).map(([key, value]) => (
-                                <Typography key={key} variant='body2' sx={{ ml: 2 }}>
-                                  {key}: {Array.isArray(value) ? value.length : value}
-                                </Typography>
-                              ))}
-                            </Box>
-                          )}
-                        </Box>
-                      }
-                    />
-                  </ListItem>
-                  {index < client.payment_methods.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
-            </List>
+            client.payment_methods.map((method) => (
+              <div key={method.id} className='tx-dialog-item'>
+                <h4>{method.name}</h4>
+                <dl className='tx-dialog-kv'>
+                  <div>
+                    <dt>ID</dt>
+                    <dd>{method.id}</dd>
+                  </div>
+                  <div>
+                    <dt>Status</dt>
+                    <dd>{method.status === 1 ? 'Active' : 'Inactive'}</dd>
+                  </div>
+                  <div>
+                    <dt>Flexible</dt>
+                    <dd>{method.flexible ? 'Yes' : 'No'}</dd>
+                  </div>
+                  <div>
+                    <dt>MSISDN</dt>
+                    <dd>{method.msisdn}</dd>
+                  </div>
+                  <div>
+                    <dt>Client ID</dt>
+                    <dd>{method.client_id}</dd>
+                  </div>
+                  {method.route && Object.keys(method.route).length > 0 && (
+                    <div>
+                      <dt>Routes</dt>
+                      {Object.entries(method.route).map(([key, value]) => (
+                        <dd key={key}>
+                          {key}: {Array.isArray(value) ? value.length : value}
+                        </dd>
+                      ))}
+                    </div>
+                  )}
+                </dl>
+              </div>
+            ))
           ) : (
-            <Typography variant='body1' color='text.secondary' textAlign='center' py={3}>
-              Tidak ada metode pembayaran terdaftar
-            </Typography>
+            <div className='tx-dialog-empty'>No registered payment methods</div>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenPaymentDialog(false)}>Tutup</Button>
+          <Button variant='outlined' onClick={() => setOpenPaymentDialog(false)}>
+            Close
+          </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </div>
   )
 }
 

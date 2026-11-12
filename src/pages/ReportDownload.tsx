@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Table, Select, DatePicker, Row, Col, message } from 'antd'
+import { Table, Select, DatePicker, message } from 'antd'
 import axios from 'axios'
 import type { TableColumnsType } from 'antd'
 import dayjs, { Dayjs } from 'dayjs'
@@ -88,14 +88,14 @@ const columns: TableColumnsType<ReportSummary> = [
     title: 'Denom',
     dataIndex: 'amount',
     key: 'amount',
-    align: 'center',
+    render: (val: number) => <span className='rpt-num rpt-strong'>{val?.toLocaleString('id-ID')}</span>,
   },
   {
     title: '#Trx',
     dataIndex: 'count',
     width: 100,
     key: 'count',
-    align: 'center',
+    align: 'right',
   },
   {
     title: 'Sales (incl. VAT)',
@@ -220,7 +220,7 @@ const ReportDownload: React.FC = () => {
       start = filteredDateRange[0].startOf('day')
       end = filteredDateRange[1].endOf('day')
       if (end.diff(start, 'day') > 31) {
-        message.error('Rentang waktu maksimal 1 bulan')
+        message.error('The date range can be at most 1 month')
         return
       }
     }
@@ -240,7 +240,7 @@ const ReportDownload: React.FC = () => {
       setData(res.data)
     } catch (error) {
       console.error(error)
-      message.error('Gagal mengambil data report')
+      message.error('Could not load report data')
       // Reset data to undefined when error occurs
       setData(undefined)
     } finally {
@@ -691,27 +691,44 @@ const ReportDownload: React.FC = () => {
     setData(undefined)
   }, [filteredApp, filteredPaymentMethod, filteredMonth, filteredDate, filteredDateRange, reportType])
 
+  const hasRows = !!data?.summaries?.length
+  const periodLabel = reportType === 'monthly' ? 'Month' : reportType === 'custom' ? 'Date range' : 'Date'
+
   return (
-    <div className='sf-page'>
-      <h2 className='sf-page-title'>Download Report</h2>
+    <div className='rpt-page'>
+      <div className='rpt-head'>
+        <div className='rpt-actions'>
+          <button
+            type='button'
+            onClick={exportToPDF}
+            className='sf-btn sf-btn-ghost'
+            disabled={!data || !data.summaries || data.summaries.length === 0}
+          >
+            Export PDF
+          </button>
+          <button
+            type='button'
+            onClick={fetchReport}
+            className='sf-btn sf-btn-primary'
+            disabled={!filteredApp || !filteredPaymentMethod || loading}
+          >
+            {loading ? 'Loading...' : 'Load Data'}
+          </button>
+        </div>
+      </div>
 
       {/* Filter Controls */}
-      <div className='sf-panel'>
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }} className='flex gap-6'>
-        <Col className='flex gap-4'>
-          <label htmlFor='type-select' className='sf-field-label'>
-            Type :
-          </label>
-          <Select id='type-select' value={reportType} style={{ width: 150 }} onChange={(val) => setReportType(val)}>
+      <div className='rpt-filters'>
+        <label className='rpt-field' htmlFor='type-select'>
+          <span>Type</span>
+          <Select id='type-select' value={reportType} style={{ width: 120 }} onChange={(val) => setReportType(val)}>
             <Option value='daily'>Daily</Option>
             <Option value='monthly'>Monthly</Option>
             <Option value='custom'>Custom</Option>
           </Select>
-        </Col>
-        <Col className='flex gap-4'>
-          <label htmlFor='app-select' className='sf-field-label'>
-            App :
-          </label>
+        </label>
+        <label className='rpt-field' htmlFor='app-select'>
+          <span>App</span>
           <Select
             id='app-select'
             allowClear
@@ -722,7 +739,7 @@ const ReportDownload: React.FC = () => {
               return String(text).toLowerCase().includes(input.toLowerCase())
             }}
             placeholder={merchantsLoading || clientLoading ? 'Loading...' : 'Select App'}
-            style={{ width: 300 }}
+            style={{ width: 280 }}
             onChange={(val) => setFilteredApp(val)}
             loading={merchantsLoading || clientLoading}
             disabled={merchantsLoading || clientLoading}
@@ -733,11 +750,9 @@ const ReportDownload: React.FC = () => {
               </Option>
             ))}
           </Select>
-        </Col>
-        <Col className='flex gap-4'>
-          <label htmlFor='client-select' className='sf-field-label'>
-            Payment Method :{' '}
-          </label>
+        </label>
+        <label className='rpt-field' htmlFor='payment-select'>
+          <span>Payment method</span>
           <Select
             id='payment-select'
             allowClear
@@ -748,7 +763,7 @@ const ReportDownload: React.FC = () => {
               return String(text).toLowerCase().includes(input.toLowerCase())
             }}
             placeholder='Select Payment Method'
-            style={{ width: 180 }}
+            style={{ width: 190 }}
             onChange={(val) => {
               const selected = paymentMethods.find((m) => m.value === val)
               if (selected) setFilteredPaymentMethod(selected)
@@ -762,21 +777,19 @@ const ReportDownload: React.FC = () => {
               </Option>
             ))}
           </Select>
-        </Col>
-        <Col className='flex gap-4'>
-          <label htmlFor='client-select' className='sf-field-label'>
-            {reportType === 'monthly' ? 'Month :' : reportType === 'custom' ? 'Date Range :' : 'Date :'}
-          </label>
+        </label>
+        <div className='rpt-field'>
+          <span>{periodLabel}</span>
           {reportType === 'monthly' ? (
             <MonthPicker
               placeholder='Select Month'
-              style={{ width: 160 }}
+              style={{ width: 140 }}
               onChange={(val) => setFilteredMonth(val)}
               value={filteredMonth}
             />
           ) : reportType === 'custom' ? (
             <RangePicker
-              style={{ width: 260 }}
+              style={{ width: 250 }}
               value={filteredDateRange as any}
               onChange={(val) => setFilteredDateRange(val as any)}
               onCalendarChange={(val) => setCalendarDates(val as any)}
@@ -799,49 +812,63 @@ const ReportDownload: React.FC = () => {
           ) : (
             <DatePicker
               placeholder='Select Date'
-              style={{ width: 160 }}
+              style={{ width: 140 }}
               onChange={(val) => setFilteredDate(val)}
               value={filteredDate}
             />
           )}
-        </Col>
-      </Row>
-
-      <div className='flex gap-3' style={{ marginTop: 16 }}>
-        <button
-          type='button'
-          onClick={fetchReport}
-          className='sf-btn sf-btn-primary'
-          disabled={!filteredApp || !filteredPaymentMethod || loading}
-        >
-          {loading ? 'Loading...' : 'Load Data'}
-        </button>
-
-        <button
-          type='button'
-          onClick={exportToPDF}
-          className='sf-btn sf-btn-ghost'
-          disabled={!data || !data.summaries || data.summaries.length === 0}
-        >
-          Export PDF
-        </button>
+        </div>
       </div>
+
+      <div className='rpt-kpis'>
+        <div className='rpt-kpi'>
+          <span className='rpt-kpi-label'>Transactions</span>
+          <span className={`rpt-kpi-value${hasRows ? '' : ' is-empty'}`}>
+            {hasRows ? data?.total_transaction?.toLocaleString('id-ID') : '—'}
+          </span>
+          <span className='rpt-kpi-sub'>{filteredPaymentMethod?.name ?? 'No payment method selected'}</span>
+        </div>
+        <div className='rpt-kpi'>
+          <span className='rpt-kpi-label'>
+            <i className='rpt-dot data' />
+            Redision share
+          </span>
+          <span className={`rpt-kpi-value${hasRows ? '' : ' is-empty'}`}>
+            {hasRows ? `IDR ${data?.grand_total_redision?.toLocaleString('id-ID')}` : '—'}
+          </span>
+          <span className='rpt-kpi-sub'>{filteredClient ?? 'Load data to see totals'}</span>
+        </div>
+        <div className='rpt-kpi'>
+          <span className='rpt-kpi-label'>
+            <i className='rpt-dot data-2' />
+            Partner share
+          </span>
+          <span className={`rpt-kpi-value${hasRows ? '' : ' is-empty'}`}>
+            {hasRows ? `IDR ${data?.total_merchant?.toLocaleString('id-ID')}` : '—'}
+          </span>
+          <span className='rpt-kpi-sub'>{filteredApp ?? 'No app selected'}</span>
+        </div>
+        <div className='rpt-kpi'>
+          <span className='rpt-kpi-label'>MDR</span>
+          <span className={`rpt-kpi-value${hasRows ? '' : ' is-empty'}`}>{hasRows ? data?.mdr || '—' : '—'}</span>
+          <span className='rpt-kpi-sub'>{data?.summaries ? `${data.summaries.length} denominations` : 'Report type: ' + reportType}</span>
+        </div>
       </div>
-      <div className='sf-panel'>
+
+      <div className='rpt-table'>
         <Table
-          bordered
           loading={loading}
           columns={columns}
           rowKey={(record) => `${record.amount}-${record.payment_method}`}
           dataSource={data?.summaries}
           pagination={false}
-          scroll={{ x: 1000 }}
+          scroll={{ x: 900 }}
           summary={() => (
             <Table.Summary.Row>
-              <Table.Summary.Cell index={0} align='center'>
-                <strong>Total</strong>
+              <Table.Summary.Cell index={0}>
+                <span className='rpt-total-label'>Total</span>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={1} align='center'>
+              <Table.Summary.Cell index={1} align='right'>
                 <strong>{data?.total_transaction} </strong>
               </Table.Summary.Cell>
               <Table.Summary.Cell index={1} align='right' />

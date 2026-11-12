@@ -1,13 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Table, DatePicker, Row, Col, Button, message, Typography as AntTypography } from 'antd'
+import { Table, DatePicker, Button, message } from 'antd'
 import type { TableColumnsType } from 'antd'
 import axios from 'axios'
 import dayjs, { Dayjs } from 'dayjs'
 import { useAuth } from '../provider/AuthProvider'
 import formatRupiah from '../utils/FormatRupiah'
+import ChevronRightRounded from '@mui/icons-material/ChevronRightRounded'
 
 // using DatePicker with picker='month'
-const { Title } = AntTypography
+const tone = (v: number) => (v < 0 ? 'rpt-num rpt-neg' : 'rpt-num rpt-pos')
 
 interface MarginSummaryItem {
   merchant_name: string
@@ -49,8 +50,21 @@ type GroupedRow = {
 }
 
 const childColumns: TableColumnsType<MarginSummaryItem> = [
-  { title: 'Payment Method', dataIndex: 'payment_method', key: 'payment_method', width: 200 },
-  { title: '#Trx', dataIndex: 'count', key: 'count', width: 100, align: 'right' },
+  {
+    title: 'Payment Method',
+    dataIndex: 'payment_method',
+    key: 'payment_method',
+    width: 200,
+    render: (v: string) => <span className='rpt-mono'>{v}</span>,
+  },
+  {
+    title: '#Trx',
+    dataIndex: 'count',
+    key: 'count',
+    width: 100,
+    align: 'right',
+    render: (v: number) => (v || 0).toLocaleString('id-ID'),
+  },
   {
     title: 'Sales EXC',
     dataIndex: 'total_amount',
@@ -111,7 +125,7 @@ const childColumns: TableColumnsType<MarginSummaryItem> = [
     key: 'margin',
     align: 'right',
     width: 180,
-    render: (v: number) => <span className={v < 0 ? 'text-red-600' : 'text-emerald-600'}>{formatRupiah(v || 0)}</span>,
+    render: (v: number) => <span className={tone(v)}>{formatRupiah(v || 0)}</span>,
   },
   {
     title: 'Margin %',
@@ -120,7 +134,7 @@ const childColumns: TableColumnsType<MarginSummaryItem> = [
     width: 100,
     render: (_, r) => {
       const per = r.total_amount ? (r.margin / r.total_amount) * 100 : 0
-      return <span className={per < 0 ? 'text-red-600' : 'text-emerald-600'}>{per.toFixed(2)}%</span>
+      return <span className={tone(per)}>{per.toFixed(2)}%</span>
     },
   },
 ]
@@ -132,9 +146,16 @@ const parentColumns: TableColumnsType<GroupedRow> = [
     key: 'merchant_name',
     width: 420,
     ellipsis: true,
-    render: (v: string) => <span style={{ fontWeight: 600 }}>{v}</span>,
+    render: (v: string) => <span className='rpt-strong'>{v}</span>,
   },
-  { title: '#Trx', dataIndex: 'total_count', key: 'total_count', width: 120, align: 'right' },
+  {
+    title: '#Trx',
+    dataIndex: 'total_count',
+    key: 'total_count',
+    width: 120,
+    align: 'right',
+    render: (v: number) => (v || 0).toLocaleString('id-ID'),
+  },
   {
     title: 'Total Sales',
     dataIndex: 'total_amount',
@@ -149,7 +170,7 @@ const parentColumns: TableColumnsType<GroupedRow> = [
     key: 'total_margin',
     align: 'right',
     width: 200,
-    render: (v: number) => <span className={v < 0 ? 'text-red-600' : 'text-emerald-700'}>{formatRupiah(v || 0)}</span>,
+    render: (v: number) => <span className={tone(v)}>{formatRupiah(v || 0)}</span>,
   },
   {
     title: 'Margin %',
@@ -158,7 +179,7 @@ const parentColumns: TableColumnsType<GroupedRow> = [
     width: 100,
     render: (_, r) => {
       const per = r.total_amount ? (r.total_margin / r.total_amount) * 100 : 0
-      return <span className={per < 0 ? 'text-red-600' : 'text-emerald-700'}>{per.toFixed(2)}%</span>
+      return <span className={tone(per)}>{per.toFixed(2)}%</span>
     },
   },
 ]
@@ -210,6 +231,20 @@ const ReportMargin: React.FC = () => {
     )
   }, [groupedData])
 
+  // Footer figures: all merchants except PPOB Redision (Aura Pakar is already left out of groupedData).
+  const footer = useMemo(() => {
+    const ppobRedisionData = raw?.summaries?.filter((item) => item.merchant_name === 'PPOB Redision')
+    const ppobRedisionCount = ppobRedisionData?.reduce((acc, curr) => acc + (curr.count || 0), 0) || 0
+    const ppobRedisionAmount = ppobRedisionData?.reduce((acc, curr) => acc + (curr.total_amount || 0), 0) || 0
+    const ppobRedisionMargin = ppobRedisionData?.reduce((acc, curr) => acc + (curr.margin || 0), 0) || 0
+    // Use totals.* instead of raw.total_* to exclude hidden merchants (Aura Pakar)
+    const count = totals.count - ppobRedisionCount
+    const amount = totals.amount - ppobRedisionAmount
+    const margin = totals.margin - ppobRedisionMargin
+    const per = amount ? (margin / amount) * 100 : 0
+    return { count, amount, margin, per }
+  }, [raw, totals])
+
   const fetchData = async () => {
     if (!month) return
     const start = month.startOf('month')
@@ -222,7 +257,7 @@ const ReportMargin: React.FC = () => {
       setRaw(res.data)
     } catch (e) {
       console.error(e)
-      message.error('Gagal mengambil data report margin')
+      message.error('Could not load report margin data')
     } finally {
       setLoading(false)
     }
@@ -233,77 +268,56 @@ const ReportMargin: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  return (
-    <div className='flex flex-col p-6'>
-      <style>{`
-        /* Parent table header */
-        .report-margin-table.parent .ant-table-thead > tr > th {
-          background-color: var(--theme-primary); /* sky-500 */
-          color: var(--theme-on-primary);
-          font-size: 15px;
-          font-weight: 600;
-        }
-        /* Child table header */
-        .report-margin-table.child .ant-table-thead > tr > th {
-          background-color: var(--theme-accent-soft); /* sky-100 */
-          color: var(--dash-accent); /* sky-700 */
-          font-size: 14px;
-          font-weight: 600;
-        }
-        /* Hover */
-        .report-margin-table .ant-table-tbody > tr:hover > td {
-          background-color: var(--dash-surface-2); /* slate-50 */
-        }
-        /* Summary row */
-        .report-margin-table .ant-table-summary {
-          background-color: var(--dash-surface-2); /* slate-100 */
-        }
-        /* Body text size */
-        .report-margin-table.parent .ant-table-tbody > tr > td {
-          font-size: 14px;
-          padding: 10px 12px;
-        }
-        .report-margin-table.child .ant-table-tbody > tr > td {
-          font-size: 14px;
-          padding: 8px 12px;
-        }
-        .report-margin-table .ant-table-thead > tr > th {
-          padding: 10px 12px;
-        }
-        /* Thick borders override */
-        .report-margin-table .ant-table-container {
-          border-inline-start: 1.5px solid var(--dash-border) !important;
-          border-top: 1.5px solid var(--dash-border) !important;
-        }
-        .report-margin-table .ant-table-thead > tr > th,
-        .report-margin-table .ant-table-tbody > tr > td,
-        .report-margin-table .ant-table-summary > tr > td {
-          border-bottom: 1.5px solid var(--dash-border) !important;
-          border-inline-end: 1.5px solid var(--dash-border) !important;
-        }
-      `}</style>
-      <Title level={4} style={{ marginBottom: 16 }}>
-        Report Margin
-      </Title>
+  const hasData = groupedData.length > 0
 
-      <Row gutter={12} style={{ marginBottom: 16 }}>
-        <Col>
+  return (
+    <div className='rpt-page'>
+      <div className='rpt-head'>
+        <div className='rpt-actions'>
           <DatePicker
             picker='month'
             value={month as any}
             onChange={(v) => v && setMonth(v as any)}
             allowClear={false}
+            style={{ width: 140 }}
           />
-        </Col>
-        <Col>
           <Button type='primary' onClick={fetchData} loading={loading}>
             Load
           </Button>
-        </Col>
-      </Row>
+        </div>
+      </div>
+
+      <div className='rpt-kpis'>
+        <div className='rpt-kpi'>
+          <span className='rpt-kpi-label'>Transactions</span>
+          <span className={`rpt-kpi-value${hasData ? '' : ' is-empty'}`}>
+            {hasData ? footer.count.toLocaleString('id-ID') : '—'}
+          </span>
+          <span className='rpt-kpi-sub'>{groupedData.length} merchants</span>
+        </div>
+        <div className='rpt-kpi'>
+          <span className='rpt-kpi-label'>Total sales</span>
+          <span className={`rpt-kpi-value${hasData ? '' : ' is-empty'}`}>{hasData ? formatRupiah(footer.amount) : '—'}</span>
+          <span className='rpt-kpi-sub'>Excluding PPOB Redision</span>
+        </div>
+        <div className='rpt-kpi'>
+          <span className='rpt-kpi-label'>
+            <i className={`rpt-dot ${footer.margin < 0 ? 'negative' : 'positive'}`} />
+            Total margin
+          </span>
+          <span className={`rpt-kpi-value${hasData ? '' : ' is-empty'}`}>{hasData ? formatRupiah(footer.margin) : '—'}</span>
+          <span className='rpt-kpi-sub'>{month.format('MMMM YYYY')}</span>
+        </div>
+        <div className='rpt-kpi'>
+          <span className='rpt-kpi-label'>Margin %</span>
+          <span className={`rpt-kpi-value${hasData ? '' : ' is-empty'}`}>
+            {hasData ? <span className={footer.per < 0 ? 'rpt-neg' : 'rpt-pos'}>{footer.per.toFixed(2)}%</span> : '—'}
+          </span>
+          <span className='rpt-kpi-sub'>Margin over sales</span>
+        </div>
+      </div>
 
       <Table<GroupedRow>
-        bordered
         loading={loading}
         columns={parentColumns}
         dataSource={groupedData}
@@ -311,7 +325,6 @@ const ReportMargin: React.FC = () => {
         sticky
         tableLayout='fixed'
         scroll={{ x: true }}
-        rowClassName={(_, index) => (index % 2 === 0 ? 'odd' : 'even')}
         expandable={{
           expandedRowRender: (record) => (
             <Table<MarginSummaryItem>
@@ -320,18 +333,21 @@ const ReportMargin: React.FC = () => {
               dataSource={record.details}
               pagination={false}
               rowKey={(r) => `${record.client_uid}-${r.payment_method}`}
-              bordered
               tableLayout='fixed'
               scroll={{ x: true }}
-              className='report-margin-table child mt-3 mb-3'
+              className='report-margin-table child'
             />
           ),
           expandIcon: ({ expanded, onExpand, record }) => (
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-              <Button type='link' onClick={(e) => onExpand(record as any, e)}>
-                {`Detail ${expanded ? 'v' : '>'}`}
-              </Button>
-            </div>
+            <button
+              type='button'
+              className={`rpt-expand${expanded ? ' open' : ''}`}
+              aria-label={expanded ? 'Hide detail' : 'Show detail'}
+              title={expanded ? 'Hide detail' : 'Show detail'}
+              onClick={(e) => onExpand(record as any, e as any)}
+            >
+              <ChevronRightRounded />
+            </button>
           ),
           expandRowByClick: false,
         }}
@@ -340,61 +356,27 @@ const ReportMargin: React.FC = () => {
           <Table.Summary fixed>
             <Table.Summary.Row>
               <Table.Summary.Cell index={0} colSpan={2}>
-                <strong>Total</strong>
+                <span className='rpt-total-label'>Total</span>
               </Table.Summary.Cell>
 
               <Table.Summary.Cell index={1} align='right'>
-                <strong>
-                  {(() => {
-                    const ppobRedisionData = raw?.summaries?.filter((item) => item.merchant_name === 'PPOB Redision')
-                    const ppobRedisionCount = ppobRedisionData?.reduce((acc, curr) => acc + (curr.count || 0), 0) || 0
-                    return (totals.count - ppobRedisionCount).toLocaleString('id-ID')
-                  })()}
-                </strong>
+                <strong>{footer.count.toLocaleString('id-ID')}</strong>
               </Table.Summary.Cell>
               <Table.Summary.Cell index={2} align='right'>
-                <strong>
-                  {(() => {
-                    const ppobRedisionData = raw?.summaries?.filter((item) => item.merchant_name === 'PPOB Redision')
-                    const ppobRedisionAmount =
-                      ppobRedisionData?.reduce((acc, curr) => acc + (curr.total_amount || 0), 0) || 0
-                    // Use totals.amount instead of raw.total_amount to exclude hidden merchants (Aura Pakar)
-                    return formatRupiah(totals.amount - ppobRedisionAmount)
-                  })()}
-                </strong>
+                <strong>{formatRupiah(footer.amount)}</strong>
               </Table.Summary.Cell>
               <Table.Summary.Cell index={3} align='right'>
-                <strong>
-                  {(() => {
-                    const ppobRedisionData = raw?.summaries?.filter((item) => item.merchant_name === 'PPOB Redision')
-                    const ppobRedisionMargin = ppobRedisionData?.reduce((acc, curr) => acc + (curr.margin || 0), 0) || 0
-                    // Use totals.margin instead of raw.total_margin to exclude hidden merchants (Aura Pakar)
-                    return formatRupiah(totals.margin - ppobRedisionMargin)
-                  })()}
-                </strong>
+                <strong>{formatRupiah(footer.margin)}</strong>
               </Table.Summary.Cell>
               <Table.Summary.Cell index={4} align='right'>
                 <strong>
-                  {(() => {
-                    const ppobRedisionData = raw?.summaries?.filter((item) => item.merchant_name === 'PPOB Redision')
-                    const ppobRedisionAmount =
-                      ppobRedisionData?.reduce((acc, curr) => acc + (curr.total_amount || 0), 0) || 0
-                    // Use totals.amount instead of raw.total_amount
-                    const totalAmount = totals.amount - ppobRedisionAmount
-
-                    const ppobRedisionMargin = ppobRedisionData?.reduce((acc, curr) => acc + (curr.margin || 0), 0) || 0
-                    // Use totals.margin instead of raw.total_margin
-                    const totalMargin = totals.margin - ppobRedisionMargin
-
-                    const per = totalAmount ? (totalMargin / totalAmount) * 100 : 0
-                    return <span className={per < 0 ? 'text-red-600' : 'text-emerald-700'}>{per.toFixed(2)}%</span>
-                  })()}
+                  <span className={tone(footer.per)}>{footer.per.toFixed(2)}%</span>
                 </strong>
               </Table.Summary.Cell>
             </Table.Summary.Row>
           </Table.Summary>
         )}
-        className='report-margin-table parent rounded-lg shadow'
+        className='report-margin-table parent'
       />
     </div>
   )

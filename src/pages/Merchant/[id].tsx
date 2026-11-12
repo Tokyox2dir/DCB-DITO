@@ -2,34 +2,15 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 import dayjs from 'dayjs'
-import { Box, Typography as MuiTypography } from '@mui/material'
-import {
-  Card,
-  Tag,
-  Row,
-  Col,
-  Descriptions,
-  Button,
-  Skeleton,
-  Space,
-  Divider,
-  Typography,
-  Table,
-  Tooltip,
-  Alert,
-} from 'antd'
+import { Tag, Button, Skeleton, Table, Tooltip, Alert } from 'antd'
 import {
   ArrowLeftOutlined,
-  CalendarOutlined,
   PhoneOutlined,
   MailOutlined,
-  IdcardOutlined,
-  AppstoreOutlined,
   LinkOutlined,
   EyeOutlined,
   EyeInvisibleOutlined,
   KeyOutlined,
-  SettingOutlined,
   CopyOutlined,
 } from '@ant-design/icons'
 
@@ -44,7 +25,7 @@ const useMerchantDetail = (id?: string) => {
   useEffect(() => {
     const getMerchantDetail = async () => {
       if (!id || id === 'undefined' || id.trim() === '') {
-        setError('ID merchant tidak valid')
+        setError('Invalid merchant ID')
         setIsLoading(false)
         return
       }
@@ -64,9 +45,9 @@ const useMerchantDetail = (id?: string) => {
         setData(response?.data?.data ?? null)
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
-          setError(error.response.data?.message || 'Gagal memuat data merchant')
+          setError(error.response.data?.message || 'Failed to load merchant data')
         } else {
-          setError('Terjadi kesalahan yang tidak terduga')
+          setError('An unexpected error occurred')
         }
       } finally {
         setIsLoading(false)
@@ -122,23 +103,12 @@ const DetailMerchant = () => {
 
   const renderSensitiveField = (value: string, visible: boolean, onToggle: () => void) => {
     if (!isSuperAdmin) {
-      return <Typography.Text type='secondary'>Hidden</Typography.Text>
+      return <span className='tx-empty'>Hidden</span>
     }
 
     return (
-      <Space>
-        <code
-          style={{
-            padding: '2px 6px',
-            backgroundColor: 'var(--dash-surface-2)',
-            borderRadius: '4px',
-            fontSize: '12px',
-            minWidth: '150px',
-            display: 'inline-block',
-          }}
-        >
-          {maskSensitiveData(value, visible)}
-        </code>
+      <span className='tx-secret'>
+        <code>{maskSensitiveData(value, visible)}</code>
         <Button
           type='text'
           size='small'
@@ -146,153 +116,145 @@ const DetailMerchant = () => {
           onClick={onToggle}
         />
         {visible && <Button type='text' size='small' icon={<CopyOutlined />} onClick={() => copyToClipboard(value)} />}
-      </Space>
+      </span>
     )
   }
 
+  const loadingBlock = (rows: number) => (
+    <div className='tx-card-body'>
+      <Skeleton active paragraph={{ rows }} />
+    </div>
+  )
+  const ready = !!merchantDetail && !isLoading
+  const fmtDate = (d?: string) => (d ? dayjs(d).format('DD MMM YYYY, HH:mm:ss') : '-')
+  const label = (text: string) => text.replace(/_/g, ' ').toUpperCase()
+
   return (
-    <Box
-      component='main'
-      sx={{
-        flexGrow: 1,
-        backgroundColor: 'background.default',
-        overflow: 'auto',
-        pt: 4,
-      }}
-    >
-      <div style={{ padding: '24px' }}>
-        {/* Header */}
-        <div style={{ marginBottom: '24px' }}>
-          <Space size='large' align='center'>
-            <Button
-              type='text'
-              icon={<ArrowLeftOutlined />}
-              onClick={() => navigate(-1)}
-              style={{ padding: '4px 8px' }}
-            >
-              Back
-            </Button>
-            <MuiTypography variant='h4' component='h1' style={{ margin: 0, fontWeight: 600 }}>
-              Merchant Details
-            </MuiTypography>
-          </Space>
+    <div className='tx-page'>
+      {/* Header */}
+      <header className='tx-head'>
+        <div className='tx-head-main'>
+          <span className='tx-eyebrow'>Merchant</span>
+          <h2 className='tx-title'>
+            {merchantDetail?.client_name || 'Merchant Details'}
+            {merchantDetail && (
+              <Tag color={getStatusColor(merchantDetail.client_status)}>
+                {getStatusText(merchantDetail.client_status)}
+              </Tag>
+            )}
+          </h2>
+          {merchantDetail && (
+            <p className='tx-sub'>
+              <span className='tx-mono dim'>{merchantDetail.u_id}</span>
+              <span className='sep'>·</span>
+              {merchantDetail.app_name || '-'}
+            </p>
+          )}
         </div>
+        <div className='tx-actions'>
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
+            Back
+          </Button>
+        </div>
+      </header>
 
-        {/* Error Message */}
-        {merchantError && !isLoading && (
-          <Alert
-            message='Error'
-            description={merchantError}
-            type='error'
-            showIcon
-            closable
-            style={{ marginBottom: '24px' }}
-          />
-        )}
+      {/* Error Message */}
+      {merchantError && !isLoading && (
+        <Alert message='Error' description={merchantError} type='error' showIcon closable />
+      )}
 
-        {id && (id === 'undefined' || id.trim() === '') && (
-          <Alert
-            message='ID Tidak Valid'
-            description={`ID merchant yang diberikan tidak valid: "${id}". Silakan kembali ke halaman sebelumnya.`}
-            type='warning'
-            showIcon
-            closable
-            style={{ marginBottom: '24px' }}
-          />
-        )}
+      {id && (id === 'undefined' || id.trim() === '') && (
+        <Alert
+          message='Invalid ID'
+          description={`The merchant ID "${id}" is invalid. Please go back to the previous page.`}
+          type='warning'
+          showIcon
+          closable
+        />
+      )}
 
-        {/* Content */}
-        <Row gutter={[24, 24]}>
+      {/* Content */}
+      <div className='tx-detail-grid side'>
+        <div className='tx-stack'>
           {/* Main Information */}
-          <Col xs={24} lg={16}>
-            <Card
-              title={
-                <Space>
-                  <IdcardOutlined />
-                  <span>Merchant Information</span>
-                </Space>
-              }
-              loading={isLoading}
-            >
-              {merchantDetail ? (
-                <Descriptions column={1} labelStyle={{ fontWeight: 600, width: '200px' }}>
-                  <Descriptions.Item label='Merchant Name'>{merchantDetail.client_name || '-'}</Descriptions.Item>
-                  <Descriptions.Item
-                    label={
-                      <Space>
-                        <PhoneOutlined />
-                        <span>Phone</span>
-                      </Space>
-                    }
-                  >
-                    {merchantDetail.phone || '-'}
-                  </Descriptions.Item>
-                  <Descriptions.Item
-                    label={
-                      <Space>
-                        <MailOutlined />
-                        <span>Email</span>
-                      </Space>
-                    }
-                  >
-                    {merchantDetail.email || '-'}
-                  </Descriptions.Item>
-                  <Descriptions.Item label='Address'>{merchantDetail.address || '-'}</Descriptions.Item>
-                  <Descriptions.Item label='UID'>
-                    <code
-                      style={{ padding: '2px 6px', backgroundColor: 'var(--dash-surface-2)', borderRadius: '4px', fontSize: '12px' }}
-                    >
-                      {merchantDetail.u_id || '-'}
-                    </code>
-                  </Descriptions.Item>
-                  <Descriptions.Item label='Status'>
+          <section className='tx-card'>
+            <div className='tx-card-head'>
+              <h3>Merchant Information</h3>
+            </div>
+            {ready && merchantDetail ? (
+              <dl className='tx-kv'>
+                <div>
+                  <dt>Merchant Name</dt>
+                  <dd>{merchantDetail.client_name || '-'}</dd>
+                </div>
+                <div>
+                  <dt>Status</dt>
+                  <dd>
                     <Tag color={getStatusColor(merchantDetail.client_status)}>
                       {getStatusText(merchantDetail.client_status)}
                     </Tag>
-                  </Descriptions.Item>
-                  <Descriptions.Item
-                    label={
-                      <Space>
-                        <KeyOutlined />
-                        <span>Client Secret</span>
-                      </Space>
-                    }
-                  >
+                  </dd>
+                </div>
+                <div>
+                  <dt>
+                    <PhoneOutlined />
+                    Phone
+                  </dt>
+                  <dd className='mono'>{merchantDetail.phone || '-'}</dd>
+                </div>
+                <div>
+                  <dt>
+                    <MailOutlined />
+                    Email
+                  </dt>
+                  <dd>{merchantDetail.email || '-'}</dd>
+                </div>
+                <div className='wide'>
+                  <dt>Address</dt>
+                  <dd>{merchantDetail.address || '-'}</dd>
+                </div>
+                <div>
+                  <dt>UID</dt>
+                  <dd className='mono'>{merchantDetail.u_id || '-'}</dd>
+                </div>
+                <div>
+                  <dt>
+                    <KeyOutlined />
+                    Client Secret
+                  </dt>
+                  <dd>
                     {renderSensitiveField(merchantDetail.client_secret, showClientSecret, () =>
                       setShowClientSecret(!showClientSecret),
                     )}
-                  </Descriptions.Item>
-                </Descriptions>
-              ) : (
-                <Skeleton active paragraph={{ rows: 5 }} />
-              )}
-            </Card>
+                  </dd>
+                </div>
+              </dl>
+            ) : (
+              loadingBlock(5)
+            )}
+          </section>
 
-            {/* Application Info */}
-            <Card
-              title={
-                <Space>
-                  <AppstoreOutlined />
-                  <span>Informasi Aplikasi</span>
-                </Space>
-              }
-              style={{ marginTop: '24px' }}
-              loading={isLoading}
-            >
-              {merchantDetail ? (
-                <Descriptions column={1} labelStyle={{ fontWeight: 600, width: '200px' }}>
-                  <Descriptions.Item label='Application Name'>{merchantDetail.app_name || '-'}</Descriptions.Item>
-                  <Descriptions.Item label='Application Type'>
-                    <Tag color='blue'>{merchantDetail.mobile ? 'Mobile App' : 'Web App'}</Tag>
-                  </Descriptions.Item>
-                  <Descriptions.Item
-                    label={
-                      <Space>
-                        <LinkOutlined />
-                        <span>Callback URL</span>
-                      </Space>
-                    }
-                  >
+          {/* Application Info */}
+          <section className='tx-card'>
+            <div className='tx-card-head'>
+              <h3>Application Information</h3>
+            </div>
+            {ready && merchantDetail ? (
+              <dl className='tx-kv'>
+                <div>
+                  <dt>Application Name</dt>
+                  <dd>{merchantDetail.app_name || '-'}</dd>
+                </div>
+                <div>
+                  <dt>Application Type</dt>
+                  <dd>{merchantDetail.mobile ? 'Mobile App' : 'Web App'}</dd>
+                </div>
+                <div className='wide'>
+                  <dt>
+                    <LinkOutlined />
+                    Callback URL
+                  </dt>
+                  <dd className='mono'>
                     {merchantDetail.callback_url ? (
                       <a href={merchantDetail.callback_url} target='_blank' rel='noopener noreferrer'>
                         {merchantDetail.callback_url}
@@ -300,278 +262,269 @@ const DetailMerchant = () => {
                     ) : (
                       '-'
                     )}
-                  </Descriptions.Item>
-                  <Descriptions.Item label='Testing Mode'>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Testing Mode</dt>
+                  <dd>
                     <Tag color={merchantDetail.testing === 1 ? 'orange' : 'green'}>
                       {merchantDetail.testing === 1 ? 'Testing' : 'Production'}
                     </Tag>
-                  </Descriptions.Item>
-                  <Descriptions.Item label='Language'>
-                    <Tag>{merchantDetail.lang || 'id'}</Tag>
-                  </Descriptions.Item>
-                  <Descriptions.Item label='Whitelisted IPs'>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Language</dt>
+                  <dd className='mono'>{merchantDetail.lang || 'id'}</dd>
+                </div>
+                <div className='wide'>
+                  <dt>Whitelisted IPs</dt>
+                  <dd>
                     {merchantDetail.whitelisted_ips && merchantDetail.whitelisted_ips.trim() !== '' ? (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      <div className='tx-tags'>
                         {merchantDetail.whitelisted_ips
                           .split(',')
                           .map((ip) => ip.trim())
                           .filter(Boolean)
                           .map((ip, index) => (
-                            <Tag key={index} color='geekblue'>
+                            <span key={index} className='tx-code'>
                               {ip}
-                            </Tag>
+                            </span>
                           ))}
                       </div>
                     ) : (
-                      <Typography.Text type='secondary'>Semua IP diizinkan</Typography.Text>
+                      <span className='tx-empty'>All IPs allowed</span>
                     )}
-                  </Descriptions.Item>
-                </Descriptions>
-              ) : (
-                <Skeleton active paragraph={{ rows: 4 }} />
-              )}
-            </Card>
+                  </dd>
+                </div>
+              </dl>
+            ) : (
+              loadingBlock(4)
+            )}
+          </section>
 
-            {/* Apps Section */}
-            <Card
-              title={
-                <Space>
-                  <AppstoreOutlined />
-                  <span>Daftar Aplikasi</span>
-                </Space>
-              }
-              style={{ marginTop: '24px' }}
-              loading={isLoading}
-            >
-              {merchantDetail ? (
-                <Table
-                  dataSource={merchantDetail.apps}
-                  rowKey='id'
-                  size='small'
-                  pagination={false}
-                  columns={[
-                    {
-                      title: 'App Name',
-                      dataIndex: 'app_name',
-                      key: 'app_name',
-                    },
-                    {
-                      title: 'App ID',
-                      dataIndex: 'appid',
-                      key: 'appid',
-                      render: (appid, record) =>
-                        renderSensitiveField(appid, visibleAppKeys[record.id] || false, () =>
-                          toggleAppKeyVisibility(record.id),
-                        ),
-                    },
-                    {
-                      title: 'App Key',
-                      dataIndex: 'appkey',
-                      key: 'appkey',
-                      render: (appkey, record) =>
-                        renderSensitiveField(appkey, visibleAppKeys[record.id] || false, () =>
-                          toggleAppKeyVisibility(record.id),
-                        ),
-                    },
-                    {
-                      title: 'Status',
-                      dataIndex: 'status',
-                      key: 'status',
-                      render: (status) => <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>,
-                    },
-                    {
-                      title: 'Testing',
-                      dataIndex: 'testing',
-                      key: 'testing',
-                      render: (testing) => (
-                        <Tag color={testing === 1 ? 'orange' : 'green'}>{testing === 1 ? 'Testing' : 'Production'}</Tag>
+          {/* Apps Section */}
+          <section className='tx-card'>
+            <div className='tx-card-head'>
+              <h3>Applications</h3>
+              {merchantDetail && <span className='tx-count'>{merchantDetail.apps?.length || 0} apps</span>}
+            </div>
+            {ready && merchantDetail ? (
+              <Table
+                dataSource={merchantDetail.apps}
+                rowKey='id'
+                size='small'
+                pagination={false}
+                scroll={{ x: 'max-content' }}
+                columns={[
+                  {
+                    title: 'App Name',
+                    dataIndex: 'app_name',
+                    key: 'app_name',
+                  },
+                  {
+                    title: 'App ID',
+                    dataIndex: 'appid',
+                    key: 'appid',
+                    render: (appid, record) =>
+                      renderSensitiveField(appid, visibleAppKeys[record.id] || false, () =>
+                        toggleAppKeyVisibility(record.id),
                       ),
-                    },
-                    {
-                      title: 'Callback URL',
-                      dataIndex: 'callback_url',
-                      key: 'callback_url',
-                      render: (url) =>
-                        url ? (
-                          <Tooltip title={url}>
-                            <a href={url} target='_blank' rel='noopener noreferrer'>
-                              {url.length > 30 ? `${url.substring(0, 30)}...` : url}
-                            </a>
-                          </Tooltip>
-                        ) : (
-                          '-'
-                        ),
-                    },
-                  ]}
-                />
-              ) : (
-                <Skeleton active paragraph={{ rows: 3 }} />
-              )}
-            </Card>
+                  },
+                  {
+                    title: 'App Key',
+                    dataIndex: 'appkey',
+                    key: 'appkey',
+                    render: (appkey, record) =>
+                      renderSensitiveField(appkey, visibleAppKeys[record.id] || false, () =>
+                        toggleAppKeyVisibility(record.id),
+                      ),
+                  },
+                  {
+                    title: 'Status',
+                    dataIndex: 'status',
+                    key: 'status',
+                    render: (status) => <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>,
+                  },
+                  {
+                    title: 'Testing',
+                    dataIndex: 'testing',
+                    key: 'testing',
+                    render: (testing) => (
+                      <Tag color={testing === 1 ? 'orange' : 'green'}>{testing === 1 ? 'Testing' : 'Production'}</Tag>
+                    ),
+                  },
+                  {
+                    title: 'Callback URL',
+                    dataIndex: 'callback_url',
+                    key: 'callback_url',
+                    render: (url) =>
+                      url ? (
+                        <Tooltip title={url}>
+                          <a href={url} target='_blank' rel='noopener noreferrer' className='tx-mono'>
+                            {url.length > 30 ? `${url.substring(0, 30)}...` : url}
+                          </a>
+                        </Tooltip>
+                      ) : (
+                        '-'
+                      ),
+                  },
+                ]}
+              />
+            ) : (
+              loadingBlock(3)
+            )}
+          </section>
 
-            {/* Settlements Section */}
-            <Card
-              title={
-                <Space>
-                  <SettingOutlined />
-                  <span>Settlement Configuration</span>
-                </Space>
-              }
-              style={{ marginTop: '24px' }}
-              loading={isLoading}
-            >
-              {merchantDetail ? (
-                <Table
-                  dataSource={merchantDetail.settlements}
-                  rowKey='id'
-                  size='small'
-                  pagination={false}
-                  columns={[
-                    {
-                      title: 'Payment Method',
-                      dataIndex: 'name',
-                      key: 'name',
-                      render: (name) => <Tag color='processing'>{name.replace(/_/g, ' ').toUpperCase()}</Tag>,
-                    },
-                    {
-                      title: 'MDR',
-                      dataIndex: 'mdr',
-                      key: 'mdr',
-                      render: (mdr) => `${mdr}`,
-                    },
-                    {
-                      title: 'PPN',
-                      dataIndex: 'additional_percent',
-                      key: 'additional_percent',
-                      render: (percent) => (percent ? `${percent}%` : 'No'),
-                    },
-                    {
-                      title: 'Tax 23',
-                      dataIndex: 'tax23',
-                      key: 'tax23',
-                      render: (tax) => (tax === '1' ? 'Yes' : 'No'),
-                    },
-                    {
-                      title: 'IS BHPUSO',
-                      dataIndex: 'is_bhpuso',
-                      key: 'is_bhpuso',
-                      render: (isbhp) => (isbhp === '1' ? 'Yes' : 'No'),
-                    },
-                    {
-                      title: 'Share Partner',
-                      dataIndex: 'share_partner',
-                      key: 'share_partner',
-                      render: (share) => `${share}%`,
-                    },
-                    {
-                      title: 'Share Redision',
-                      dataIndex: 'share_redision',
-                      key: 'share_redision',
-                      render: (share) => `${share}%`,
-                    },
-                  ]}
-                />
-              ) : (
-                <Skeleton active paragraph={{ rows: 3 }} />
-              )}
-            </Card>
-          </Col>
+          {/* Settlements Section */}
+          <section className='tx-card'>
+            <div className='tx-card-head'>
+              <h3>Settlement Configuration</h3>
+            </div>
+            {ready && merchantDetail ? (
+              <Table
+                dataSource={merchantDetail.settlements}
+                rowKey='id'
+                size='small'
+                pagination={false}
+                scroll={{ x: 'max-content' }}
+                columns={[
+                  {
+                    title: 'Payment Method',
+                    dataIndex: 'name',
+                    key: 'name',
+                    render: (name) => <span className='tx-code'>{label(name)}</span>,
+                  },
+                  {
+                    title: 'MDR',
+                    dataIndex: 'mdr',
+                    key: 'mdr',
+                    align: 'right',
+                    render: (mdr) => <span className='tx-amount'>{`${mdr}`}</span>,
+                  },
+                  {
+                    title: 'PPN',
+                    dataIndex: 'additional_percent',
+                    key: 'additional_percent',
+                    align: 'right',
+                    render: (percent) => <span className='tx-amount'>{percent ? `${percent}%` : 'No'}</span>,
+                  },
+                  {
+                    title: 'Tax 23',
+                    dataIndex: 'tax23',
+                    key: 'tax23',
+                    render: (tax) => (tax === '1' ? 'Yes' : 'No'),
+                  },
+                  {
+                    title: 'IS BHPUSO',
+                    dataIndex: 'is_bhpuso',
+                    key: 'is_bhpuso',
+                    render: (isbhp) => (isbhp === '1' ? 'Yes' : 'No'),
+                  },
+                  {
+                    title: 'Share Partner',
+                    dataIndex: 'share_partner',
+                    key: 'share_partner',
+                    align: 'right',
+                    render: (share) => <span className='tx-amount'>{`${share}%`}</span>,
+                  },
+                  {
+                    title: 'Share Redision',
+                    dataIndex: 'share_redision',
+                    key: 'share_redision',
+                    align: 'right',
+                    render: (share) => <span className='tx-amount'>{`${share}%`}</span>,
+                  },
+                ]}
+              />
+            ) : (
+              loadingBlock(3)
+            )}
+          </section>
+        </div>
 
-          {/* Sidebar Information */}
-          <Col xs={24} lg={8}>
-            {/* Payment Methods */}
-            <Card title='Payment Methods' loading={isLoading} style={{ marginBottom: '24px' }}>
-              {merchantDetail ? (
-                <div>
-                  {!merchantDetail.payment_methods || merchantDetail.payment_methods.length === 0 ? (
-                    <Typography.Text type='secondary'>No payment methods</Typography.Text>
-                  ) : (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      {merchantDetail.payment_methods.map((item, index) => (
-                        <Tag key={index} color='processing'>
-                          {item.name.replace(/_/g, ' ').toUpperCase()}
-                        </Tag>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Skeleton active paragraph={{ rows: 2 }} />
-              )}
-            </Card>
-
-            {/* Route Weights */}
-            <Card title='Route Weights' loading={isLoading} style={{ marginBottom: '24px' }}>
-              {merchantDetail ? (
-                <div>
-                  {!merchantDetail.route_weights || merchantDetail.route_weights.length === 0 ? (
-                    <Typography.Text type='secondary'>No route weights</Typography.Text>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      {merchantDetail.route_weights.map((rw, index) => (
-                        <div
-                          key={index}
-                          style={{
-                            padding: '8px 12px',
-                            backgroundColor: 'var(--dash-surface-2)',
-                            borderRadius: '6px',
-                            border: '1px solid #d9d9d9',
-                          }}
-                        >
-                          <div style={{ fontWeight: 600, fontSize: '12px', color: 'var(--dash-accent)', marginBottom: '4px' }}>
-                            {rw.payment_method.replace(/_/g, ' ').toUpperCase()}
-                          </div>
-                          <div style={{ fontSize: '12px' }}>
-                            <span style={{ fontWeight: 500 }}>{rw.route}</span>: {rw.weight}%
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Skeleton active paragraph={{ rows: 2 }} />
-              )}
-            </Card>
-
-            {/* Timestamps */}
-            <Card
-              title={
-                <Space>
-                  <CalendarOutlined />
-                  <span>Timeline</span>
-                </Space>
-              }
-              loading={isLoading}
-            >
-              {merchantDetail ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div>
-                    <div style={{ fontWeight: 600, marginBottom: '4px' }}>Date Created</div>
-                    <Typography.Text type='secondary'>
-                      {merchantDetail.created_at
-                        ? dayjs(merchantDetail.created_at).format('DD MMM YYYY, HH:mm:ss')
-                        : '-'}
-                    </Typography.Text>
+        {/* Sidebar Information */}
+        <div className='tx-stack'>
+          {/* Payment Methods */}
+          <section className='tx-card'>
+            <div className='tx-card-head'>
+              <h3>Payment Methods</h3>
+              {merchantDetail && <span className='tx-count'>{merchantDetail.payment_methods?.length || 0}</span>}
+            </div>
+            {ready && merchantDetail ? (
+              <div className='tx-card-body'>
+                {!merchantDetail.payment_methods || merchantDetail.payment_methods.length === 0 ? (
+                  <span className='tx-empty'>No payment methods</span>
+                ) : (
+                  <div className='tx-tags'>
+                    {merchantDetail.payment_methods.map((item, index) => (
+                      <span key={index} className='tx-code'>
+                        {label(item.name)}
+                      </span>
+                    ))}
                   </div>
-                  <Divider style={{ margin: '8px 0' }} />
-                  <div>
-                    <div style={{ fontWeight: 600, marginBottom: '4px' }}>Last Updated</div>
-                    <Typography.Text type='secondary'>
-                      {merchantDetail.updated_at
-                        ? dayjs(merchantDetail.updated_at).format('DD MMM YYYY, HH:mm:ss')
-                        : '-'}
-                    </Typography.Text>
-                  </div>
+                )}
+              </div>
+            ) : (
+              loadingBlock(2)
+            )}
+          </section>
+
+          {/* Route Weights */}
+          <section className='tx-card'>
+            <div className='tx-card-head'>
+              <h3>Route Weights</h3>
+            </div>
+            {ready && merchantDetail ? (
+              !merchantDetail.route_weights || merchantDetail.route_weights.length === 0 ? (
+                <div className='tx-card-body'>
+                  <span className='tx-empty'>No route weights</span>
                 </div>
               ) : (
-                <Skeleton active paragraph={{ rows: 3 }} />
-              )}
-            </Card>
-          </Col>
-        </Row>
+                <div className='tx-route-list'>
+                  {merchantDetail.route_weights.map((rw, index) => (
+                    <div key={index} className='tx-route'>
+                      <div className='name'>
+                        <strong>{label(rw.payment_method)}</strong>
+                        <span>{rw.route}</span>
+                      </div>
+                      <div className='right'>
+                        <span className='bar' aria-hidden='true'>
+                          <i style={{ width: `${Math.max(0, Math.min(100, Number(rw.weight) || 0))}%` }} />
+                        </span>
+                        <span className='w'>{rw.weight}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              loadingBlock(2)
+            )}
+          </section>
+
+          {/* Timestamps */}
+          <section className='tx-card'>
+            <div className='tx-card-head'>
+              <h3>Timeline</h3>
+            </div>
+            {ready && merchantDetail ? (
+              <dl className='tx-kv cols-1'>
+                <div>
+                  <dt>Date Created</dt>
+                  <dd className='mono'>{fmtDate(merchantDetail.created_at)}</dd>
+                </div>
+                <div>
+                  <dt>Last Updated</dt>
+                  <dd className='mono'>{fmtDate(merchantDetail.updated_at)}</dd>
+                </div>
+              </dl>
+            ) : (
+              loadingBlock(3)
+            )}
+          </section>
+        </div>
       </div>
-    </Box>
+    </div>
   )
 }
 

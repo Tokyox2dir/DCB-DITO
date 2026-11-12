@@ -27,23 +27,32 @@ export default function RankingCard({ title, subtitle, variant, icon, items, loa
   const barClass = variant === 'client' ? 'dash-rank-bar' : `dash-rank-bar ${variant}`
 
   return (
-    <article className={`dash-rank-card dash-rank-${variant}`} aria-busy={loading}>
-      <div className='dash-rank-head'>
-        <span className={iconClass}>{icon}</span>
+    <article className={`rp-card dash-rank-card dash-rank-${variant}`} aria-busy={loading}>
+      <header className='rp-card-head dash-rank-head'>
         <div>
-          <h2>{title}</h2>
+          <h3>{title}</h3>
           <small>{subtitle}</small>
         </div>
+        <span className={iconClass} aria-hidden='true'>
+          {icon}
+        </span>
+      </header>
+      <div className='dash-rank-columns' aria-hidden='true'>
+        <span>Ranking</span>
+        <span>Transactions</span>
       </div>
-      <div className='dash-rank-columns' aria-hidden='true'><span>Ranking</span><span>Transactions</span></div>
       <ol className='dash-rank-list'>
-        {loading && rows.length === 0 && <li className='dash-rank-empty' role='status'>Loading rankings…</li>}
+        {loading && rows.length === 0 && (
+          <li className='dash-rank-empty' role='status'>
+            Loading rankings…
+          </li>
+        )}
         {!loading && rows.length === 0 && <li className='dash-rank-empty'>No traffic data.</li>}
         {rows.map((row, index) => {
           const pct = max > 0 ? Math.round((row.value * 100) / max) : 0
           return (
             <li key={`${row.label}-${index}`}>
-              <span className='dash-rank-pos'>{index + 1}</span>
+              <span className='dash-rank-pos'>{String(index + 1).padStart(2, '0')}</span>
               <div className='dash-rank-body'>
                 <div className='dash-rank-meta'>
                   <strong title={row.label}>{row.label}</strong>

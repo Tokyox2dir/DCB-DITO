@@ -1,0 +1,611 @@
+/* Ops Console: transactions and merchants. Builds on the tokens in core.css.
+   Lists:   page header, then one card holding the filter bar, the table and the pagination footer.
+   Details: a header with the ID in mono and a status tag, then key-value cards in a two-column grid.
+   Forms:   grouped sections with small uppercase labels, fields in a two-column grid. */
+
+/* ---------- Page frame ---------- */
+html[data-theme] .sf-shell .tx-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+}
+
+/* Page header: title and context on the left, actions on the right. */
+html[data-theme] .sf-shell .tx-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+}
+html[data-theme] .sf-shell .tx-head-main { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+html[data-theme] .sf-shell .tx-eyebrow {
+  font: 600 11px var(--font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+html[data-theme] .sf-shell .tx-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font: 600 20px/1.3 var(--font);
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+html[data-theme] .sf-shell .tx-title .tx-id {
+  font: 500 17px/1.3 var(--mono);
+  letter-spacing: -0.01em;
+  word-break: break-all;
+}
+html[data-theme] .sf-shell .tx-sub { margin: 0; font-size: 13px; color: var(--muted); }
+html[data-theme] .sf-shell .tx-sub .sep { margin: 0 6px; color: var(--faint); }
+html[data-theme] .sf-shell .tx-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+html[data-theme] .sf-shell .tx-actions > a { text-decoration: none; }
+
+/* ---------- Cards ---------- */
+html[data-theme] .sf-shell .tx-card {
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+html[data-theme] .sf-shell .tx-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  min-height: 48px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+html[data-theme] .sf-shell .tx-card-head h3 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 14px/1.3 var(--font);
+  color: var(--text);
+}
+html[data-theme] .sf-shell .tx-card-head h3 .anticon,
+html[data-theme] .sf-shell .tx-card-head h3 svg { color: var(--faint); font-size: 15px; }
+html[data-theme] .sf-shell .tx-card-head small { font-size: 12px; color: var(--faint); }
+html[data-theme] .sf-shell .tx-card-head .tx-count { font: 500 12px var(--mono); color: var(--faint); }
+html[data-theme] .sf-shell .tx-card-body { padding: 16px; }
+html[data-theme] .sf-shell .tx-card-body.flush { padding: 0; }
+
+/* ---------- Filter bar: a single row of 32px controls ---------- */
+html[data-theme] .sf-shell .tx-filterbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+html[data-theme] .sf-shell .tx-filterbar > * { flex: 0 0 auto; min-width: 0; }
+html[data-theme] .sf-shell .tx-filterbar .tx-f-date { width: 300px; }
+html[data-theme] .sf-shell .tx-filterbar .tx-f-md { width: 180px; }
+html[data-theme] .sf-shell .tx-filterbar .tx-f-sm { width: 140px; }
+html[data-theme] .sf-shell .tx-filterbar .tx-f-grow { flex: 1 1 160px; max-width: 300px; }
+html[data-theme] .sf-shell :is(.tx-filterbar, .tx-actions) .MuiButton-startIcon > svg { font-size: 16px; }
+html[data-theme] .sf-shell :is(.tx-filterbar, .tx-actions) .MuiButton-startIcon { margin-right: 0; margin-left: -2px; }
+html[data-theme] .sf-shell .tx-filterbar .tx-spacer { flex: 1 1 0; min-width: 0; }
+html[data-theme] .sf-shell .tx-filterbar .tx-filter-btns { display: flex; gap: 8px; margin-left: auto; }
+html[data-theme] .sf-shell .tx-filterbar .MuiOutlinedInput-root { height: var(--ctl-h); }
+html[data-theme] .sf-shell .tx-filterbar .MuiInputBase-input { padding-top: 0; padding-bottom: 0; }
+html[data-theme] .sf-shell .tx-filterbar .MuiSelect-select { display: flex; align-items: center; min-height: 0; }
+html[data-theme] .sf-shell .tx-placeholder { color: var(--faint); }
+html[data-theme] .sf-shell .tx-filterbar .ant-select-multiple .ant-select-selector { min-height: var(--ctl-h); padding-top: 1px; padding-bottom: 1px; }
+html[data-theme] .sf-shell .tx-filterbar .ant-select-multiple .ant-select-selection-item { height: 22px; line-height: 20px; border-radius: var(--radius-chip); background: var(--raised); border: 1px solid var(--border); }
+
+/* The "more filters" toggle shows how many hidden filters are set. */
+html[data-theme] .sf-shell .tx-more-btn .tx-more-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-chip);
+  background: var(--data-soft);
+  color: var(--data);
+  font: 600 11px var(--mono);
+}
+html[data-theme] .sf-shell .tx-more-btn[aria-expanded='true'] { background: var(--active); border-color: var(--faint); }
+
+/* Extra filters, revealed under the bar on a raised well. */
+html[data-theme] .sf-shell .tx-filter-more {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px 12px;
+  padding: 12px 16px 14px;
+  background: var(--raised);
+  border-bottom: 1px solid var(--rule);
+}
+html[data-theme] .sf-shell .tx-field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+html[data-theme] .sf-shell .tx-field > label,
+html[data-theme] .sf-shell .tx-field > .tx-field-label {
+  font: 500 12px var(--font);
+  color: var(--muted);
+}
+html[data-theme] .sf-shell .tx-field .MuiOutlinedInput-root:not(.MuiInputBase-multiline) { height: var(--ctl-h); }
+html[data-theme] .sf-shell .tx-field .MuiOutlinedInput-root:not(.MuiInputBase-multiline) .MuiInputBase-input { padding-top: 0; padding-bottom: 0; }
+html[data-theme] .sf-shell .tx-field .MuiInputBase-multiline { align-items: flex-start; padding: 8px 12px; }
+html[data-theme] .sf-shell .tx-field .MuiInputBase-multiline .tx-input-icon { margin-top: 1px; }
+html[data-theme] .sf-shell .tx-field .MuiSelect-select { display: flex; align-items: center; min-height: 0; }
+
+/* Batch actions for the selected rows. */
+html[data-theme] .sf-shell .tx-batchbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: 8px 16px;
+  background: var(--data-soft);
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+  color: var(--text);
+}
+html[data-theme] .sf-shell .tx-batchbar strong { font: 600 13px var(--mono); }
+
+/* ---------- Table inside a card ---------- */
+html[data-theme] .sf-shell .rp-page .tx-card .transactions-table {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+html[data-theme] .sf-shell .tx-card .ant-table-wrapper .ant-table-thead > tr > :is(th, td) { white-space: nowrap; }
+html[data-theme] .sf-shell .tx-card .ant-table-wrapper .ant-table-tbody > tr > td { white-space: nowrap; }
+html[data-theme] .sf-shell .tx-card .ant-table-wrapper .ant-table-thead > tr > :is(th, td):first-child,
+html[data-theme] .sf-shell .tx-card .ant-table-wrapper .ant-table-tbody > tr > td:first-child { padding-left: 16px; }
+html[data-theme] .sf-shell .tx-card .ant-table-wrapper .ant-table-thead > tr > :is(th, td):last-child,
+html[data-theme] .sf-shell .tx-card .ant-table-wrapper .ant-table-tbody > tr > td:last-child { padding-right: 16px; }
+html[data-theme] .sf-shell .tx-card .ant-table-wrapper .ant-table-tbody > tr:last-child > td { border-bottom: 0 !important; }
+html[data-theme] .sf-shell .tx-card .ant-table-wrapper .ant-table-selection-column { padding-left: 16px !important; padding-right: 4px !important; width: 44px; }
+/* Pagination sits in the card footer. */
+html[data-theme] .sf-shell .tx-card .ant-table-wrapper .ant-table-pagination.ant-pagination {
+  margin: 0;
+  padding: 10px 16px;
+  border-top: 1px solid var(--rule);
+  align-items: center;
+  row-gap: 8px;
+}
+html[data-theme] .sf-shell .tx-card .ant-pagination .ant-pagination-total-text {
+  margin-right: auto;
+  height: 30px;
+  line-height: 30px;
+  font: 500 12px/30px var(--mono);
+  color: var(--faint);
+}
+html[data-theme] .sf-shell .tx-card .ant-table-placeholder .ant-table-cell { border-bottom: 0 !important; }
+
+/* Cell vocabulary */
+html[data-theme] .sf-shell .tx-mono { font: 400 12px var(--mono); color: var(--text); letter-spacing: 0; }
+html[data-theme] .sf-shell .tx-mono.dim,
+html[data-theme] .sf-shell .tx-dim { color: var(--muted); }
+html[data-theme] .sf-shell .tx-amount {
+  font: 500 12.5px var(--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  white-space: nowrap;
+}
+html[data-theme] .sf-shell .tx-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: copy;
+  text-align: left;
+}
+html[data-theme] .sf-shell .tx-copy:hover { color: var(--data); }
+html[data-theme] .sf-shell .tx-empty { color: var(--faint); }
+html[data-theme] .sf-shell .tx-method { font-size: 13px; color: var(--text); }
+html[data-theme] .sf-shell .tx-fail { font-size: 12px; color: var(--negative); }
+html[data-theme] .sf-shell .tx-row-actions { display: inline-flex; align-items: center; gap: 4px; }
+/* Row buttons stay compact (the generic button rule in core.css outranks its in-table size). */
+html[data-theme] .sf-shell .tx-row-actions .ant-btn { height: 26px !important; padding: 0 8px !important; font-size: 12px !important; gap: 4px; box-shadow: none !important; }
+html[data-theme] .sf-shell .tx-row-actions .ant-btn .anticon { font-size: 13px; }
+
+/* Small link-like row button */
+html[data-theme] .sf-shell .tx-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--control);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--text);
+  font: 500 12px var(--font);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+html[data-theme] .sf-shell .tx-link-btn:hover { background: var(--raised); border-color: var(--faint); color: var(--text); }
+html[data-theme] .sf-shell .tx-link-btn.danger { color: var(--negative); border-color: color-mix(in srgb, var(--negative) 35%, var(--surface)); }
+html[data-theme] .sf-shell .tx-link-btn.danger:hover { background: var(--pill-negative-bg); }
+html[data-theme] .sf-shell .tx-link-btn svg,
+html[data-theme] .sf-shell .tx-link-btn .anticon { font-size: 13px; }
+
+/* ---------- Status tag (Badge.tsx) ---------- */
+html[data-theme] .tx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--radius-chip);
+  font: 500 12px/1 var(--font);
+  white-space: nowrap;
+  vertical-align: middle;
+  background: var(--pill-neutral-bg);
+  color: var(--pill-neutral-ink);
+}
+html[data-theme] .tx-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.85;
+}
+html[data-theme] .tx-badge.is-success { background: var(--pill-positive-bg); color: var(--pill-positive-ink); }
+html[data-theme] .tx-badge.is-error { background: var(--pill-negative-bg); color: var(--pill-negative-ink); }
+html[data-theme] .tx-badge.is-pending { background: var(--pill-warning-bg); color: var(--pill-warning-ink); }
+html[data-theme] .tx-badge.is-waiting-callback { background: var(--pill-info-bg); color: var(--pill-info-ink); }
+
+/* Plain square tag for codes (HTTP status, method, flags). */
+html[data-theme] .sf-shell .tx-code {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-chip);
+  font: 500 11.5px/1 var(--mono);
+  background: var(--pill-neutral-bg);
+  color: var(--pill-neutral-ink);
+}
+html[data-theme] .sf-shell .tx-code.ok { background: var(--pill-positive-bg); color: var(--pill-positive-ink); }
+html[data-theme] .sf-shell .tx-code.bad { background: var(--pill-negative-bg); color: var(--pill-negative-ink); }
+html[data-theme] .sf-shell .tx-code.info { background: var(--pill-info-bg); color: var(--pill-info-ink); }
+
+/* ---------- Detail pages ---------- */
+html[data-theme] .sf-shell .tx-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap);
+  align-items: stretch;
+}
+html[data-theme] .sf-shell .tx-detail-grid > .span-2 { grid-column: 1 / -1; }
+html[data-theme] .sf-shell .tx-detail-grid.side {
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  align-items: start;
+}
+html[data-theme] .sf-shell .tx-stack { display: flex; flex-direction: column; gap: var(--gap); min-width: 0; }
+
+/* Key-value list: label above value, two per row. */
+html[data-theme] .sf-shell .tx-kv {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 24px;
+  margin: 0 0 -1px; /* the last row's rule tucks under the card edge */
+  padding: 2px 16px 0;
+}
+html[data-theme] .sf-shell .tx-kv.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+html[data-theme] .sf-shell .tx-kv.cols-1 { grid-template-columns: minmax(0, 1fr); }
+html[data-theme] .sf-shell .tx-kv > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
+}
+html[data-theme] .sf-shell .tx-kv > div.wide { grid-column: 1 / -1; }
+html[data-theme] .sf-shell .tx-kv dt { font: 400 12px var(--font); color: var(--faint); }
+html[data-theme] .sf-shell .tx-kv dd {
+  margin: 0;
+  min-width: 0;
+  font: 400 13px/1.45 var(--font);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+html[data-theme] .sf-shell .tx-kv dd.mono { font: 400 12.5px/1.45 var(--mono); }
+html[data-theme] .sf-shell .tx-kv dd.amount { font: 500 15px/1.35 var(--mono); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+html[data-theme] .sf-shell .tx-kv dd a { color: var(--data); text-decoration: none; }
+html[data-theme] .sf-shell .tx-kv dd a:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* Horizontal variant: label left, value right. */
+html[data-theme] .sf-shell .tx-kv.rows { grid-template-columns: minmax(0, 1fr); padding: 0 16px; }
+html[data-theme] .sf-shell .tx-kv.rows > div {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 9px 0;
+}
+html[data-theme] .sf-shell .tx-kv dt .anticon { margin-right: 6px; color: var(--faint); }
+
+/* Secret / key value with reveal and copy buttons. */
+html[data-theme] .sf-shell .tx-secret { display: inline-flex; align-items: center; gap: 4px; min-width: 0; }
+html[data-theme] .sf-shell .tx-secret code,
+html[data-theme] .sf-shell code.tx-chip-code {
+  padding: 2px 6px;
+  border-radius: var(--radius-chip);
+  background: var(--raised);
+  border: 1px solid var(--border);
+  font: 400 12px var(--mono);
+  color: var(--text);
+  word-break: break-all;
+}
+html[data-theme] .sf-shell .tx-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+html[data-theme] .sf-shell .tx-tags .ant-tag { margin: 0; }
+
+/* Notification history */
+html[data-theme] .sf-shell .tx-log { display: flex; flex-direction: column; }
+html[data-theme] .sf-shell .tx-log-item { border-bottom: 1px solid var(--rule); }
+html[data-theme] .sf-shell .tx-log-item:last-child { border-bottom: 0; }
+html[data-theme] .sf-shell .tx-log-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 16px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: 400 13px var(--font);
+  text-align: left;
+  cursor: pointer;
+}
+html[data-theme] .sf-shell .tx-log-row:hover { background: var(--raised); }
+html[data-theme] .sf-shell .tx-log-row .chev { display: inline-block; width: 12px; color: var(--faint); font-size: 10px; transition: transform 0.15s; }
+html[data-theme] .sf-shell .tx-log-item.open .tx-log-row .chev { transform: rotate(90deg); }
+html[data-theme] .sf-shell .tx-log-row .dur { margin-left: auto; font: 400 12px var(--mono); color: var(--faint); }
+html[data-theme] .sf-shell .tx-log-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 16px 14px 40px;
+}
+html[data-theme] .sf-shell .tx-log-body .tx-kv { padding: 0; }
+html[data-theme] .sf-shell .tx-pre-label { font: 600 11px var(--font); letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); margin-bottom: 4px; }
+html[data-theme] :is(.sf-shell, .tx-modal) .tx-pre {
+  margin: 0;
+  max-height: 360px;
+  overflow: auto;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--raised);
+  color: var(--text);
+  font: 400 12px/1.5 var(--mono);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Route weights list */
+html[data-theme] .sf-shell .tx-route-list { display: flex; flex-direction: column; }
+html[data-theme] .sf-shell .tx-route {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+html[data-theme] .sf-shell .tx-route:last-child { border-bottom: 0; }
+html[data-theme] .sf-shell .tx-route .name { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+html[data-theme] .sf-shell .tx-route .name strong { font: 600 11px var(--font); letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); }
+html[data-theme] .sf-shell .tx-route .name span { font: 400 12.5px var(--mono); color: var(--text); }
+html[data-theme] .sf-shell .tx-route .w { font: 500 13px var(--mono); font-variant-numeric: tabular-nums; color: var(--text); }
+html[data-theme] .sf-shell .tx-route .bar { display: block; width: 64px; height: 4px; border-radius: 2px; background: var(--rule); overflow: hidden; }
+html[data-theme] .sf-shell .tx-route .bar i { display: block; height: 100%; background: var(--data); }
+html[data-theme] .sf-shell .tx-route .right { display: flex; align-items: center; gap: 10px; }
+
+/* Plain tables inside detail cards */
+html[data-theme] .sf-shell .tx-card .ant-table-wrapper .ant-table { border-radius: 0; }
+
+/* ---------- Merchant profile ---------- */
+html[data-theme] .sf-shell .tx-identity { display: flex; align-items: center; gap: 12px; min-width: 0; }
+html[data-theme] .sf-shell .tx-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-card);
+  background: var(--primary);
+  color: var(--on-primary);
+  font: 600 16px var(--font);
+}
+html[data-theme] .sf-shell .tx-stat-list { display: flex; flex-direction: column; }
+html[data-theme] .sf-shell .tx-stat {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 2px 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+html[data-theme] .sf-shell .tx-stat:last-child { border-bottom: 0; }
+html[data-theme] .sf-shell .tx-stat .label { font: 600 11px var(--font); letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); }
+html[data-theme] .sf-shell .tx-stat .value { grid-row: span 2; font: 500 24px/1 var(--mono); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--text); }
+html[data-theme] .sf-shell .tx-stat .sub { font-size: 12px; color: var(--muted); }
+html[data-theme] .sf-shell .tx-stat .rp-link { background: none; border: 0; padding: 0; cursor: pointer; justify-self: start; font-size: 12px; }
+
+/* Form layout shared by the profile page and the merchant dialogs. */
+html[data-theme] :is(.sf-shell, .tx-modal) .tx-form-section { padding: 16px 0; border-bottom: 1px solid var(--rule); }
+html[data-theme] :is(.sf-shell, .tx-modal) .tx-form-section:first-child { padding-top: 0; }
+html[data-theme] :is(.sf-shell, .tx-modal) .tx-form-section:last-child { border-bottom: 0; padding-bottom: 0; }
+html[data-theme] :is(.sf-shell, .tx-modal) .tx-section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 12px;
+  font: 600 11px var(--font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+html[data-theme] :is(.sf-shell, .tx-modal) .tx-section-label small { font: 400 12px var(--font); letter-spacing: 0; text-transform: none; color: var(--faint); }
+html[data-theme] :is(.sf-shell, .tx-modal) .tx-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+html[data-theme] :is(.sf-shell, .tx-modal) .tx-form-grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+html[data-theme] :is(.sf-shell, .tx-modal) .tx-form-grid > .span-2 { grid-column: 1 / -1; }
+html[data-theme] :is(.sf-shell, .tx-modal) .tx-form-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--rule);
+  background: var(--raised);
+}
+html[data-theme] .sf-shell .tx-app-block {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 12px;
+}
+html[data-theme] .sf-shell .tx-app-block + .tx-app-block { margin-top: 10px; }
+html[data-theme] .sf-shell .tx-app-block h4 { margin: 0 0 10px; font: 600 13px var(--font); color: var(--text); }
+html[data-theme] .sf-shell .tx-input-icon { color: var(--faint); font-size: 16px !important; }
+html[data-theme] .sf-shell .tx-field .ant-input-affix-wrapper-disabled,
+html[data-theme] .sf-shell .tx-field .ant-input-disabled { background: var(--raised); color: var(--text); }
+
+/* ---------- Merchant dialogs (antd modals live outside .sf-shell) ---------- */
+html[data-theme] .tx-modal .ant-modal-content { padding: 0; overflow: hidden; background: var(--surface); }
+html[data-theme] .tx-modal .ant-modal-header { margin: 0; padding: 14px 20px; border-bottom: 1px solid var(--rule); background: var(--surface); }
+html[data-theme] .tx-modal .ant-modal-title { font: 600 15px var(--font); color: var(--text); }
+html[data-theme] .tx-modal .ant-modal-close { top: 12px; inset-inline-end: 12px; }
+html[data-theme] .tx-modal .ant-modal-body { padding: 16px 20px; max-height: calc(100vh - 220px); overflow-y: auto; }
+html[data-theme] .tx-modal .ant-modal-footer {
+  margin: 0;
+  padding: 12px 20px;
+  border-top: 1px solid var(--rule);
+  background: var(--raised);
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+html[data-theme] .tx-modal .ant-modal-footer .ant-btn + .ant-btn { margin-inline-start: 0; }
+html[data-theme] .tx-modal .ant-form-item { margin-bottom: 0; }
+html[data-theme] .tx-modal :is(.tx-form-section, form) > :is(.tx-form-grid, .ant-form-item) + :is(.tx-form-grid, .ant-form-item) { margin-top: 12px; }
+html[data-theme] .tx-modal .tx-form-grid > .ant-form-item { margin: 0; }
+html[data-theme] .tx-modal .ant-form-item .ant-form-item-label { padding-bottom: 4px; }
+html[data-theme] .tx-modal .ant-form-item .ant-form-item-label > label { font: 500 12px var(--font); color: var(--muted); height: auto; }
+html[data-theme] .tx-modal .ant-form-item .ant-form-item-explain { font-size: 12px; }
+html[data-theme] .tx-modal :is(.ant-input, .ant-input-affix-wrapper, .ant-select-selector, .ant-input-number) { border-radius: var(--radius-control) !important; }
+html[data-theme] .tx-modal .ant-input:not(textarea),
+html[data-theme] .tx-modal .ant-select-single .ant-select-selector { min-height: var(--ctl-h); }
+html[data-theme] .tx-modal .ant-btn { height: var(--ctl-h); border-radius: var(--radius-control); font: 500 13px var(--font); box-shadow: none; }
+html[data-theme] .tx-modal .ant-btn-primary:not(.ant-btn-dangerous) { background: var(--primary); border-color: var(--primary); color: var(--on-primary); }
+html[data-theme] .tx-modal .ant-btn-primary:not(.ant-btn-dangerous):not(:disabled):hover { background: color-mix(in srgb, var(--primary) 85%, var(--surface)); }
+html[data-theme] .tx-modal .ant-btn-dashed { width: 100%; border-color: var(--control); color: var(--muted); background: var(--surface); }
+html[data-theme] .tx-modal .ant-btn-dashed:hover { color: var(--text); border-color: var(--faint); background: var(--raised); }
+html[data-theme] .tx-modal .ant-btn-sm { height: 26px; padding: 0 9px; font-size: 12px; }
+html[data-theme] .tx-modal .tx-table {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  overflow: hidden;
+  margin-top: 10px;
+}
+html[data-theme] .tx-modal .tx-table .ant-table { background: transparent; border-radius: 0; }
+html[data-theme] .tx-modal .tx-table .ant-table-thead > tr > th {
+  background: var(--raised);
+  color: var(--faint);
+  font: 600 11px var(--font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+html[data-theme] .tx-modal .tx-table .ant-table-thead > tr > th::before { display: none; }
+html[data-theme] .tx-modal .tx-table .ant-table-tbody > tr > td { border-bottom: 1px solid var(--rule); font-size: 13px; }
+html[data-theme] .tx-modal .tx-table .ant-table-tbody > tr:last-child > td { border-bottom: 0; }
+html[data-theme] .tx-modal .ant-empty-description,
+html[data-theme] .tx-modal .ant-table-placeholder { color: var(--faint); font-size: 12px; }
+html[data-theme] .tx-modal .tx-cell-title { font-weight: 600; font-size: 12.5px; }
+html[data-theme] .tx-modal .tx-cell-sub,
+html[data-theme] .tx-modal .tx-cell-small { font-size: 12px; color: var(--muted); }
+html[data-theme] .tx-modal .tx-cell-small { color: var(--text); font-family: var(--mono); }
+html[data-theme] .tx-modal .tx-ok { color: var(--positive); }
+html[data-theme] .tx-modal .tx-bad { color: var(--negative); }
+html[data-theme] .tx-modal .tx-route-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 12px 0; }
+html[data-theme] .tx-modal .tx-route-head .ant-btn-dashed { width: auto; }
+html[data-theme] .tx-modal .tx-route-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 32px; gap: 12px; align-items: start; margin-bottom: 8px; }
+html[data-theme] .tx-modal .tx-route-row .ant-btn { width: 32px; padding: 0; }
+html[data-theme] .tx-modal .tx-loading { padding: 40px 24px; text-align: left; color: var(--muted); }
+
+/* Check-status modal on the transaction page */
+html[data-theme] .tx-modal .tx-modal-kv { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 6px 12px; margin-bottom: 12px; font-size: 13px; }
+html[data-theme] .tx-modal .tx-modal-kv dt { color: var(--faint); font-size: 12px; }
+html[data-theme] .tx-modal .tx-modal-kv dd { margin: 0; color: var(--text); }
+html[data-theme] .tx-modal .tx-pre-label { font: 600 11px var(--font); letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); margin-bottom: 4px; }
+
+/* ---------- MUI dialogs on the profile page ---------- */
+html[data-theme] .tx-dialog .MuiDialogTitle-root { display: flex; align-items: center; gap: 8px; padding: 14px 20px; font: 600 15px var(--font); }
+html[data-theme] .tx-dialog .MuiDialogTitle-root svg { font-size: 18px; color: var(--faint); }
+html[data-theme] .tx-dialog .MuiDialogContent-root { padding: 0 !important; }
+html[data-theme] .tx-dialog .tx-dialog-item { padding: 12px 20px; border-bottom: 1px solid var(--rule); }
+html[data-theme] .tx-dialog .tx-dialog-item:last-child { border-bottom: 0; }
+html[data-theme] .tx-dialog .tx-dialog-item h4 { margin: 0 0 8px; font: 600 13px var(--font); color: var(--text); }
+html[data-theme] .tx-dialog .tx-dialog-kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px 16px; margin: 0; }
+html[data-theme] .tx-dialog .tx-dialog-kv dt { font-size: 12px; color: var(--faint); }
+html[data-theme] .tx-dialog .tx-dialog-kv dd { margin: 2px 0 0; font: 400 12.5px var(--mono); color: var(--text); overflow-wrap: anywhere; }
+html[data-theme] .tx-dialog .tx-dialog-empty { padding: 24px 20px; text-align: left; color: var(--faint); font-size: 13px; }
+
+/* ---------- Merchant list search ---------- */
+html[data-theme] .sf-shell .tx-search { width: 420px; max-width: 100%; }
+html[data-theme] .sf-shell .tx-search .ant-input-affix-wrapper { height: var(--ctl-h); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+  html[data-theme] .sf-shell .tx-detail-grid.side { grid-template-columns: minmax(0, 1fr); }
+  html[data-theme] .sf-shell .tx-kv.cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  html[data-theme] .sf-shell .tx-detail-grid { grid-template-columns: minmax(0, 1fr); }
+  html[data-theme] .sf-shell .tx-head { align-items: flex-start; }
+}
+@media (max-width: 640px) {
+  html[data-theme] .sf-shell .tx-filterbar > *,
+  html[data-theme] .sf-shell .tx-filterbar .tx-f-date,
+  html[data-theme] .sf-shell .tx-filterbar .tx-f-md,
+  html[data-theme] .sf-shell .tx-filterbar .tx-f-sm,
+  html[data-theme] .sf-shell .tx-filterbar .tx-f-grow { flex: 1 1 100%; width: 100%; max-width: none; }
+  html[data-theme] .sf-shell .tx-filterbar .tx-f-half { flex: 1 1 calc(50% - 4px); width: auto; }
+  html[data-theme] .sf-shell .tx-filterbar .tx-filter-btns { margin-left: 0; }
+  html[data-theme] .sf-shell .tx-filterbar .tx-filter-btns > * { flex: 1 1 0; }
+  html[data-theme] .sf-shell .tx-filter-more { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  html[data-theme] .sf-shell .tx-kv,
+  html[data-theme] .sf-shell .tx-kv.cols-3 { grid-template-columns: minmax(0, 1fr); }
+  html[data-theme] .sf-shell .tx-kv.rows > div { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+  html[data-theme] :is(.sf-shell, .tx-modal) .tx-form-grid,
+  html[data-theme] :is(.sf-shell, .tx-modal) .tx-form-grid.cols-3 { grid-template-columns: minmax(0, 1fr); }
+  html[data-theme] .sf-shell .tx-search { width: 100%; }
+  html[data-theme] .sf-shell .tx-log-body { padding-left: 16px; }
+  html[data-theme] .sf-shell .tx-head .tx-actions { width: 100%; }
+}
+
+/* In two-column lists, the last row has no rule (cards in a row may be stretched to equal height). */
+html[data-theme] .sf-shell .tx-kv > div:last-child,
+html[data-theme] .sf-shell .tx-kv:not(.cols-3):not(.cols-1):not(.rows) > div:nth-last-child(2):nth-child(odd) { border-bottom-color: transparent; }
+@media (max-width: 640px) {
+  html[data-theme] .sf-shell .tx-kv:not(.cols-3):not(.cols-1):not(.rows) > div:nth-last-child(2):nth-child(odd) { border-bottom-color: var(--rule); }
+}
+html[data-theme] .tx-modal :is(.tx-form-grid, .ant-form-item) + .tx-form-section { margin-top: 16px; border-top: 1px solid var(--rule); }
+html[data-theme] .tx-modal .tx-form-section > div:has(> .ant-btn-dashed) + .tx-table { margin-top: 10px; }
+html[data-theme] .tx-modal .tx-route-row .ant-form-item { margin: 0; }
+html[data-theme] .sf-shell .tx-field .MuiInputBase-root.Mui-disabled { background: var(--raised); }
+html[data-theme] .sf-shell .tx-field .MuiInputBase-input.Mui-disabled { -webkit-text-fill-color: var(--text); color: var(--text); }

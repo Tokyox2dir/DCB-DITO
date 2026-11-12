@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Form, Modal, Input, Select, Card, Row, Col, message, Space, Table } from 'antd'
+import { Button, Form, Modal, Input, Select, message, Space, Table } from 'antd'
 import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import axios from 'axios'
 import { useAuth } from '../../../provider/AuthProvider'
@@ -291,7 +291,7 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
       }
     } catch (error) {
       console.error('Error fetching merchant detail:', error)
-      message.error('Gagal memuat detail merchant')
+      message.error('Failed to load merchant details')
     } finally {
       setFetchLoading(false)
     }
@@ -314,7 +314,7 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
       }
     } catch (error) {
       console.error('Error fetching payment methods:', error)
-      message.error('Gagal memuat metode pembayaran')
+      message.error('Failed to load payment methods')
     }
   }
 
@@ -413,7 +413,7 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
 
       const totalWeight = processedRoutes.reduce((sum: number, route: any) => sum + route.weight, 0)
       if (totalWeight !== 100) {
-        message.error(`Total weight harus 100%. Saat ini: ${totalWeight}%`)
+        message.error(`Total weight must be 100%. Currently ${totalWeight}%.`)
         return
       }
     }
@@ -451,12 +451,12 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
 
   const handleSubmit = async (values: MerchantFormData) => {
     if (apps.length === 0) {
-      message.error('Minimal harus ada satu aplikasi!')
+      message.error('Add at least one application.')
       return
     }
 
     if (selectedPaymentMethods.length === 0) {
-      message.error('Pilih minimal satu metode pembayaran!')
+      message.error('Select at least one payment method.')
       return
     }
 
@@ -498,20 +498,20 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
         },
       })
 
-      message.success('Merchant berhasil diupdate!')
+      message.success('Merchant updated.')
       handleClose()
       // Refresh parent component if needed
       window.location.reload()
     } catch (error: any) {
       console.error('Error updating merchant:', error)
-      message.error(error.response?.data?.message || 'Gagal mengupdate merchant')
+      message.error(error.response?.data?.message || 'Failed to update merchant')
     }
     setLoading(false)
   }
 
   const appColumns = [
     {
-      title: 'Nama Aplikasi',
+      title: 'App Name',
       dataIndex: 'app_name',
       key: 'app_name',
     },
@@ -525,13 +525,13 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
       title: 'Testing',
       dataIndex: 'testing',
       key: 'testing',
-      render: (value: number) => (value === 1 ? 'Ya' : 'Tidak'),
+      render: (value: number) => (value === 1 ? 'Yes' : 'No'),
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (value: number) => (value === 1 ? 'Aktif' : 'Tidak Aktif'),
+      render: (value: number) => (value === 1 ? 'Active' : 'Inactive'),
     },
     {
       title: 'Action',
@@ -542,7 +542,7 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
             Edit
           </Button>
           <Button size='small' danger icon={<DeleteOutlined />} onClick={() => handleDeleteApp(index)}>
-            Hapus
+            Delete
           </Button>
         </Space>
       ),
@@ -551,16 +551,16 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
 
   const selectedPaymentColumns = [
     {
-      title: 'Metode Pembayaran',
+      title: 'Payment Method',
       dataIndex: 'payment_method_slug',
       key: 'payment_method_slug',
       render: (slug: string) => {
         const method = availablePaymentMethods.find((m) => m.slug === slug)
         return (
           <div>
-            <div style={{ fontWeight: 'bold' }}>{slug.replace(/_/g, ' ').toUpperCase()}</div>
+            <div className='tx-cell-title'>{slug.replace(/_/g, ' ').toUpperCase()}</div>
             {method && (
-              <div style={{ fontSize: '12px', color: 'var(--dash-muted)' }}>
+              <div className='tx-cell-sub'>
                 {method.type} {method.description && `- ${method.description}`}
               </div>
             )}
@@ -573,7 +573,7 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
       dataIndex: 'selected_routes',
       key: 'selected_routes',
       render: (routes: SelectedRoute[]) => (
-        <div style={{ fontSize: '12px' }}>
+        <div className='tx-cell-small'>
           {routes.map((route, index) => (
             <div key={index}>
               {route.route}: {route.weight}%
@@ -587,18 +587,14 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
       dataIndex: 'status',
       key: 'status',
       render: (value: number) =>
-        value === 1 ? (
-          <span style={{ color: 'var(--theme-success)' }}>Aktif</span>
-        ) : (
-          <span style={{ color: 'var(--theme-danger)' }}>Tidak Aktif</span>
-        ),
+        value === 1 ? <span className='tx-ok'>Active</span> : <span className='tx-bad'>Inactive</span>,
     },
     {
       title: 'Settlement',
       dataIndex: 'settlement_config',
       key: 'settlement_config',
       render: (config: SettlementConfig) => (
-        <div style={{ fontSize: '12px' }}>
+        <div className='tx-cell-small'>
           <div>MDR: {config.mdr}%</div>
           <div>
             Share: {config.share_redision}% / {config.share_partner}%
@@ -615,7 +611,7 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
             Edit
           </Button>
           <Button size='small' danger icon={<DeleteOutlined />} onClick={() => handleDeletePaymentMethod(index)}>
-            Hapus
+            Delete
           </Button>
         </Space>
       ),
@@ -624,33 +620,19 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
 
   return (
     <>
-      <Button
-        type='default'
-        size='small'
-        icon={<EditOutlined />}
-        onClick={handleOpen}
-        style={{
-          borderRadius: '6px',
-          fontSize: '11px',
-          fontWeight: 600,
-          height: 28,
-          minWidth: 70,
-          backgroundColor: 'var(--theme-primary)',
-          borderColor: 'var(--theme-primary)',
-          color: 'var(--theme-on-primary)',
-        }}
-      >
+      <Button type='default' size='small' icon={<EditOutlined />} onClick={handleOpen}>
         Edit
       </Button>
 
       <Modal
+        className='tx-modal'
         title='Edit Merchant'
         open={open}
         onCancel={handleClose}
         width={800}
         footer={[
           <Button key='cancel' onClick={handleClose}>
-            Batal
+            Cancel
           </Button>,
           <Button key='submit' type='primary' loading={loading} onClick={() => form.submit()}>
             Update
@@ -670,125 +652,91 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
           }}
         >
           {fetchLoading ? (
-            <div style={{ textAlign: 'center', padding: '40px' }}>
+            <div className='tx-loading'>
               <span>Loading merchant data...</span>
             </div>
           ) : (
             <>
-              <Card title='Informasi Dasar' style={{ marginBottom: 16 }}>
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Form.Item
-                      label='Nama Client'
-                      name='client_name'
-                      rules={[{ required: true, message: 'Nama client wajib diisi!' }]}
-                    >
-                      <Input placeholder='Masukkan nama client' />
-                    </Form.Item>
-                  </Col>
-                  <Col span={12}>
-                    <Form.Item
-                      label='Nama Aplikasi'
-                      name='app_name'
-                      rules={[{ required: true, message: 'Nama aplikasi wajib diisi!' }]}
-                    >
-                      <Input placeholder='Masukkan nama aplikasi' />
-                    </Form.Item>
-                  </Col>
-                </Row>
+              <section className='tx-form-section'>
+                <h4 className='tx-section-label'>Basic Information</h4>
+                <div className='tx-form-grid'>
+                  <Form.Item
+                    label='Client Name'
+                    name='client_name'
+                    rules={[{ required: true, message: 'Client name is required' }]}
+                  >
+                    <Input placeholder='Enter client name' />
+                  </Form.Item>
+                  <Form.Item
+                    label='App Name'
+                    name='app_name'
+                    rules={[{ required: true, message: 'App name is required' }]}
+                  >
+                    <Input placeholder='Enter app name' />
+                  </Form.Item>
 
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Form.Item
-                      label='Email'
-                      name='email'
-                      rules={[
-                        { required: true, message: 'Email wajib diisi!' },
-                        { type: 'email', message: 'Format email tidak valid!' },
-                      ]}
-                    >
-                      <Input placeholder='Masukkan email' />
-                    </Form.Item>
-                  </Col>
-                  <Col span={12}>
-                    <Form.Item
-                      label='Nomor Telepon'
-                      name='phone'
-                      rules={[{ required: true, message: 'Nomor telepon wajib diisi!' }]}
-                    >
-                      <Input placeholder='Masukkan nomor telepon' />
-                    </Form.Item>
-                  </Col>
-                </Row>
+                  <Form.Item
+                    label='Email'
+                    name='email'
+                    rules={[
+                      { required: true, message: 'Email is required' },
+                      { type: 'email', message: 'Invalid email format' },
+                    ]}
+                  >
+                    <Input placeholder='Enter email' />
+                  </Form.Item>
+                  <Form.Item
+                    label='Phone Number'
+                    name='phone'
+                    rules={[{ required: true, message: 'Phone number is required' }]}
+                  >
+                    <Input placeholder='Enter phone number' />
+                  </Form.Item>
 
-                <Row gutter={16}>
-                  <Col span={12}>
-                    <Form.Item
-                      label='Mobile'
-                      name='mobile'
-                      rules={[{ required: true, message: 'Mobile wajib diisi!' }]}
-                    >
-                      <Input placeholder='Masukkan nomor mobile' />
-                    </Form.Item>
-                  </Col>
-                  <Col span={12}>
-                    <Form.Item
-                      label='Alamat'
-                      name='address'
-                      rules={[{ required: true, message: 'Alamat wajib diisi!' }]}
-                    >
-                      <Input placeholder='Masukkan alamat' />
-                    </Form.Item>
-                  </Col>
-                </Row>
-              </Card>
+                  <Form.Item label='Mobile' name='mobile' rules={[{ required: true, message: 'Mobile is required' }]}>
+                    <Input placeholder='Enter mobile number' />
+                  </Form.Item>
+                  <Form.Item label='Address' name='address' rules={[{ required: true, message: 'Address is required' }]}>
+                    <Input placeholder='Enter address' />
+                  </Form.Item>
+                </div>
+              </section>
 
-              <Card title='Configuration' style={{ marginBottom: 16 }}>
-                <Row gutter={16}>
-                  <Col span={8}>
-                    <Form.Item label='Client Status' name='client_status'>
-                      <Select>
-                        <Option value={1}>Active</Option>
-                        <Option value={0}>Inactive</Option>
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                  <Col span={8}>
-                    <Form.Item label='Testing Mode' name='testing'>
-                      <Select>
-                        <Option value={1}>Yes</Option>
-                        <Option value={0}>No</Option>
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                </Row>
+              <section className='tx-form-section'>
+                <h4 className='tx-section-label'>Configuration</h4>
+                <div className='tx-form-grid'>
+                  <Form.Item label='Client Status' name='client_status'>
+                    <Select>
+                      <Option value={1}>Active</Option>
+                      <Option value={0}>Inactive</Option>
+                    </Select>
+                  </Form.Item>
+                  <Form.Item label='Testing Mode' name='testing'>
+                    <Select>
+                      <Option value={1}>Yes</Option>
+                      <Option value={0}>No</Option>
+                    </Select>
+                  </Form.Item>
 
-                <Row gutter={16}>
-                  <Col span={8}>
-                    <Form.Item label='Language' name='lang'>
-                      <Select>
-                        <Option value='id'>Indonesia</Option>
-                        <Option value='en'>English</Option>
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                  <Col span={8}>
-                    <Form.Item label='DCB' name='isdcb'>
-                      <Select>
-                        <Option value='1'>Yes</Option>
-                        <Option value='0'>No</Option>
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                  <Col span={8}>
-                    <Form.Item label='Fail Callback' name='fail_callback'>
-                      <Select defaultValue='0'>
-                        <Option value='1'>Yes</Option>
-                        <Option value='0'>No</Option>
-                      </Select>
-                    </Form.Item>
-                  </Col>
-                </Row>
+                  <Form.Item label='Language' name='lang'>
+                    <Select>
+                      <Option value='id'>Indonesian</Option>
+                      <Option value='en'>English</Option>
+                    </Select>
+                  </Form.Item>
+                  <Form.Item label='DCB' name='isdcb'>
+                    <Select>
+                      <Option value='1'>Yes</Option>
+                      <Option value='0'>No</Option>
+                    </Select>
+                  </Form.Item>
+                  <Form.Item label='Fail Callback' name='fail_callback'>
+                    <Select defaultValue='0'>
+                      <Option value='1'>Yes</Option>
+                      <Option value='0'>No</Option>
+                    </Select>
+                  </Form.Item>
+                </div>
 
                 <Form.Item label='Callback URL (Default)' name='callback_url'>
                   <Input placeholder='https://example.com/callback' />
@@ -797,7 +745,7 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
                 <Form.Item
                   label='Whitelisted IPs'
                   name='whitelisted_ips'
-                  tooltip='Pisahkan beberapa IP dengan koma. Kosongkan untuk mengizinkan semua IP.'
+                  tooltip='Separate multiple IPs with commas. Leave empty to allow all IPs.'
                 >
                   <TextArea rows={2} placeholder='192.168.1.1,10.0.0.1' />
                 </Form.Item>
@@ -813,8 +761,8 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
                         label='Fail Callback URL'
                         name='fail_callback_url'
                         rules={[
-                          { required: true, message: 'Fail callback URL wajib diisi!' },
-                          { type: 'url', message: 'Format URL tidak valid!' },
+                          { required: true, message: 'Fail callback URL is required' },
+                          { type: 'url', message: 'Invalid URL format' },
                         ]}
                       >
                         <Input placeholder='https://example.com/fail-callback' />
@@ -822,55 +770,55 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
                     ) : null
                   }}
                 </Form.Item> */}
-              </Card>
+              </section>
 
-              <Card title='Metode Pembayaran' style={{ marginBottom: 16 }}>
-                <div style={{ marginBottom: 16 }}>
-                  <Button
-                    type='dashed'
-                    icon={<PlusOutlined />}
-                    onClick={handleAddPaymentMethod}
-                    style={{ width: '100%' }}
-                  >
-                    Pilih Metode Pembayaran
+              <section className='tx-form-section'>
+                <h4 className='tx-section-label'>Payment Methods</h4>
+                <div>
+                  <Button type='dashed' icon={<PlusOutlined />} onClick={handleAddPaymentMethod}>
+                    Select Payment Methods
                   </Button>
                 </div>
 
                 <Table
                   columns={selectedPaymentColumns}
+                  className='tx-table'
                   dataSource={selectedPaymentMethods}
                   pagination={false}
                   size='small'
                   locale={{
-                    emptyText: 'Belum ada metode pembayaran dipilih. Klik "Pilih Metode Pembayaran" untuk menambah.',
+                    emptyText: 'No payment methods selected yet. Click "Select Payment Methods" to add one.',
                   }}
                 />
-              </Card>
+              </section>
 
-              <Card title='Aplikasi' style={{ marginBottom: 16 }}>
-                <div style={{ marginBottom: 16 }}>
-                  <Button type='dashed' icon={<PlusOutlined />} onClick={handleAddApp} style={{ width: '100%' }}>
-                    Tambah Aplikasi
+              <section className='tx-form-section'>
+                <h4 className='tx-section-label'>Applications</h4>
+                <div>
+                  <Button type='dashed' icon={<PlusOutlined />} onClick={handleAddApp}>
+                    Add Application
                   </Button>
                 </div>
 
                 <Table
                   columns={appColumns}
+                  className='tx-table'
                   dataSource={apps}
                   pagination={false}
                   size='small'
                   locale={{
-                    emptyText: 'Belum ada aplikasi. Klik "Tambah Aplikasi" untuk menambah.',
+                    emptyText: 'No applications yet. Click "Add Application" to add one.',
                   }}
                 />
-              </Card>
+              </section>
             </>
           )}
         </Form>
 
-        {/* Modal untuk menambah/edit aplikasi */}
+        {/* Modal for adding/editing an application */}
         <Modal
-          title={editingApp !== null ? 'Edit Aplikasi' : 'Tambah Aplikasi'}
+          className='tx-modal'
+          title={editingApp !== null ? 'Edit Application' : 'Add Application'}
           open={appModalOpen}
           onCancel={() => {
             setAppModalOpen(false)
@@ -886,10 +834,10 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
                 setEditingApp(null)
               }}
             >
-              Batal
+              Cancel
             </Button>,
             <Button key='submit' type='primary' onClick={() => appForm.submit()}>
-              {editingApp !== null ? 'Update' : 'Tambah'}
+              {editingApp !== null ? 'Update' : 'Add'}
             </Button>,
           ]}
         >
@@ -903,45 +851,42 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
             }}
           >
             <Form.Item
-              label='Nama Aplikasi'
+              label='App Name'
               name='app_name'
-              rules={[{ required: true, message: 'Nama aplikasi wajib diisi!' }]}
+              rules={[{ required: true, message: 'App name is required' }]}
             >
-              <Input placeholder='Masukkan nama aplikasi' />
+              <Input placeholder='Enter app name' />
             </Form.Item>
 
             <Form.Item
               label='Callback URL'
               name='callback_url'
-              rules={[{ required: true, message: 'Callback URL wajib diisi!' }]}
+              rules={[{ required: true, message: 'Callback URL is required' }]}
             >
               <Input placeholder='https://example.com/callback' />
             </Form.Item>
 
-            <Row gutter={16}>
-              <Col span={12}>
-                <Form.Item label='Testing Mode' name='testing'>
-                  <Select>
-                    <Option value={1}>Ya</Option>
-                    <Option value={0}>Tidak</Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item label='Status' name='status'>
-                  <Select>
-                    <Option value={1}>Aktif</Option>
-                    <Option value={0}>Tidak Aktif</Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
+            <div className='tx-form-grid'>
+              <Form.Item label='Testing Mode' name='testing'>
+                <Select>
+                  <Option value={1}>Yes</Option>
+                  <Option value={0}>No</Option>
+                </Select>
+              </Form.Item>
+              <Form.Item label='Status' name='status'>
+                <Select>
+                  <Option value={1}>Active</Option>
+                  <Option value={0}>Inactive</Option>
+                </Select>
+              </Form.Item>
+            </div>
           </Form>
         </Modal>
 
-        {/* Modal untuk konfigurasi payment method */}
+        {/* Modal for configuring a payment method */}
         <Modal
-          title={editingPaymentIndex !== null ? 'Edit Payment Method' : 'Pilih Payment Method'}
+          className='tx-modal'
+          title={editingPaymentIndex !== null ? 'Edit Payment Method' : 'Select Payment Method'}
           open={paymentConfigModalOpen}
           onCancel={() => {
             setPaymentConfigModalOpen(false)
@@ -958,10 +903,10 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
                 setEditingPaymentIndex(null)
               }}
             >
-              Batal
+              Cancel
             </Button>,
             <Button key='submit' type='primary' onClick={() => paymentConfigForm.submit()}>
-              {editingPaymentIndex !== null ? 'Update' : 'Tambah'}
+              {editingPaymentIndex !== null ? 'Update' : 'Add'}
             </Button>,
           ]}
         >
@@ -992,9 +937,9 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
             <Form.Item
               label='Payment Method'
               name='payment_method_slug'
-              rules={[{ required: true, message: 'Payment method wajib dipilih!' }]}
+              rules={[{ required: true, message: 'Payment method is required' }]}
             >
-              <Select placeholder='Pilih payment method'>
+              <Select placeholder='Select payment method'>
                 {availablePaymentMethods.map((method) => (
                   <Option key={method.id} value={method.slug}>
                     {method.slug.replace(/_/g, ' ').toUpperCase()}
@@ -1021,75 +966,60 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
                   <Form.List name='selected_routes'>
                     {(fields, { add, remove }) => (
                       <div>
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            marginBottom: 16,
-                          }}
-                        >
+                        <div className='tx-route-head'>
                           <div>
-                            <label style={{ fontWeight: 'bold' }}>Routes & Weight</label>
-                            {fields.length > 1 && (
-                              <div style={{ fontSize: '12px', color: 'var(--dash-muted)', marginTop: '4px' }}>
-                                Total weight harus 100%
-                              </div>
-                            )}
+                            <label className='tx-section-label' style={{ margin: 0 }}>
+                              Routes & Weight
+                            </label>
+                            {fields.length > 1 && <div className='tx-cell-sub'>Total weight must be 100%</div>}
                           </div>
                           <Button type='dashed' onClick={() => add()} icon={<PlusOutlined />}>
                             Add Route
                           </Button>
                         </div>
                         {fields.map(({ key, name, ...restField }) => (
-                          <Row key={key} gutter={16} style={{ marginBottom: 8 }}>
-                            <Col span={10}>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'route']}
-                                rules={[{ required: true, message: 'Route wajib dipilih!' }]}
-                              >
-                                <Select placeholder='Pilih route'>
-                                  {selectedMethod.route?.map((route) => (
-                                    <Option key={route} value={route}>
-                                      {route}
-                                    </Option>
-                                  ))}
-                                </Select>
-                              </Form.Item>
-                            </Col>
-                            <Col span={10}>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'weight']}
-                                rules={
-                                  fields.length === 1
-                                    ? []
-                                    : [
-                                        { required: true, message: 'Weight wajib diisi!' },
-                                        {
-                                          validator: (_, value) => {
-                                            const numValue = Number(value)
-                                            if (isNaN(numValue) || numValue < 1 || numValue > 100) {
-                                              return Promise.reject(new Error('Weight harus antara 1-100!'))
-                                            }
-                                            return Promise.resolve()
-                                          },
+                          <div key={key} className='tx-route-row'>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'route']}
+                              rules={[{ required: true, message: 'Route is required' }]}
+                            >
+                              <Select placeholder='Select route'>
+                                {selectedMethod.route?.map((route) => (
+                                  <Option key={route} value={route}>
+                                    {route}
+                                  </Option>
+                                ))}
+                              </Select>
+                            </Form.Item>
+                            <Form.Item
+                              {...restField}
+                              name={[name, 'weight']}
+                              rules={
+                                fields.length === 1
+                                  ? []
+                                  : [
+                                      { required: true, message: 'Weight is required' },
+                                      {
+                                        validator: (_, value) => {
+                                          const numValue = Number(value)
+                                          if (isNaN(numValue) || numValue < 1 || numValue > 100) {
+                                            return Promise.reject(new Error('Weight must be between 1 and 100'))
+                                          }
+                                          return Promise.resolve()
                                         },
-                                      ]
-                                }
-                              >
-                                {fields.length === 1 ? (
-                                  <Input value='100' disabled suffix='%' />
-                                ) : (
-                                  <Input type='number' placeholder='Weight (%)' min={1} max={100} />
-                                )}
-                              </Form.Item>
-                            </Col>
-                            <Col span={4}>
-                              <Button type='link' danger onClick={() => remove(name)} icon={<DeleteOutlined />} />
-                            </Col>
-                          </Row>
+                                      },
+                                    ]
+                              }
+                            >
+                              {fields.length === 1 ? (
+                                <Input value='100' disabled suffix='%' />
+                              ) : (
+                                <Input type='number' placeholder='Weight (%)' min={1} max={100} />
+                              )}
+                            </Form.Item>
+                            <Button type='link' danger onClick={() => remove(name)} icon={<DeleteOutlined />} />
+                          </div>
                         ))}
                       </div>
                     )}
@@ -1098,93 +1028,68 @@ const EditMerchant = ({ id }: EditMerchantProps) => {
               }}
             </Form.Item>
 
-            <Row gutter={16}>
-              <Col span={12}>
-                <Form.Item label='Status' name='status'>
-                  <Select>
-                    <Option value={1}>Aktif</Option>
-                    <Option value={0}>Tidak Aktif</Option>
+            <div className='tx-form-grid'>
+              <Form.Item label='Status' name='status'>
+                <Select>
+                  <Option value={1}>Active</Option>
+                  <Option value={0}>Inactive</Option>
+                </Select>
+              </Form.Item>
+              <Form.Item label='MSISDN' name='msisdn'>
+                <Select>
+                  <Option value={1}>Yes</Option>
+                  <Option value={0}>No</Option>
+                </Select>
+              </Form.Item>
+            </div>
+
+            <section className='tx-form-section'>
+              <h4 className='tx-section-label'>Settlement Configuration</h4>
+
+              <div className='tx-form-grid cols-3'>
+                <Form.Item label='MDR' name={['settlement_config', 'mdr']}>
+                  <Input placeholder='MDR' disabled value='0' />
+                </Form.Item>
+                <Form.Item label='MDR Type' name={['settlement_config', 'mdr_type']}>
+                  <Select disabled defaultValue={''}>
+                    <Option value='percent'>Percent</Option>
+                    <Option value='fixed'>Fixed</Option>
                   </Select>
                 </Form.Item>
-              </Col>
-              <Col span={12}>
-                <Form.Item label='MSISDN' name='msisdn'>
+                <Form.Item label='Additional Fee' name={['settlement_config', 'additionalfee']}>
                   <Select>
-                    <Option value={1}>Ya</Option>
-                    <Option value={0}>Tidak</Option>
+                    <Option value={1}>Yes</Option>
+                    <Option value={0}>No</Option>
                   </Select>
                 </Form.Item>
-              </Col>
-            </Row>
 
-            <Card title='Settlement Configuration' style={{ marginTop: 16 }}>
+                <Form.Item label='Include PPN' name={['settlement_config', 'additional_percent']}>
+                  <Select placeholder='Include PPN'>
+                    <Option value={11}>Yes</Option>
+                    <Option value={0}>No</Option>
+                  </Select>
+                </Form.Item>
+                <Form.Item label='Additional Fee Type' name={['settlement_config', 'additionalfee_type']}>
+                  <Input placeholder='Additional fee type' disabled />
+                </Form.Item>
+                <Form.Item label='Payment Type' name={['settlement_config', 'payment_type']}>
+                  <Input placeholder='Payment type' disabled value='idr' />
+                </Form.Item>
 
-              <Row gutter={16}>
-                <Col span={8}>
-                  <Form.Item label='MDR' name={['settlement_config', 'mdr']}>
-                    <Input placeholder='MDR' disabled value='0' />
-                  </Form.Item>
-                </Col>
-                <Col span={8}>
-                  <Form.Item label='MDR Type' name={['settlement_config', 'mdr_type']}>
-                    <Select disabled defaultValue={''}>
-                      <Option value='percent'>Percent</Option>
-                      <Option value='fixed'>Fixed</Option>
-                    </Select>
-                  </Form.Item>
-                </Col>
-                <Col span={8}>
-                  <Form.Item label='Additional Fee' name={['settlement_config', 'additionalfee']}>
-                    <Select>
-                      <Option value={1}>Ya</Option>
-                      <Option value={0}>Tidak</Option>
-                    </Select>
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Row gutter={16}>
-                <Col span={8}>
-                  <Form.Item label='Include PPN' name={['settlement_config', 'additional_percent']}>
-                    <Select placeholder='Include PPN'>
-                      <Option value={11}>Ya</Option>
-                      <Option value={0}>Tidak</Option>
-                    </Select>
-                  </Form.Item>
-                </Col>
-                <Col span={8}>
-                  <Form.Item label='Additional Fee Type' name={['settlement_config', 'additionalfee_type']}>
-                    <Input placeholder='Additional fee type' disabled />
-                  </Form.Item>
-                </Col>
-                <Col span={8}>
-                  <Form.Item label='Payment Type' name={['settlement_config', 'payment_type']}>
-                    <Input placeholder='Payment type' disabled value='idr' />
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Row gutter={16}>
-                <Col span={8}>
-                  <Form.Item label='Share Redision (%)' name={['settlement_config', 'share_redision']}>
-                    <Input type='number' placeholder='Share redision' step='0.01' min='0' max='100' />
-                  </Form.Item>
-                </Col>
-                <Col span={8}>
-                  <Form.Item label='Share Partner (%)' name={['settlement_config', 'share_partner']}>
-                    <Input type='number' placeholder='Share partner' step='0.01' min='0' max='100' />
-                  </Form.Item>
-                </Col>
-                <Col span={8}>
-                  <Form.Item label='BHPUSO' name={['settlement_config', 'is_bhpuso']}>
-                    <Select>
-                      <Option value='1'>Ya</Option>
-                      <Option value='0'>Tidak</Option>
-                    </Select>
-                  </Form.Item>
-                </Col>
-              </Row>
-            </Card>
+                <Form.Item label='Share Redision (%)' name={['settlement_config', 'share_redision']}>
+                  <Input type='number' placeholder='Share redision' step='0.01' min='0' max='100' />
+                </Form.Item>
+                <Form.Item label='Share Partner (%)' name={['settlement_config', 'share_partner']}>
+                  <Input type='number' placeholder='Share partner' step='0.01' min='0' max='100' />
+                </Form.Item>
+                <Form.Item label='BHPUSO' name={['settlement_config', 'is_bhpuso']}>
+                  <Select>
+                    <Option value='1'>Yes</Option>
+                    <Option value='0'>No</Option>
+                  </Select>
+                </Form.Item>
+              </div>
+            </section>
           </Form>
         </Modal>
       </Modal>

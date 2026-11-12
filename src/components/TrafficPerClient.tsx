@@ -1,6 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import BarChartOutlinedIcon from '@mui/icons-material/BarChartOutlined'
-import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined'
 import dayjs, { type Dayjs } from 'dayjs'
 import { MetricStatus, TrafficSeries, pointValue } from './VolumePerHourChart'
 import { paymentMethods } from '../utils/paymentMethods'
@@ -150,39 +148,39 @@ function TrafficTable({
           {!loading && rows.length === 0 && (
             <tr>
               <td colSpan={5} className='mon-panel-empty'>
-                Belum ada data traffic
+                No traffic data yet
               </td>
             </tr>
           )}
           {rows.map((r) => {
             const delta = r.today - r.yesterday
             const up = delta >= 0
-            const col = up ? '#10b981' : '#ef4444'
+            const tone = up ? 'up' : 'down'
             const pct = r.yesterday ? (delta / r.yesterday) * 100 : 0
             const w = Math.max(6, Math.round((r.today / max) * 100))
             return (
-              <tr key={r.client}>
+              <tr key={r.client} className={tone}>
                 <td>
-                  <span className='mon-tpc-client'>
-                    <i style={{ background: col }} />
+                  <span className='mon-tpc-client' title={r.client}>
+                    <i />
                     {r.client}
                   </span>
                 </td>
                 <td className='num'>
                   <span className='mon-tpc-today'>{formatNum(r.today)}</span>
-                  <span className='mon-tpc-delta-pill' style={{ color: col, background: `${col}1f` }}>
+                  <span className='mon-tpc-delta-pill'>
                     {up ? '+' : ''}
                     {formatNum(delta)}
                   </span>
                 </td>
                 <td className='num muted'>{formatNum(r.yesterday)}</td>
-                <td className='num' style={{ color: col, fontWeight: 700 }}>
-                  {up ? '+' : ''}
+                <td className='num mon-tpc-pct'>
+                  {up ? '▲' : '▼'} {up ? '+' : ''}
                   {pct.toFixed(1)}%
                 </td>
                 <td className='bar-col'>
                   <div className='mon-tpc-bar'>
-                    <i style={{ width: `${w}%`, background: col }} />
+                    <i style={{ width: `${w}%` }} />
                   </div>
                 </td>
               </tr>
@@ -246,17 +244,14 @@ export default function TrafficPerClient({
     ? 'vs same time yesterday'
     : `${ref.format('DD MMM')} vs ${ref.subtract(1, 'day').format('DD MMM')}`
 
-  const TitleIcon = SLIDES[active].groupBy === 'payment' ? PaymentsOutlinedIcon : BarChartOutlinedIcon
-
   return (
     <div className='mon-panel mon-panel-tpc'>
-      <div className='mon-panel-head mon-panel-head-border'>
+      <div className='mon-panel-head'>
         <div className='mon-panel-title'>
-          <TitleIcon sx={{ fontSize: 18 }} />
           <h4>{SLIDES[active].title}</h4>
+          <small>{compareLabel}</small>
         </div>
         <div className='mon-tpc-head-right'>
-          <span className='mon-panel-meta'>{compareLabel}</span>
           <div className='mon-tpc-dots' role='tablist' aria-label='Traffic view'>
             {SLIDES.map((slide, i) => (
               <button
@@ -268,7 +263,9 @@ export default function TrafficPerClient({
                 title={slide.title}
                 className={i === active ? 'active' : ''}
                 onClick={() => goTo(i)}
-              />
+              >
+                {slide.column}
+              </button>
             ))}
           </div>
         </div>
@@ -283,7 +280,8 @@ export default function TrafficPerClient({
       </div>
 
       <div className='mon-panel-foot'>
-        ● traffic API — {isLive ? 'refresh tiap 30 detik' : 'data historis'} · geser untuk ganti tampilan
+        <i className={`mon-live-dot${isLive ? ' on' : ''}`} />
+        traffic API — {isLive ? 'refreshes every 30s' : 'historical data'} · swipe to switch view
       </div>
     </div>
   )

@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import { Table, Select, DatePicker, Row, Col, message } from 'antd'
+import { Table, Select, DatePicker, message } from 'antd'
 import axios from 'axios'
 import type { TableColumnsType } from 'antd'
-import Typography from '@mui/material/Typography'
 import dayjs, { Dayjs } from 'dayjs'
 import { useAuth } from '../provider/AuthProvider'
 import { useMerchants } from '../context/MerchantContext'
@@ -75,14 +74,13 @@ const columns: TableColumnsType<ReportSummary> = [
     title: 'Denom',
     dataIndex: 'amount',
     key: 'amount',
-    align: 'center',
   },
   {
     title: '#Trx',
     dataIndex: 'count',
     width: 100,
     key: 'count',
-    align: 'center',
+    align: 'right',
   },
   {
     title: 'Sales (incl. VAT)',
@@ -174,7 +172,7 @@ const Report: React.FC = () => {
       setData(res.data)
     } catch (error) {
       console.error(error)
-      message.error('Gagal mengambil data report')
+      message.error('Could not load report data')
       // Reset data to undefined when error occurs
       setData(undefined)
     } finally {
@@ -599,22 +597,29 @@ const Report: React.FC = () => {
   }, [filteredApp, filteredPaymentMethod, filteredMonth])
 
   return (
-    <div className='flex flex-col p-6'>
-      <Typography component='h2' variant='h2' sx={{ mb: 6 }}>
-        Report Transaction Merchant
-      </Typography>
+    <div className='rpt-page'>
+      <div className='rpt-head'>
+        <div className='rpt-actions'>
+          <button
+            type='button'
+            onClick={exportToPDF}
+            className='sf-btn sf-btn-primary'
+            disabled={!data || !data.summaries || data.summaries.length === 0}
+          >
+            Export PDF
+          </button>
+        </div>
+      </div>
 
       {/* Filter Controls */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 16 }} className='flex gap-6'>
-        <Col className='flex gap-4'>
-          <label htmlFor='app-select' className='text-2xl'>
-            App :
-          </label>
+      <div className='rpt-filters'>
+        <label className='rpt-field' htmlFor='app-select'>
+          <span>App</span>
           <Select
             id='app-select'
             allowClear
             placeholder={merchantsLoading ? 'Loading...' : 'Select App'}
-            style={{ width: 300 }}
+            style={{ width: 280 }}
             onChange={(val) => setFilteredApp(val)}
             loading={merchantsLoading}
             disabled={merchantsLoading}
@@ -625,16 +630,14 @@ const Report: React.FC = () => {
               </Option>
             ))}
           </Select>
-        </Col>
-        <Col className='flex gap-4'>
-          <label htmlFor='client-select' className='text-2xl'>
-            Payment Method :{' '}
-          </label>
+        </label>
+        <label className='rpt-field' htmlFor='payment-select'>
+          <span>Payment method</span>
           <Select
             id='payment-select'
             allowClear
             placeholder='Select Payment Method'
-            style={{ width: 180 }}
+            style={{ width: 190 }}
             onChange={(val) => {
               const selected = paymentMethods.find((m) => m.value === val)
               if (selected) setFilteredPaymentMethod(selected)
@@ -648,47 +651,32 @@ const Report: React.FC = () => {
               </Option>
             ))}
           </Select>
-        </Col>
-        <Col className='flex gap-4'>
-          <label htmlFor='client-select' className='text-2xl'>
-            Month :{' '}
-          </label>
+        </label>
+        <div className='rpt-field'>
+          <span>Month</span>
           <MonthPicker
             placeholder='Select Month'
-            style={{ width: 160 }}
+            style={{ width: 140 }}
             onChange={(val) => setFilteredMonth(val)}
             value={filteredMonth}
           />
-        </Col>
-      </Row>
+        </div>
+      </div>
 
-      <button
-        onClick={exportToPDF}
-        style={{ marginTop: 16 }}
-        className={`py-1 px-2 w-28 rounded ${
-          !data || !data.summaries || data.summaries.length === 0
-            ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-            : 'bg-green-500 text-white hover:bg-green-600'
-        }`}
-        disabled={!data || !data.summaries || data.summaries.length === 0}
-      >
-        Export PDF
-      </button>
-      <div style={{ padding: 24 }}>
+      <div className='rpt-table'>
         <Table
-          bordered
           loading={loading}
           columns={columns}
           rowKey={(record) => `${record.amount}-${record.payment_method}`}
           dataSource={data?.summaries}
           pagination={false}
-          scroll={{ x: 1000 }}
+          scroll={{ x: 900 }}
           summary={() => (
             <Table.Summary.Row>
-              <Table.Summary.Cell index={0} align='center'>
-                <strong>Total</strong>
+              <Table.Summary.Cell index={0}>
+                <span className='rpt-total-label'>Total</span>
               </Table.Summary.Cell>
-              <Table.Summary.Cell index={1} align='center'>
+              <Table.Summary.Cell index={1} align='right'>
                 <strong>{data?.total_transaction} </strong>
               </Table.Summary.Cell>
               <Table.Summary.Cell index={1} align='right' />

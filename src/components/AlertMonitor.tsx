@@ -68,7 +68,7 @@ export function buildClientStopAlerts(options: {
     rows.push({
       client,
       product,
-      detail: `Traffic stop — ${totalToday.toLocaleString('id-ID')} trx, terakhir ${since}`,
+      detail: `Traffic stop — ${totalToday.toLocaleString('id-ID')} trx, last at ${since}`,
       since,
       lastTs: lastMs,
       totalToday,
@@ -104,7 +104,7 @@ export function buildClientDownAlerts(stops: ClientStopAlert[], todayCounts: Tod
     const since = formatLastSeen(lastTs)
     out.push({
       client,
-      detail: `Client stop total — ${rows.length} produk berhenti, terakhir ${since}`,
+      detail: `Client stop total — ${rows.length} products stopped, last at ${since}`,
       since,
       lastTs,
     })
@@ -205,21 +205,26 @@ export default function AlertMonitor({
 
   return (
     <div className='mon-panel mon-panel-alert'>
-      <div className='mon-alert-head'>
-        <h4>Alert Monitor</h4>
+      <div className='mon-panel-head mon-alert-head'>
+        <div className='mon-panel-title'>
+          <h4>Alert Monitor</h4>
+          <small>No traffic or failed spikes in the last 5 minutes</small>
+        </div>
         <div className='mon-alert-badges'>
-          <span className='crit'>{clientStops.length} stop</span>
-          <span className='warn'>{incidentCount} incident</span>
+          <span className={clientStops.length ? 'crit' : 'ok'}>{clientStops.length} stop</span>
+          <span className={incidentCount ? 'warn' : 'ok'}>{incidentCount} incident</span>
         </div>
       </div>
 
       <div className='mon-alert-section'>
-        <div className='mon-alert-section-title crit'>Client Info</div>
+        <div className='mon-alert-section-title crit'>
+          Client Info<span>{clientStops.length}</span>
+        </div>
         <div className='mon-alert-scroll'>
           {loading && clientStops.length === 0 ? (
             <div className='mon-panel-empty'>Loading alerts…</div>
           ) : clientStops.length === 0 ? (
-            <div className='mon-panel-empty'>Tidak ada client stop (5 menit)</div>
+            <div className='mon-panel-empty'>No client stops (5 min)</div>
           ) : (
             <table className='mon-alert-table'>
               <thead>
@@ -234,7 +239,7 @@ export default function AlertMonitor({
                 {clientStops.map((r) => (
                   <tr key={`${r.client}-${r.product}`}>
                     <td>
-                      <span className='mon-alert-client'>
+                      <span className='mon-alert-client' title={r.client}>
                         <i className='dot crit' />
                         {r.client}
                       </span>
@@ -251,12 +256,14 @@ export default function AlertMonitor({
       </div>
 
       <div className='mon-alert-section'>
-        <div className='mon-alert-section-title warn'>Incidents</div>
+        <div className='mon-alert-section-title warn'>
+          Incidents<span>{incidentCount}</span>
+        </div>
         <div className='mon-alert-scroll'>
           {loading && incidentCount === 0 ? (
             <div className='mon-panel-empty'>Loading incidents…</div>
           ) : incidentCount === 0 ? (
-            <div className='mon-panel-empty'>Tidak ada client stop total / failed spike (5 menit)</div>
+            <div className='mon-panel-empty'>No total client stops / failed spikes (5 min)</div>
           ) : (
             <table className='mon-alert-table'>
               <thead>
@@ -270,7 +277,7 @@ export default function AlertMonitor({
                 {clientDowns.map((r) => (
                   <tr key={`down-${r.client}`}>
                     <td>
-                      <span className='mon-alert-client'>
+                      <span className='mon-alert-client' title={r.client}>
                         <i className='dot crit' />
                         {r.client}
                       </span>
@@ -282,7 +289,7 @@ export default function AlertMonitor({
                 {incidents.map((r) => (
                   <tr key={r.product}>
                     <td>
-                      <span className='mon-alert-client'>
+                      <span className='mon-alert-client' title={r.product}>
                         <i className='dot warn' />
                         <span className='product'>{r.product}</span>
                       </span>

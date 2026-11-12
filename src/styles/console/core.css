@@ -1,0 +1,816 @@
+/* Redpay Ops Console.
+   A dense, quiet console for the ops team: cool slate neutrals, hairline rules instead of shadows,
+   small radii, Geist for text and Geist Mono for figures and IDs. Redpay red marks the brand and the
+   current place only; data and status carry their own colours. Every page builds on these tokens. */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
+
+/* ---------- Tokens ---------- */
+html[data-theme='light'] {
+  --bg: #f4f5f7;        /* the app ground behind cards */
+  --surface: #ffffff;   /* cards, bars, dialogs */
+  --raised: #f8f9fb;    /* table heads, hover rows, wells */
+  --active: #eceef2;    /* selected rows and items */
+  --border: #e2e5ea;    /* card edges */
+  --rule: #edeff2;      /* row rules inside cards */
+  --control: #cfd4dc;   /* field and button edges */
+  --text: #0f1728;
+  --muted: #475467;
+  --faint: #667085;
+  --brand: #cc2030;
+  --brand-soft: #fdecee;
+  --primary: #0f1728;
+  --on-primary: #ffffff;
+  --data: #3d63dd;      /* the main data series */
+  --data-2: #9db1f2;
+  --data-soft: #ebf0fd;
+  --positive: #067647;
+  --warning: #b54708;
+  --negative: #d92d20;
+  --info: #1570ef;
+  --pill-positive-bg: #e7f6ec; --pill-positive-ink: #05603a;
+  --pill-warning-bg: #fef4e6;  --pill-warning-ink: #93370d;
+  --pill-negative-bg: #fdeceb; --pill-negative-ink: #b42318;
+  --pill-info-bg: #eaf2fe;     --pill-info-ink: #1849a9;
+  --pill-neutral-bg: #eef0f3;  --pill-neutral-ink: #344054;
+  --float-shadow: 0 10px 28px rgba(15, 23, 40, 0.12), 0 1px 3px rgba(15, 23, 40, 0.08);
+  --focus: 0 0 0 3px rgba(61, 99, 221, 0.22);
+  color-scheme: light;
+}
+html[data-theme='dark'] {
+  --bg: #0a0d14;
+  --surface: #10141d;
+  --raised: #151a25;
+  --active: #1c2231;
+  --border: #212938;
+  --rule: #1a2030;
+  --control: #344055;
+  --text: #e7eaf1;
+  --muted: #a5adbe;
+  --faint: #7f899c;
+  --brand: #f0444f;
+  --brand-soft: #2c1418;
+  --primary: #e7eaf1;
+  --on-primary: #0a0d14;
+  --data: #7391ff;
+  --data-2: #3e4f8f;
+  --data-soft: #18203a;
+  --positive: #3ccb7f;
+  --warning: #f5a524;
+  --negative: #f97066;
+  --info: #53b1fd;
+  --pill-positive-bg: #0f2a1d; --pill-positive-ink: #6ce0a1;
+  --pill-warning-bg: #2d2010;  --pill-warning-ink: #f7c066;
+  --pill-negative-bg: #2f1517; --pill-negative-ink: #fb9a92;
+  --pill-info-bg: #102340;     --pill-info-ink: #84c5fe;
+  --pill-neutral-bg: #1c2231;  --pill-neutral-ink: #c9cfdb;
+  --float-shadow: 0 14px 36px rgba(0, 0, 0, 0.55), 0 0 0 1px #212938;
+  --focus: 0 0 0 3px rgba(115, 145, 255, 0.3);
+  color-scheme: dark;
+}
+html[data-theme] {
+  --font: 'Geist', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --radius-card: 8px;
+  --radius-control: 6px;
+  --radius-chip: 4px;
+  --gap: 16px;
+  --pad: 16px;
+  --ctl-h: 32px;
+  --rail-w: 64px;
+  --bar-h: 52px;
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --rail-bg: #0b111d;
+  --rail-ink: rgba(231, 234, 241, 0.62);
+
+  /* Older names used inline by components point at the console tokens. */
+  --ground: var(--bg);
+  --accent: var(--data);
+  --sf-bg: var(--bg);
+  --sf-card: var(--surface);
+  --sf-card-2: var(--raised);
+  --sf-line: var(--border);
+  --sf-ink: var(--text);
+  --sf-muted: var(--muted);
+  --sf-dark: var(--primary);
+  --sf-on-dark: var(--on-primary);
+  --sf-peach: var(--pill-warning-bg);
+  --sf-peach-bar: var(--warning);
+  --sf-sky: var(--pill-info-bg);
+  --sf-sky-bar: var(--data);
+  --sf-rose: var(--pill-negative-bg);
+  --sf-rose-bar: var(--negative);
+  --sf-red: var(--negative);
+  --sf-yellow: var(--warning);
+  --sf-good: var(--positive);
+  --sf-warn: var(--warning);
+  --sf-bad: var(--negative);
+  --dash-bg: var(--bg);
+  --dash-surface: var(--surface);
+  --dash-surface-2: var(--raised);
+  --dash-border: var(--border);
+  --dash-text: var(--text);
+  --dash-muted: var(--muted);
+  --dash-subtle: var(--faint);
+  --dash-accent: var(--data);
+  --dash-blue: var(--data);
+  --dash-green: var(--positive);
+  --dash-amber: var(--warning);
+  --dash-red: var(--negative);
+  --dash-shadow: none;
+  --dash-radius: var(--radius-card);
+  --dash-radius-sm: var(--radius-control);
+  --theme-primary: var(--primary);
+  --theme-primary-hover: color-mix(in srgb, var(--primary) 86%, var(--surface));
+  --theme-on-primary: var(--on-primary);
+  --theme-accent-soft: var(--active);
+  --theme-success: var(--positive);
+  --theme-warning: var(--warning);
+  --theme-danger: var(--negative);
+  --theme-danger-bg: var(--pill-negative-bg);
+}
+
+html[data-theme],
+html[data-theme] body,
+html[data-theme] #root { background: var(--bg); color: var(--text); }
+html[data-theme] body,
+html[data-theme] .sf-shell,
+html[data-theme] .sf-shell :is(button, input, select, textarea),
+html[data-theme] :is(.MuiPopover-paper, .MuiDialog-paper, .MuiTooltip-tooltip, .ant-select-dropdown, .ant-picker-dropdown, .ant-modal, .ant-message, .ant-notification) {
+  font-family: var(--font);
+}
+html[data-theme] .sf-shell { color: var(--text); font-size: 14px; line-height: 1.45; }
+html[data-theme] .sf-shell :is(td, .num, strong) { font-variant-numeric: tabular-nums; }
+html[data-theme] .sf-shell code,
+html[data-theme] .sf-shell .mono { font-family: var(--mono); font-size: 0.92em; }
+html[data-theme] ::selection { background: color-mix(in srgb, var(--data) 28%, transparent); }
+html[data-theme] .sf-shell :focus-visible { outline: 2px solid var(--data); outline-offset: 2px; }
+
+/* ---------- Frame: rail, bar, page ---------- */
+html[data-theme] .rp-frame {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: var(--bar-h) minmax(0, 1fr);
+  background: var(--bg);
+  padding-left: var(--rail-w);
+}
+
+/* The rail: the small floating capsule on the left edge (the original one). */
+html[data-theme] .rp-frame .sf-capsule.rp-rail {
+  position: fixed;
+  left: 16px;
+  top: 50%;
+  z-index: 1300;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 999px;
+  background: #141413;
+  box-shadow: 0 14px 34px rgba(20, 20, 19, 0.28), 0 2px 6px rgba(20, 20, 19, 0.12);
+  opacity: 1;
+  transform: translateY(-50%);
+  animation: rp-rail-in 0.5s var(--ease) both;
+}
+html[data-theme='dark'] .rp-frame .sf-capsule.rp-rail { background: #222220; box-shadow: 0 14px 34px rgba(0, 0, 0, 0.55), inset 0 0 0 1px #2e2e2b; }
+html[data-theme] .rp-rail-mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+html[data-theme] .rp-rail-mark img { width: 30px; height: auto; display: block; }
+html[data-theme] .rp-rail .sf-capsule-item {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: background-color 0.2s var(--ease), color 0.2s, transform 0.2s var(--ease);
+}
+html[data-theme] .rp-rail .sf-capsule-item svg { font-size: 21px; transition: transform 0.25s var(--ease); }
+html[data-theme] .rp-rail .sf-capsule-item:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
+html[data-theme] .rp-rail .sf-capsule-item:hover svg { transform: scale(1.12); }
+html[data-theme] .rp-rail .sf-capsule-item:active { transform: scale(0.9); }
+html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open) { background: #fff; color: #141413; }
+html[data-theme] .rp-rail .sf-capsule-item.active { animation: rp-pop-in 0.35s var(--ease); }
+html[data-theme] .rp-rail .sf-capsule-item:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+html[data-theme] .rp-rail .sf-capsule-item.has-menu::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.7;
+}
+html[data-theme] .rp-rail .sf-capsule-sep { display: block; width: 20px; height: 1px; margin: 4px 0; background: rgba(255, 255, 255, 0.16); }
+html[data-theme] .rp-rail .rp-rail-logout:hover { background: color-mix(in srgb, var(--negative) 30%, transparent); color: #fff; }
+html[data-theme] .rp-rail-edge { display: none; }
+
+@media (min-width: 901px) {
+  /* Auto-hide: the capsule waits off-screen and slides in when the pointer reaches the left edge; the page moves over for it. */
+  html[data-theme] .rp-frame { padding-left: 8px; transition: padding-left 0.38s cubic-bezier(0.22, 1, 0.36, 1); }
+  html[data-theme] .rp-frame.rail-open { padding-left: 92px; }
+  html[data-theme] .rp-rail-edge {
+    display: block;
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 20px;
+    z-index: 1290;
+  }
+  html[data-theme] .rp-rail-edge i {
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    width: 4px;
+    height: 64px;
+    border-radius: 99px;
+    transform: translateY(-50%);
+    background: color-mix(in srgb, var(--text) 24%, transparent);
+    transition: opacity 0.2s, height 0.25s var(--ease);
+  }
+  html[data-theme] .rp-rail-edge:hover i { height: 88px; background: color-mix(in srgb, var(--text) 40%, transparent); }
+  html[data-theme] .rp-frame .sf-capsule.rp-rail {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(calc(-100% - 28px), -50%);
+    transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+    animation: none;
+  }
+  html[data-theme] .rp-frame.rail-open .sf-capsule.rp-rail { opacity: 1; pointer-events: auto; transform: translateY(-50%); }
+  html[data-theme] .rp-frame.rail-open .rp-rail-edge i { opacity: 0; }
+}
+@keyframes rp-rail-in { from { opacity: 0; transform: translate(-24px, -50%); } }
+@keyframes rp-pop-in { from { transform: scale(0.7); } }
+@keyframes rp-rail-up { from { opacity: 0; transform: translate(-50%, 24px); } }
+
+/* Top bar */
+html[data-theme] .rp-bar {
+  grid-row: 1;
+  position: sticky;
+  top: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--bar-h);
+  padding: 0 20px 0 16px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: saturate(1.4) blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+html[data-theme] .rp-brand { display: flex; align-items: center; height: 28px; padding-right: 14px; border-right: 1px solid var(--border); }
+html[data-theme] .rp-brand img { height: 20px; width: auto; display: block; }
+html[data-theme='light'] .rp-brand .on-dark,
+html[data-theme='dark'] .rp-brand .on-light { display: none; }
+html[data-theme] .rp-crumbs { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+html[data-theme] .rp-crumbs h1 {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 600 14px var(--font);
+  color: var(--text);
+}
+html[data-theme] .rp-crumbs h1 span { color: var(--faint); font-weight: 400; }
+html[data-theme] .rp-crumbs h1 span::after { content: '/'; margin: 0 8px; color: var(--control); }
+html[data-theme] .rp-bar-right { display: flex; align-items: center; gap: 8px; }
+html[data-theme] .rp-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  width: 240px;
+  padding: 0 6px 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--raised);
+  color: var(--faint);
+  font: 400 13px var(--font);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+html[data-theme] .rp-search svg { font-size: 17px; }
+html[data-theme] .rp-search:hover { border-color: var(--control); color: var(--muted); background: var(--surface); }
+html[data-theme] :is(.rp-search, .sf-search) kbd {
+  margin-left: auto;
+  padding: 1px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--faint);
+  font: 500 11px var(--mono);
+}
+html[data-theme] :is(.rp-icon, .rp-back) {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+html[data-theme] .rp-icon svg { font-size: 18px; }
+html[data-theme] .rp-back { width: 28px; height: 28px; flex: none; }
+html[data-theme] .rp-back svg { font-size: 16px; }
+html[data-theme] :is(.rp-icon, .rp-back):hover { background: var(--raised); border-color: var(--border); color: var(--text); }
+html[data-theme] .rp-avatar {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--primary);
+  color: var(--on-primary);
+  font: 600 13px var(--font);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+html[data-theme] .rp-avatar:hover { opacity: 0.86; }
+
+/* Prod / Dev: a two-way segmented switch */
+html[data-theme] .aura-api-switch {
+  display: inline-flex;
+  gap: 0;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--raised);
+}
+html[data-theme] .aura-api-opt {
+  height: 26px;
+  min-width: 44px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--faint);
+  font: 500 12px var(--font);
+  cursor: pointer;
+}
+html[data-theme] .aura-api-switch.is-disabled { opacity: 0.55; }
+html[data-theme] .aura-api-opt.active { background: var(--surface); color: var(--text); box-shadow: 0 0 0 1px var(--border), 0 1px 2px rgba(15, 23, 40, 0.06); }
+html[data-theme] .aura-api-opt.active::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  vertical-align: 1px;
+  background: var(--positive);
+}
+html[data-theme] .aura-api-opt.active.dev::before { background: var(--warning); }
+
+/* The page */
+html[data-theme] .rp-sheet.sf-content {
+  grid-row: 2;
+  min-width: 0;
+  padding: 24px 28px 48px;
+  background: var(--bg);
+}
+html[data-theme] .rp-page { width: 100%; }
+
+/* ---------- Page titles ---------- */
+html[data-theme] .sf-shell .rp-page > * > h2:first-child,
+html[data-theme] .sf-shell .rp-page :is(h2.sf-page-title, .dash-title) {
+  margin: 0 0 16px;
+  font: 600 20px/1.3 var(--font);
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+html[data-theme] .sf-shell .rp-page :is(.dash-subtitle, .sf-section-title) { color: var(--muted); }
+html[data-theme] .sf-shell .sf-section-title { margin: 0 0 10px; font: 600 13px var(--font); color: var(--text); }
+html[data-theme] .sf-shell .rp-page > :is(main.MuiBox-root, .space-y-4) { padding: 0; }
+html[data-theme] .sf-shell .rp-page > main.MuiBox-root > .MuiStack-root > .MuiBox-root { max-width: none; }
+
+/* ---------- Surfaces ---------- */
+html[data-theme] .sf-shell :is(.rp-card, .sf-card, .sf-panel, .MuiPaper-root.MuiCard-root, .ant-card) {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: none;
+}
+html[data-theme] .sf-shell .MuiPaper-root:not(.MuiCard-root):not(.MuiAlert-root):not(.MuiAppBar-root) {
+  background-color: var(--surface);
+  background-image: none;
+  box-shadow: none;
+  border-radius: var(--radius-card);
+}
+html[data-theme] .sf-shell .rp-page .MuiPaper-elevation:not(.MuiCard-root) { border: 1px solid var(--border); }
+html[data-theme] .sf-shell :is(.rp-card, .sf-panel) { padding: 16px; min-width: 0; }
+html[data-theme] .sf-shell .ant-card .ant-card-head { min-height: 44px; padding: 0 16px; border-bottom: 1px solid var(--rule); font: 600 14px var(--font); }
+html[data-theme] .sf-shell .ant-card .ant-card-body { padding: 16px; }
+html[data-theme] .sf-shell .rp-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+html[data-theme] .sf-shell .rp-card-head h3 { margin: 0; font: 600 14px/1.3 var(--font); color: var(--text); }
+html[data-theme] .sf-shell .rp-card-head small { display: block; margin-top: 2px; font-size: 12px; color: var(--faint); }
+html[data-theme] .sf-shell .rp-link { flex: none; color: var(--data); font-size: 13px; font-weight: 500; text-decoration: none; }
+html[data-theme] .sf-shell .rp-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+html[data-theme] .sf-shell .MuiDivider-root { border-color: var(--rule); }
+html[data-theme] .sf-shell .MuiTypography-root { font-family: var(--font); }
+
+/* ---------- Buttons ---------- */
+html[data-theme] .sf-shell .rp-btn,
+html[data-theme] .sf-shell :is(.sf-btn, .MuiButton-root, .ant-btn):not(.ant-btn-icon-only):not(.ant-btn-link):not(.ant-btn-text):not(.MuiButton-text) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--ctl-h);
+  padding: 0 12px;
+  border-radius: var(--radius-control);
+  font: 500 13px/1 var(--font);
+  letter-spacing: 0;
+  text-transform: none;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(15, 23, 40, 0.05);
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+html[data-theme] .sf-shell .rp-btn svg { font-size: 16px; }
+html[data-theme] .sf-shell .rp-btn,
+html[data-theme] .sf-shell :is(.sf-btn-ghost, .MuiButton-outlined, .ant-btn-default:not(.ant-btn-dangerous)) {
+  background: var(--surface);
+  border: 1px solid var(--control);
+  color: var(--text);
+}
+html[data-theme] .sf-shell .rp-btn:hover,
+html[data-theme] .sf-shell :is(.sf-btn-ghost, .MuiButton-outlined, .ant-btn-default:not(.ant-btn-dangerous)):not(:disabled):hover {
+  background: var(--raised);
+  border-color: var(--faint);
+  color: var(--text);
+}
+html[data-theme] .sf-shell .rp-btn.primary,
+html[data-theme] .sf-shell :is(.sf-btn-primary, .MuiButton-contained, .ant-btn-primary:not(.ant-btn-dangerous)) {
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  color: var(--on-primary);
+}
+html[data-theme] .sf-shell .rp-btn.primary:hover,
+html[data-theme] .sf-shell :is(.sf-btn-primary, .MuiButton-contained, .ant-btn-primary:not(.ant-btn-dangerous)):not(:disabled):hover {
+  background: color-mix(in srgb, var(--primary) 85%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 85%, var(--surface));
+  color: var(--on-primary);
+}
+html[data-theme] .sf-shell .rp-btn.spin svg { animation: rp-spin 0.8s linear infinite; }
+html[data-theme] .sf-shell :is(.rp-btn, .sf-btn, .MuiButton-root, .ant-btn):disabled { opacity: 0.5; cursor: not-allowed; }
+html[data-theme] .sf-shell :is(.MuiButton-sizeSmall, .ant-btn-sm) { height: 28px; padding: 0 10px; font-size: 12px; }
+/* Same :not() chain as the generic button rule so this one wins inside tables. */
+html[data-theme] .sf-shell :is(.ant-table, table) :is(.MuiButton-root, .ant-btn):not(.ant-btn-icon-only):not(.ant-btn-link):not(.ant-btn-text):not(.MuiButton-text) {
+  height: 26px;
+  min-width: 0;
+  padding: 0 9px;
+  font-size: 12px;
+}
+html[data-theme] .sf-shell :is(.MuiButton-outlinedSuccess, .MuiButton-outlinedInfo, .MuiButton-outlinedSecondary, .MuiButton-outlinedWarning) {
+  background: var(--surface);
+  border: 1px solid var(--control);
+  color: var(--text);
+}
+html[data-theme] .sf-shell :is(.MuiButton-outlinedError, .ant-btn-dangerous) {
+  border: 1px solid color-mix(in srgb, var(--negative) 40%, var(--surface));
+  color: var(--negative);
+  background: var(--surface);
+}
+html[data-theme] .sf-shell :is(.MuiButton-text, .ant-btn-link, .ant-btn-text) { color: var(--data); text-transform: none; font-family: var(--font); }
+html[data-theme] .sf-shell .MuiIconButton-root { border-radius: var(--radius-control); color: var(--muted); }
+html[data-theme] .sf-shell .MuiIconButton-root:hover { background: var(--raised); color: var(--text); }
+
+/* ---------- Fields ---------- */
+html[data-theme] .sf-shell :is(.ant-input-affix-wrapper, .ant-picker, .ant-input-number),
+html[data-theme] .sf-shell .ant-select:not(.ant-select-sm) .ant-select-selector,
+html[data-theme] .sf-shell .ant-input:not(textarea):not(.ant-input-affix-wrapper .ant-input):not(.ant-input-number .ant-input) {
+  min-height: var(--ctl-h);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  border: 1px solid var(--control);
+  box-shadow: 0 1px 2px rgba(15, 23, 40, 0.04);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+html[data-theme] .sf-shell textarea.ant-input { border-radius: var(--radius-control); border-color: var(--control); background: var(--surface); }
+html[data-theme] .sf-shell .ant-select-single:not(.ant-select-sm) { height: var(--ctl-h); }
+html[data-theme] .sf-shell .ant-select-single:not(.ant-select-sm) .ant-select-selector { align-items: center; }
+html[data-theme] .sf-shell :is(.ant-input-affix-wrapper, .ant-picker, .ant-input, .ant-select-selector):hover { border-color: var(--faint); }
+html[data-theme] .sf-shell :is(.ant-input-affix-wrapper-focused, .ant-picker-focused, .ant-input:focus, .ant-select-focused .ant-select-selector) {
+  border-color: var(--data) !important;
+  box-shadow: var(--focus) !important;
+}
+html[data-theme] .sf-shell .MuiOutlinedInput-root:not(.MuiInputBase-multiline):not(.MuiInputBase-sizeSmall) { height: var(--ctl-h); }
+html[data-theme] .sf-shell .MuiOutlinedInput-root { border-radius: var(--radius-control); background: var(--surface); transition: box-shadow 0.15s; }
+html[data-theme] .sf-shell .MuiOutlinedInput-notchedOutline { border-color: var(--control); }
+html[data-theme] .sf-shell .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline { border-color: var(--faint); }
+html[data-theme] .sf-shell .MuiOutlinedInput-root.Mui-focused { box-shadow: var(--focus); }
+html[data-theme] .sf-shell .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline { border-color: var(--data); border-width: 1px; }
+html[data-theme] .sf-shell .MuiInputBase-input { font: 400 13px var(--font); color: var(--text); }
+html[data-theme] .sf-shell :is(.MuiInputLabel-root, .MuiFormLabel-root, .ant-form-item-label > label, .sf-field-label) {
+  font: 500 12px var(--font);
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+}
+html[data-theme] .sf-shell .MuiInputLabel-root.Mui-focused { color: var(--data); }
+html[data-theme] .sf-shell :is(.ant-select-selection-placeholder, input::placeholder, .ant-picker input::placeholder) { color: var(--faint); opacity: 1; }
+html[data-theme] .sf-shell :is(.MuiCheckbox-root, .MuiRadio-root).Mui-checked,
+html[data-theme] .sf-shell .MuiSwitch-switchBase.Mui-checked { color: var(--data); }
+html[data-theme] .sf-shell .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track { background-color: var(--data); }
+html[data-theme] .sf-shell .ant-checkbox-checked .ant-checkbox-inner,
+html[data-theme] .sf-shell .ant-radio-checked .ant-radio-inner { background: var(--data); border-color: var(--data); }
+html[data-theme] .sf-shell .ant-form-item { margin-bottom: 14px; }
+html[data-theme] .sf-shell :is(.ant-segmented) { border-radius: var(--radius-control); background: var(--active); padding: 2px; }
+html[data-theme] .sf-shell .ant-segmented-item { border-radius: 4px; font-size: 13px; }
+
+/* ---------- Tables: dense rows, quiet head, hairline rules ---------- */
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table,
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table-container { background: transparent; border-radius: 0; }
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table-thead > tr > :is(th, td),
+html[data-theme] .sf-shell :is(.MuiTableHead-root) .MuiTableCell-root {
+  background: var(--raised) !important;
+  color: var(--faint) !important;
+  font: 600 11px/1.3 var(--font) !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border) !important;
+  border-radius: 0 !important;
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table-thead > tr > th::before { display: none; }
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table-tbody > tr > td,
+html[data-theme] .sf-shell .MuiTableBody-root .MuiTableCell-root {
+  border-bottom: 1px solid var(--rule) !important;
+  border-top: 0;
+  color: var(--text);
+  background: transparent;
+  font-size: 13px;
+  font-family: var(--font);
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table-tbody > tr:hover > td,
+html[data-theme] .sf-shell .MuiTableBody-root .MuiTableRow-root:hover .MuiTableCell-root { background: var(--raised) !important; }
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table-tbody > tr.ant-table-row-selected > td { background: var(--data-soft) !important; }
+html[data-theme] .sf-shell .ant-table-wrapper :is(.ant-table-cell-fix-left, .ant-table-cell-fix-right) { background: var(--surface) !important; }
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table-summary > tr > td { background: var(--raised); font-weight: 600; border-top: 1px solid var(--border); }
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table-column-sorter { color: var(--control); }
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table-column-sorter :is(.active) { color: var(--data); }
+html[data-theme] .sf-shell .ant-empty-description { color: var(--faint); }
+/* A table placed straight on the page gets the card edge. */
+html[data-theme] .sf-shell .rp-page > div > .ant-table-wrapper,
+html[data-theme] .sf-shell .rp-page .transactions-table,
+html[data-theme] .sf-shell .rp-page .report-margin-table {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+/* MUI X DataGrid */
+html[data-theme] .sf-shell .MuiDataGrid-root {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  font-family: var(--font);
+  font-size: 13px;
+  --DataGrid-rowBorderColor: var(--rule);
+  --DataGrid-containerBackground: var(--raised);
+}
+html[data-theme] .sf-shell .MuiDataGrid-columnHeaderTitle { font: 600 11px var(--font); letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint); }
+html[data-theme] .sf-shell .MuiDataGrid-row:hover { background: var(--raised); }
+html[data-theme] .sf-shell .MuiDataGrid-row.Mui-selected { background: var(--data-soft); }
+
+/* ---------- Status pills: square-cornered, tinted ---------- */
+html[data-theme] .sf-shell .ant-tag,
+html[data-theme] .sf-shell .MuiChip-root {
+  border-radius: var(--radius-chip);
+  border: 0;
+  font: 500 12px/20px var(--font);
+  padding: 0 7px;
+  height: 22px;
+  margin-inline-end: 4px;
+}
+html[data-theme] .sf-shell .MuiChip-root .MuiChip-label { padding: 0 1px; }
+html[data-theme] .sf-shell :is(.ant-tag-success, .ant-tag-green, .MuiChip-colorSuccess) { background: var(--pill-positive-bg); color: var(--pill-positive-ink); }
+html[data-theme] .sf-shell :is(.ant-tag-warning, .ant-tag-gold, .ant-tag-orange, .ant-tag-yellow, .MuiChip-colorWarning) { background: var(--pill-warning-bg); color: var(--pill-warning-ink); }
+html[data-theme] .sf-shell :is(.ant-tag-error, .ant-tag-red, .ant-tag-volcano, .MuiChip-colorError) { background: var(--pill-negative-bg); color: var(--pill-negative-ink); }
+html[data-theme] .sf-shell :is(.ant-tag-processing, .ant-tag-blue, .ant-tag-purple, .ant-tag-geekblue, .ant-tag-cyan, .MuiChip-colorInfo, .MuiChip-colorPrimary) { background: var(--pill-info-bg); color: var(--pill-info-ink); }
+html[data-theme] .sf-shell :is(.ant-tag-default, .MuiChip-colorDefault) { background: var(--pill-neutral-bg); color: var(--pill-neutral-ink); }
+
+/* Pagination */
+html[data-theme] .sf-shell .ant-pagination { font-size: 13px; }
+html[data-theme] .sf-shell .ant-pagination :is(.ant-pagination-item, .ant-pagination-prev, .ant-pagination-next) { min-width: 30px; height: 30px; line-height: 28px; border-radius: var(--radius-control); }
+html[data-theme] .sf-shell .ant-pagination .ant-pagination-item { border: 1px solid transparent; }
+html[data-theme] .sf-shell .ant-pagination .ant-pagination-item-active { border-color: var(--control); background: var(--surface); font-weight: 600; }
+html[data-theme] .sf-shell .ant-pagination .ant-pagination-item-active a { color: var(--text); }
+html[data-theme] .sf-shell .MuiTablePagination-root { color: var(--muted); font-size: 13px; }
+
+/* Tabs */
+html[data-theme] .sf-shell .ant-tabs-nav::before { border-color: var(--border); }
+html[data-theme] .sf-shell .ant-tabs-tab { font-size: 13px; padding: 10px 2px; }
+html[data-theme] .sf-shell .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn { color: var(--text); font-weight: 600; }
+html[data-theme] .sf-shell .ant-tabs-ink-bar { background: var(--brand); height: 2px; }
+html[data-theme] .sf-shell .MuiTabs-indicator { background: var(--brand); height: 2px; }
+html[data-theme] .sf-shell .MuiTab-root { text-transform: none; font: 500 13px var(--font); color: var(--muted); min-height: 40px; }
+html[data-theme] .sf-shell .MuiTab-root.Mui-selected { color: var(--text); font-weight: 600; }
+
+/* Alerts and descriptions */
+html[data-theme] .sf-shell .ant-alert { border-radius: var(--radius-card); }
+html[data-theme] .sf-shell .MuiAlert-root { border-radius: var(--radius-card); font-family: var(--font); }
+html[data-theme] .sf-shell .ant-descriptions-bordered .ant-descriptions-view { border-color: var(--border); border-radius: var(--radius-card); }
+html[data-theme] .sf-shell .ant-descriptions-bordered .ant-descriptions-item-label { background: var(--raised); color: var(--muted); font-weight: 500; }
+
+/* ---------- Floating: menus, dropdowns, dialogs, tooltips ---------- */
+html[data-theme] :is(.rp-menu, .ant-select-dropdown, .ant-picker-dropdown .ant-picker-panel-container, .ant-dropdown-menu) {
+  background: var(--surface) !important;
+  border: 1px solid var(--border);
+  border-radius: 8px !important;
+  box-shadow: var(--float-shadow) !important;
+}
+html[data-theme] .rp-menu { padding: 4px 0; }
+html[data-theme] .rp-menu .MuiMenuItem-root { font: 400 13px var(--font) !important; color: var(--text); border-radius: 5px !important; margin: 0 4px !important; min-height: 32px !important; }
+html[data-theme] .rp-menu .MuiMenuItem-root.Mui-selected { background: var(--active); font-weight: 600 !important; box-shadow: inset 2px 0 0 var(--brand); }
+html[data-theme] .rp-menu .MuiMenuItem-root:hover { background: var(--raised); }
+html[data-theme] .rp-menu .sf-menu-title { padding: 6px 12px 4px; font: 600 11px var(--font); letter-spacing: 0.05em; text-transform: uppercase; color: var(--faint); }
+html[data-theme] .rp-menu .sf-menu-user { display: flex; flex-direction: column; gap: 1px; padding: 8px 12px; }
+html[data-theme] .rp-menu .sf-menu-user strong { font-size: 13px; font-weight: 600; }
+html[data-theme] .rp-menu .sf-menu-user small { font: 500 11px var(--mono); color: var(--faint); text-transform: uppercase; letter-spacing: 0.04em; }
+html[data-theme] .rp-menu .sf-menu-api { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 12px 10px; }
+html[data-theme] .rp-menu .sf-menu-api small { font-size: 12px; color: var(--muted); }
+html[data-theme] .MuiTooltip-tooltip {
+  background: #0b111d !important;
+  color: #e7eaf1 !important;
+  border-radius: 5px !important;
+  font: 500 12px var(--font) !important;
+  padding: 5px 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+html[data-theme] .MuiTooltip-arrow { color: #0b111d !important; }
+html[data-theme] .MuiDialog-paper:not(.sf-search-dialog) {
+  background: var(--surface);
+  background-image: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--float-shadow);
+  color: var(--text);
+}
+html[data-theme] .MuiDialogTitle-root { font: 600 16px var(--font); border-bottom: 1px solid var(--rule); }
+html[data-theme] .MuiDialogActions-root { border-top: 1px solid var(--rule); padding: 12px 16px; }
+html[data-theme] .ant-modal .ant-modal-content { border-radius: 10px; border: 1px solid var(--border); box-shadow: var(--float-shadow); }
+html[data-theme] .ant-modal .ant-modal-title { font: 600 16px var(--font); }
+html[data-theme] .MuiBackdrop-root:not(.MuiBackdrop-invisible) { background: rgba(6, 9, 15, 0.5); backdrop-filter: blur(2px); }
+html[data-theme] .ant-select-item { border-radius: 5px; font-size: 13px; }
+html[data-theme] .ant-select-item-option-selected:not(.ant-select-item-option-disabled) { background: var(--active) !important; color: var(--text) !important; font-weight: 600; }
+html[data-theme] .ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner,
+html[data-theme] .ant-picker-cell-in-view:is(.ant-picker-cell-range-start, .ant-picker-cell-range-end) .ant-picker-cell-inner { background: var(--data) !important; color: #fff !important; }
+
+/* Page search (Ctrl K) */
+html[data-theme] .sf-search-dialog { animation: rp-pop 0.18s var(--ease) both; }
+html[data-theme] .sf-search-dialog .sf-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  height: 52px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px 10px 0 0;
+  color: var(--faint);
+  box-shadow: var(--float-shadow);
+}
+html[data-theme] .sf-search-dialog .sf-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font: 400 15px var(--font);
+}
+html[data-theme] .sf-search-dialog .sf-search-results {
+  position: absolute;
+  top: 100%;
+  left: -1px;
+  right: -1px;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  max-height: 50vh;
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top-color: var(--rule);
+  border-radius: 0 0 10px 10px;
+  box-shadow: var(--float-shadow);
+}
+html[data-theme] .sf-search-results button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  font: 500 13px var(--font);
+  text-align: left;
+  cursor: pointer;
+}
+html[data-theme] .sf-search-results li:first-child button,
+html[data-theme] .sf-search-results button:hover { background: var(--raised); }
+html[data-theme] .sf-search-results small { font: 400 12px var(--mono); color: var(--faint); }
+html[data-theme] .sf-search-empty { padding: 10px; color: var(--faint); font-size: 13px; }
+
+/* Environment badge */
+html[data-theme] .sf-shell .sf-env {
+  padding: 1px 7px;
+  border-radius: var(--radius-chip);
+  font: 600 11px/18px var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--pill-positive-bg);
+  color: var(--pill-positive-ink);
+}
+html[data-theme] .sf-shell .sf-env.dev { background: var(--pill-warning-bg); color: var(--pill-warning-ink); }
+
+/* Scrollbars */
+html[data-theme] * { scrollbar-width: thin; scrollbar-color: var(--control) transparent; }
+
+/* ---------- Motion ---------- */
+@keyframes rp-page { from { opacity: 0; transform: translateY(4px); } }
+@keyframes rp-row { from { opacity: 0; } }
+@keyframes rp-grow { from { transform: scaleX(0); } }
+@keyframes rp-pop { from { opacity: 0; transform: translateY(-4px) scale(0.99); } }
+@keyframes rp-spin { to { transform: rotate(360deg); } }
+@keyframes rp-pulse { 50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--negative) 22%, transparent); } }
+@keyframes rp-live { 50% { opacity: 0.35; } }
+html[data-theme] .rp-page { animation: rp-page 0.24s var(--ease) both; }
+@media (prefers-reduced-motion: reduce) {
+  html[data-theme] *,
+  html[data-theme] *::before,
+  html[data-theme] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+/* Theme switch: the circle reveal in AppShell carries the change */
+::view-transition-old(root),
+::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+html.theme-reveal.theme-transitioning,
+html.theme-reveal.theme-transitioning *,
+html.theme-reveal.theme-transitioning *::before,
+html.theme-reveal.theme-transitioning *::after { transition: none !important; }
+
+/* ---------- Narrower screens ---------- */
+@media (max-width: 1100px) {
+  html[data-theme] .rp-search { width: 32px; padding: 0; justify-content: center; }
+  html[data-theme] .rp-search :is(span, kbd) { display: none; }
+}
+@media (max-width: 900px) {
+  /* The capsule floats at the bottom; submenus open upwards. */
+  html[data-theme] .rp-frame { padding: 0 0 calc(84px + env(safe-area-inset-bottom)); }
+  html[data-theme] .rp-frame .sf-capsule.rp-rail {
+    top: auto;
+    bottom: calc(14px + env(safe-area-inset-bottom));
+    left: 50%;
+    flex-direction: row;
+    gap: 2px;
+    padding: 6px;
+    transform: translateX(-50%);
+    animation-name: rp-rail-up;
+    max-width: calc(100vw - 24px);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  html[data-theme] .rp-rail :is(.rp-rail-mark, .sf-capsule-sep, .rp-rail-logout) { display: none; }
+  html[data-theme] .rp-rail .sf-capsule-item { width: 42px; height: 42px; flex: none; }
+  html[data-theme] .rp-brand { border-right: 0; padding-right: 4px; }
+  html[data-theme] .rp-bar { padding: 0 12px; }
+  html[data-theme] .rp-crumbs .rp-back { display: none; }
+  html[data-theme] .rp-sheet.sf-content { padding: 16px 14px 32px; }
+  html[data-theme] .rp-env { display: none; }
+}

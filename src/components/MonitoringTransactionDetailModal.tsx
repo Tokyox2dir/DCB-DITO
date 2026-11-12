@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Descriptions, Modal, Spin, Tag } from 'antd'
+import { Descriptions, Modal, Spin } from 'antd'
 import axios from 'axios'
 import dayjs from 'dayjs'
 import { useAuth } from '../provider/AuthProvider'
@@ -12,10 +12,10 @@ type Props = {
 }
 
 function statusLabel(code?: number) {
-  if (code === 1000) return { text: 'Success', color: 'success' as const }
-  if (code === 1005) return { text: 'Failed', color: 'error' as const }
-  if (code === 1003) return { text: 'Waiting', color: 'processing' as const }
-  return { text: 'Pending', color: 'warning' as const }
+  if (code === 1000) return { text: 'Success', tone: 'success' }
+  if (code === 1005) return { text: 'Failed', tone: 'failed' }
+  if (code === 1003) return { text: 'Waiting', tone: 'waiting' }
+  return { text: 'Pending', tone: 'pending' }
 }
 
 function paymentLabel(method?: string) {
@@ -79,26 +79,31 @@ export default function MonitoringTransactionDetailModal({ transactionId, open, 
       onCancel={onClose}
       footer={null}
       width={820}
+      className='mon-trx-modal'
       destroyOnClose
       centered
       zIndex={2200}
     >
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-start', padding: 24 }}>
           <Spin />
         </div>
       ) : !trx ? (
-        <div style={{ padding: 24, textAlign: 'center', color: '#999' }}>Transaction not found</div>
+        <div style={{ padding: 24, textAlign: 'left', color: 'var(--faint)' }}>Transaction not found</div>
       ) : (
         <Descriptions bordered size='small' column={2} className='mon-trx-detail'>
           <Descriptions.Item label='Transaction ID' span={2}>
-            {trx.u_id || '-'}
+            <span className='mon-trx-mono'>{trx.u_id || '-'}</span>
           </Descriptions.Item>
-          <Descriptions.Item label='Merchant Trx ID'>{trx.merchant_transaction_id || '-'}</Descriptions.Item>
+          <Descriptions.Item label='Merchant Trx ID'>
+            <span className='mon-trx-mono'>{trx.merchant_transaction_id || '-'}</span>
+          </Descriptions.Item>
           <Descriptions.Item label='Status'>
-            <Tag color={status.color}>{status.text}</Tag>
+            <span className={`mon-status ${status.tone}`}>{status.text}</span>
           </Descriptions.Item>
-          <Descriptions.Item label='User MDN'>{trx.user_mdn || '-'}</Descriptions.Item>
+          <Descriptions.Item label='User MDN'>
+            <span className='mon-trx-mono'>{trx.user_mdn || '-'}</span>
+          </Descriptions.Item>
           <Descriptions.Item label='User ID'>{trx.user_id || '-'}</Descriptions.Item>
           <Descriptions.Item label='Merchant'>{trx.merchant_name || '-'}</Descriptions.Item>
           <Descriptions.Item label='App'>{trx.app_name || '-'}</Descriptions.Item>
@@ -110,16 +115,20 @@ export default function MonitoringTransactionDetailModal({ transactionId, open, 
             {trx.item_name || '-'}
           </Descriptions.Item>
           <Descriptions.Item label='Created At'>
-            {trx.created_at ? dayjs(trx.created_at).format('YYYY-MM-DD HH:mm:ss') : '-'}
+            <span className='mon-trx-mono'>{trx.created_at ? dayjs(trx.created_at).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>
           </Descriptions.Item>
           <Descriptions.Item label='Updated At'>
-            {trx.updated_at ? dayjs(trx.updated_at).format('YYYY-MM-DD HH:mm:ss') : '-'}
+            <span className='mon-trx-mono'>{trx.updated_at ? dayjs(trx.updated_at).format('YYYY-MM-DD HH:mm:ss') : '-'}</span>
           </Descriptions.Item>
           <Descriptions.Item label='Fail Reason' span={2}>
             {trx.fail_reason || '-'}
           </Descriptions.Item>
-          <Descriptions.Item label='Client IP'>{trx.user_ip || '-'}</Descriptions.Item>
-          <Descriptions.Item label='App ID'>{trx.appid || '-'}</Descriptions.Item>
+          <Descriptions.Item label='Client IP'>
+            <span className='mon-trx-mono'>{trx.user_ip || '-'}</span>
+          </Descriptions.Item>
+          <Descriptions.Item label='App ID'>
+            <span className='mon-trx-mono'>{trx.appid || '-'}</span>
+          </Descriptions.Item>
         </Descriptions>
       )}
     </Modal>

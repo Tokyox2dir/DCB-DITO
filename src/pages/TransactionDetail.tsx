@@ -5,9 +5,11 @@ import Button from '@mui/material/Button'
 import { Modal } from 'antd'
 import axios from 'axios'
 import dayjs from 'dayjs'
-import { Typography, Card, CircularProgress, Box } from '@mui/material'
+import { CircularProgress } from '@mui/material'
+import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded'
 import { useAuth } from '../provider/AuthProvider'
 import formatRupiah from '../utils/FormatRupiah'
+import Badge, { type BadgeProps } from '../components/Badge'
 
 interface Transaction {
   u_id: string
@@ -40,6 +42,21 @@ interface Transaction {
   timestamp_callback_result: string
   user_ip: string
 }
+
+// One key-value pair in a detail card.
+const KV: React.FC<{ label: string; mono?: boolean; amount?: boolean; children?: React.ReactNode }> = ({
+  label,
+  mono,
+  amount,
+  children,
+}) => (
+  <div>
+    <dt>{label}</dt>
+    <dd className={amount ? 'amount' : mono ? 'mono' : undefined}>
+      {children === undefined || children === null || children === '' ? <span className='tx-empty'>-</span> : children}
+    </dd>
+  </div>
+)
 
 interface NotificationHistory {
   timestamp: string
@@ -340,11 +357,19 @@ const TransactionDetail: React.FC = () => {
   }, [id, token])
 
   if (loading) {
-    return <CircularProgress />
+    return (
+      <div className='tx-page'>
+        <CircularProgress size={22} />
+      </div>
+    )
   }
 
   if (!transaction) {
-    return <Typography variant='h6'>Transaction not found</Typography>
+    return (
+      <div className='tx-page'>
+        <h2 className='tx-title'>Transaction not found</h2>
+      </div>
+    )
   }
 
   switch (transaction.status_code) {
@@ -424,346 +449,245 @@ const TransactionDetail: React.FC = () => {
     transaction.payment_method == 'ovo' ||
     transaction.route == 'qris_harsya'
 
-  return (
-    <div className='flex flex-col gap-2 pb-8'>
-      <Card className='transaction-detail-surface' sx={{ padding: 2 }}>
-        <Typography variant='h5' sx={{ mb: 2 }}>
-          Transaction Detail
-        </Typography>
-        <Box display='flex' flexDirection='column' gap={2}>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong> Transaction ID:</strong>
-              </div>
-              <div> {transaction.u_id}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>User MDN:</strong>
-              </div>
-              <div>{transaction.user_mdn}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong> User ID:</strong>
-              </div>
-              <div> {transaction.user_id}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Merchant Transaction ID:</strong>
-              </div>
-              <div>{transaction.merchant_transaction_id}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong> Payment Method:</strong>
-              </div>
-              <div> {paymentMethod}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Currency:</strong>
-              </div>
-              <div>{transaction.currency}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong> Amount :</strong>
-              </div>
-              <div> {formatRupiah(transaction.amount)}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Item Name:</strong>
-              </div>
-              <div>{transaction.item_name}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong> Client AppKey :</strong>
-              </div>
-              <div> {transaction.client_appkey}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Status:</strong>
-              </div>
-              <div>{status}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Refference ID :</strong>
-              </div>
-              <div>{referenceId}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Price:</strong>
-              </div>
-              <div>{formatRupiah(transaction.price)}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Route :</strong>
-              </div>
-              <div> {transaction.route}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>App ID:</strong>
-              </div>
-              <div>{transaction.appid}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Merchant Name :</strong>
-              </div>
-              <div> {transaction.merchant_name}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>App Name:</strong>
-              </div>
-              <div>{transaction.app_name}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Created At:</strong>
-              </div>
-              <div>{dayjs(transaction.created_at).format('YYYY-MM-DD HH:mm:ss.SSS')}</div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Client IP:</strong>
-              </div>
-              <div> {transaction.user_ip}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Request Date:</strong>
-              </div>
-              <div>
-                {' '}
-                {transaction.payment_method !== 'va_bca'
-                  ? dayjs(transaction.timestamp_request_date).format('YYYY-MM-DD HH:mm:ss.SSS')
-                  : dayjs(transaction.created_at).format('YYYY-MM-DD HH:mm:ss.SSS')}{' '}
-              </div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Updated At:</strong>
-              </div>
-              <div> {dayjs(transaction.updated_at).format('YYYY-MM-DD HH:mm:ss.SSS')}</div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Receive Callback Date:</strong>
-              </div>
-              <div>
-                {transaction.receive_callback_date
-                  ? dayjs(transaction.receive_callback_date).format('YYYY-MM-DD HH:mm:ss.SSS')
-                  : '-'}{' '}
-              </div>
-            </div>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Callback Date:</strong>
-              </div>
-              <div>
-                {transaction.timestamp_callback_date
-                  ? dayjs(transaction.timestamp_callback_date).format('YYYY-MM-DD HH:mm:ss.SSS')
-                  : '-'}{' '}
-              </div>
-            </div>
-          </Box>
-          <Box display='flex'>
-            <div className='w-full flex'>
-              <div className='w-1/4'>
-                <strong>Callback result:</strong>
-              </div>
-              <div>{transaction.timestamp_callback_result}</div>
-            </div>
-            {transaction.payment_method === 'telkomsel_airtime' ? (
-              <div className='w-full flex'>
-                <div className='w-1/4'>
-                  <strong>SMS Code:</strong>
-                </div>
-                <div>{transaction.otp}</div>
-              </div>
-            ) : transaction.payment_method === 'va_bca' ? (
-              <div className='w-full flex'>
-                <div className='w-1/4'>
-                  <strong>VA BCA:</strong>
-                </div>
-                <div>{transaction.va_bca}</div>
-              </div>
-            ) : (
-              <div className='w-full flex'></div>
-            )}
-          </Box>
-        </Box>
-      </Card>
-      {notifications.length > 0 && (
-        <Card className='transaction-detail-surface' sx={{ padding: 2, mt: 2 }}>
-          <Typography variant='h5' sx={{ mb: 2 }}>
-            Payment Notification History
-          </Typography>
-          <Box display='flex' flexDirection='column' gap={1}>
-            {notifications.map((notification, index) => {
-              const isExpanded = !!expandedNotifications[index]
-              const isSuccess = notification.status_code >= 200 && notification.status_code < 300
-              return (
-                <Box key={index} sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, bgcolor: 'background.paper' }}>
-                  <Box
-                    onClick={() => toggleNotification(index)}
-                    display='flex'
-                    alignItems='center'
-                    justifyContent='space-between'
-                    sx={{ cursor: 'pointer', padding: 1.5 }}
-                  >
-                    <Box display='flex' alignItems='center' gap={2}>
-                      <span>{isExpanded ? '▼' : '▶'}</span>
-                      <strong>{dayjs(notification.timestamp).format('YYYY-MM-DD HH:mm:ss')}</strong>
-                      <span>{notification.method}</span>
-                      <span
-                        style={{
-                          padding: '2px 8px',
-                          borderRadius: 4,
-                          fontSize: 12,
-                          color: '#fff',
-                          backgroundColor: isSuccess ? '#16a34a' : '#dc2626',
-                        }}
-                      >
-                        {notification.status_code}
-                      </span>
-                    </Box>
-                    <span style={{ fontSize: 12, color: 'var(--dash-muted)' }}>{notification.duration_ms.toFixed(2)} ms</span>
-                  </Box>
-                  {isExpanded && (
-                    <Box sx={{ borderTop: '1px solid #e2e8f0', padding: 1.5 }} display='flex' flexDirection='column' gap={1}>
-                      <div className='flex'>
-                        <div className='w-1/4'>
-                          <strong>Level:</strong>
-                        </div>
-                        <div>{notification.level}</div>
-                      </div>
-                      <div className='flex'>
-                        <div className='w-1/4'>
-                          <strong>Endpoint:</strong>
-                        </div>
-                        <div style={{ wordBreak: 'break-all' }}>{notification.endpoint}</div>
-                      </div>
-                      <div>
-                        <strong>Request Body:</strong>
-                        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: 'var(--dash-surface-2)', padding: 8, borderRadius: 4 }}>
-                          {JSON.stringify(notification.request_body, null, 2)}
-                        </pre>
-                      </div>
-                      <div>
-                        <strong>Response Body:</strong>
-                        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', background: 'var(--dash-surface-2)', padding: 8, borderRadius: 4 }}>
-                          {JSON.stringify(notification.response_body, null, 2)}
-                        </pre>
-                      </div>
-                    </Box>
-                  )}
-                </Box>
-              )
-            })}
-          </Box>
-        </Card>
-      )}
-      <div className='flex pl-4 pt-2'>
-        {isDev && (
-          <>
-            {transaction.status_code !== 1000 && (
-              <Button
-                type='button'
-                className='mt-3 mr-4'
-                variant='contained'
-                color='success'
-                size='small'
-                onClick={handleMarkSuccess}
-              >
-                Mark Success
-              </Button>
-            )}
+  const statusTone: BadgeProps['color'] =
+    transaction.status_code === 1000
+      ? 'success'
+      : transaction.status_code === 1005
+        ? 'error'
+        : transaction.status_code === 1003
+          ? 'waiting-callback'
+          : 'pending'
+  const fmt = (d: Date | string) => dayjs(d).format('YYYY-MM-DD HH:mm:ss.SSS')
 
-            {transaction.status_code !== 1005 && (
-              <Button
-                type='button'
-                className='mt-3 mr-4'
-                variant='contained'
-                color='error'
-                size='small'
-                onClick={handleMarkFailed}
-              >
-                Mark Failed
-              </Button>
+  return (
+    <div className='tx-page'>
+      <header className='tx-head'>
+        <div className='tx-head-main'>
+          <span className='tx-eyebrow'>Transaction</span>
+          <h2 className='tx-title'>
+            <span className='tx-id'>{transaction.u_id}</span>
+            <Badge color={statusTone} text={status} />
+          </h2>
+          <p className='tx-sub'>
+            {transaction.merchant_name}
+            <span className='sep'>·</span>
+            {transaction.app_name}
+            <span className='sep'>·</span>
+            <span className='tx-mono dim'>{dayjs(transaction.created_at).format('YYYY-MM-DD HH:mm:ss')}</span>
+          </p>
+        </div>
+        <div className='tx-actions'>
+          <Button type='button' variant='outlined' startIcon={<ArrowBackRoundedIcon />} onClick={() => navigate(-1)}>
+            Back
+          </Button>
+          {isDev && (
+            <>
+              {transaction.status_code !== 1000 && (
+                <Button type='button' variant='outlined' color='success' onClick={handleMarkSuccess}>
+                  Mark Success
+                </Button>
+              )}
+
+              {transaction.status_code !== 1005 && (
+                <Button type='button' variant='outlined' color='error' onClick={handleMarkFailed}>
+                  Mark Failed
+                </Button>
+              )}
+            </>
+          )}
+          <Button
+            type='button'
+            onClick={() => {
+              if (transaction.payment_method === 'dana') {
+                handleCheckStatusDana()
+              } else if (transaction.payment_method === 'ovo') {
+                handleCheckStatusOvo()
+              } else if (transaction.payment_method === 'qris_harsya' || transaction.route === 'qris_harsya') {
+                handleCheckStatusQrisHarsya()
+              } else {
+                handleCheckCharging()
+              }
+            }}
+            disabled={!checkCharging}
+            variant='outlined'
+          >
+            Check Charging
+          </Button>
+          <Button
+            type='button'
+            disabled={transaction.status_code != 1003 && transaction.status_code != 1000}
+            onClick={handleManualCallback}
+            variant='contained'
+          >
+            Manual Callback
+          </Button>
+        </div>
+      </header>
+
+      <div className='tx-detail-grid'>
+        <section className='tx-card'>
+          <div className='tx-card-head'>
+            <h3>Payment</h3>
+          </div>
+          <dl className='tx-kv'>
+            <KV label='Amount' amount>
+              {formatRupiah(transaction.amount)}
+            </KV>
+            <KV label='Price' amount>
+              {formatRupiah(transaction.price)}
+            </KV>
+            <KV label='Status'>
+              <Badge color={statusTone} text={status} />
+            </KV>
+            <KV label='Currency'>{transaction.currency}</KV>
+            <KV label='Payment Method'>{paymentMethod}</KV>
+            <KV label='Route' mono>
+              {transaction.route}
+            </KV>
+            <KV label='Reference ID' mono>
+              {referenceId}
+            </KV>
+            <KV label='Item Name'>{transaction.item_name}</KV>
+            {transaction.payment_method === 'telkomsel_airtime' && (
+              <KV label='SMS Code' mono>
+                {transaction.otp}
+              </KV>
             )}
-          </>
+            {transaction.payment_method === 'va_bca' && (
+              <KV label='VA BCA' mono>
+                {transaction.va_bca}
+              </KV>
+            )}
+          </dl>
+        </section>
+
+        <section className='tx-card'>
+          <div className='tx-card-head'>
+            <h3>Merchant and customer</h3>
+          </div>
+          <dl className='tx-kv'>
+            <KV label='Merchant Name'>{transaction.merchant_name}</KV>
+            <KV label='App Name'>{transaction.app_name}</KV>
+            <KV label='Transaction ID' mono>
+              {transaction.u_id}
+            </KV>
+            <KV label='Merchant Transaction ID' mono>
+              {transaction.merchant_transaction_id}
+            </KV>
+            <KV label='User MDN' mono>
+              {transaction.user_mdn}
+            </KV>
+            <KV label='User ID' mono>
+              {transaction.user_id}
+            </KV>
+            <KV label='App ID' mono>
+              {transaction.appid}
+            </KV>
+            <KV label='Client IP' mono>
+              {transaction.user_ip}
+            </KV>
+            <KV label='Client AppKey' mono>
+              {transaction.client_appkey}
+            </KV>
+          </dl>
+        </section>
+
+        <section className='tx-card span-2'>
+          <div className='tx-card-head'>
+            <h3>Timeline</h3>
+            <small>Local time, millisecond precision</small>
+          </div>
+          <dl className='tx-kv cols-3'>
+            <KV label='Created At' mono>
+              {fmt(transaction.created_at)}
+            </KV>
+            <KV label='Request Date' mono>
+              {transaction.payment_method !== 'va_bca'
+                ? fmt(transaction.timestamp_request_date)
+                : fmt(transaction.created_at)}
+            </KV>
+            <KV label='Updated At' mono>
+              {fmt(transaction.updated_at)}
+            </KV>
+            <KV label='Receive Callback Date' mono>
+              {transaction.receive_callback_date ? fmt(transaction.receive_callback_date) : '-'}
+            </KV>
+            <KV label='Callback Date' mono>
+              {transaction.timestamp_callback_date ? fmt(transaction.timestamp_callback_date) : '-'}
+            </KV>
+            <KV label='Callback result' mono>
+              {transaction.timestamp_callback_result}
+            </KV>
+          </dl>
+        </section>
+
+        {notifications.length > 0 && (
+          <section className='tx-card span-2'>
+            <div className='tx-card-head'>
+              <h3>Payment Notification History</h3>
+              <span className='tx-count'>{notifications.length} events</span>
+            </div>
+            <div className='tx-log'>
+              {notifications.map((notification, index) => {
+                const isExpanded = !!expandedNotifications[index]
+                const isSuccess = notification.status_code >= 200 && notification.status_code < 300
+                return (
+                  <div key={index} className={`tx-log-item${isExpanded ? ' open' : ''}`}>
+                    <button
+                      type='button'
+                      className='tx-log-row'
+                      aria-expanded={isExpanded}
+                      onClick={() => toggleNotification(index)}
+                    >
+                      <span className='chev'>▶</span>
+                      <span className='tx-mono'>{dayjs(notification.timestamp).format('YYYY-MM-DD HH:mm:ss')}</span>
+                      <span className='tx-code'>{notification.method}</span>
+                      <span className={`tx-code ${isSuccess ? 'ok' : 'bad'}`}>{notification.status_code}</span>
+                      <span className='dur'>{notification.duration_ms.toFixed(2)} ms</span>
+                    </button>
+                    {isExpanded && (
+                      <div className='tx-log-body'>
+                        <dl className='tx-kv'>
+                          <KV label='Level'>{notification.level}</KV>
+                          <KV label='Endpoint' mono>
+                            {notification.endpoint}
+                          </KV>
+                        </dl>
+                        <div>
+                          <div className='tx-pre-label'>Request Body</div>
+                          <pre className='tx-pre'>{JSON.stringify(notification.request_body, null, 2)}</pre>
+                        </div>
+                        <div>
+                          <div className='tx-pre-label'>Response Body</div>
+                          <pre className='tx-pre'>{JSON.stringify(notification.response_body, null, 2)}</pre>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </section>
         )}
-        <Button
-          type='button'
-          className='mt-3 mr-4'
-          onClick={() => {
-            if (transaction.payment_method === 'dana') {
-              handleCheckStatusDana()
-            } else if (transaction.payment_method === 'ovo') {
-              handleCheckStatusOvo()
-            } else if (transaction.payment_method === 'qris_harsya' || transaction.route === 'qris_harsya') {
-              handleCheckStatusQrisHarsya()
-            } else {
-              handleCheckCharging()
-            }
-          }}
-          disabled={!checkCharging}
-          variant='contained'
-          color='primary'
-        >
-          Check Charging
-        </Button>
-        <Button
-          type='button'
-          disabled={transaction.status_code != 1003 && transaction.status_code != 1000}
-          className='mt-3 mr-4'
-          onClick={handleManualCallback}
-          variant='contained'
-          color='primary'
-        >
-          Manual Callback
-        </Button>
-        <Button type='button' className='mt-3 mr-4' variant='contained' color='primary' onClick={() => navigate(-1)}>
-          Back
-        </Button>
       </div>
-      <Modal title='Transaction' open={open} onOk={handleOk} width={400} onCancel={handleCancel} centered>
-        <p>Status : {transactionStatus?.status}</p>
-        <p>Desc : {transactionStatus?.responseDesc}</p>
-        <p>Response Json:</p>
-        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', maxHeight: '400px', overflowY: 'auto' }}>
+
+      <Modal
+        title='Transaction'
+        className='tx-modal'
+        open={open}
+        onOk={handleOk}
+        width={480}
+        onCancel={handleCancel}
+        centered
+      >
+        <dl className='tx-modal-kv'>
+          <dt>Status</dt>
+          <dd>{transactionStatus?.status}</dd>
+          <dt>Desc</dt>
+          <dd>{transactionStatus?.responseDesc || '-'}</dd>
+        </dl>
+        <div className='tx-pre-label'>Response JSON</div>
+        <pre className='tx-pre'>
           {typeof transactionStatus?.json === 'string'
             ? transactionStatus.json
             : JSON.stringify(transactionStatus?.json, null, 2)}

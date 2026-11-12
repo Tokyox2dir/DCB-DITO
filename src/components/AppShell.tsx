@@ -87,13 +87,24 @@ export default function AppShell() {
   // (or a key moves focus into it); it slides away shortly after the pointer leaves.
   const [railOpen, setRailOpen] = useState(false)
   const hideTimer = useRef<number>()
+  const railRef = useRef<HTMLElement>(null)
   const showRail = () => {
     window.clearTimeout(hideTimer.current)
     setRailOpen(true)
   }
+  // Stays out while the pointer is still over it or a key has put focus in it; otherwise slides away.
   const hideRail = () => {
     window.clearTimeout(hideTimer.current)
-    hideTimer.current = window.setTimeout(() => setRailOpen(false), 450)
+    hideTimer.current = window.setTimeout(() => {
+      const rail = railRef.current
+      if (rail && (rail.matches(':hover') || rail.querySelector(':focus-visible'))) return
+      setRailOpen(false)
+    }, 450)
+  }
+  // Only keyboard focus opens it. Focus handed back after a submenu closes, or on returning to the tab,
+  // is not focus-visible after a click, so it no longer pins the capsule open.
+  const onRailFocus = (e: React.FocusEvent<HTMLElement>) => {
+    if (e.target.matches(':focus-visible')) showRail()
   }
   useEffect(() => () => window.clearTimeout(hideTimer.current), [])
 
@@ -152,15 +163,16 @@ export default function AppShell() {
 
   return (
     <div className={`sf-shell rp-frame${railOpen || openGroup ? ' rail-open' : ''}`}>
-      <div className='rp-rail-edge' aria-hidden='true' onMouseEnter={showRail}>
+      <div className='rp-rail-edge' aria-hidden='true' onMouseEnter={showRail} onMouseLeave={hideRail}>
         <i />
       </div>
       <nav
+        ref={railRef}
         className='sf-capsule rp-rail'
         aria-label='Primary navigation'
         onMouseEnter={showRail}
         onMouseLeave={hideRail}
-        onFocus={showRail}
+        onFocus={onRailFocus}
         onBlur={hideRail}
       >
         <Link to='/' className='rp-rail-mark' aria-label='Redpay home'>
@@ -188,7 +200,7 @@ export default function AppShell() {
             <Tooltip key={item.label} title={open ? '' : item.label} placement={docked ? 'top' : 'right'} arrow>
               <button
                 type='button'
-                className={`sf-capsule-item has-menu${active || open ? ' active' : ''}`}
+                className={`sf-capsule-item has-menu${active ? ' active' : ''}${open ? ' open' : ''}`}
                 aria-label={item.label}
                 aria-haspopup='menu'
                 aria-expanded={open}

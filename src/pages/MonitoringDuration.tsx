@@ -1,15 +1,4 @@
-import { alpha } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
-import Box from '@mui/material/Box'
-import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Chip from '@mui/material/Chip'
-import Accordion from '@mui/material/Accordion'
-import AccordionSummary from '@mui/material/AccordionSummary'
-import AccordionDetails from '@mui/material/AccordionDetails'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import DurationChart from '../components/DurationChart'
 import AppTheme from '../styles/theme/shared-theme/AppTheme'
 import {
@@ -30,139 +19,47 @@ export default function MonitoringDuration(props: { disableCustomTheme?: boolean
   return (
     <AppTheme {...props} themeComponents={xThemeComponents}>
       <CssBaseline enableColorScheme />
-      <Box sx={{ display: 'flex' }}>
-        {/* Main content */}
-        <Box
-          component='main'
-          sx={(theme) => ({
-            flexGrow: 1,
-            backgroundColor: theme.vars ? `` : alpha(theme.palette.background.default, 1),
-            overflow: 'auto',
-          })}
-        >
-          <Stack
-            spacing={2}
-            sx={{
-              alignItems: 'stretch',
-              mx: 3,
-              pt: 4,
-              pb: 5,
-              mt: 0,
-              width: 'calc(100% - 24px)',
-            }}
-          >
-            <Card
-              sx={{
-                borderRadius: 3,
-                border: '1px solid transparent',
-                boxShadow: '0 1px 2px rgba(21, 23, 26, 0.04)',
-                background: 'var(--sf-card)',
-              }}
-            >
-              <CardContent sx={{ p: 3 }}>
-                <Stack spacing={1.5}>
-                  <Box>
-                    <Typography
-                      variant='h5'
-                      sx={{
-                        fontWeight: 800,
-                        letterSpacing: '-0.02em',
-                        color: 'text.primary',
-                      }}
-                    >
-                      Transaction Duration Monitoring
-                    </Typography>
-                    <Typography variant='body2' sx={{ color: 'text.secondary', mt: 0.75, lineHeight: 1.7 }}>
-                      This page tracks how long transactions take to complete from start to finish, with a focus on
-                      average total duration, supplier duration, and merchant duration. The data is displayed in
-                      10-minute intervals so spikes and slowdowns are easier to spot.
-                    </Typography>
-                  </Box>
+      <section className='mon-page mon-dur-page'>
+        <header className='mon-head'>
+          <div className='mon-head-text'>
+            <div className='mon-dur-series'>
+              <span>
+                <i /> Avg Total Duration
+              </span>
+              <span>
+                <i className='supplier' /> Avg Supplier Duration
+              </span>
+              <span>
+                <i className='merchant' /> Avg Merchant Duration
+              </span>
+              <span className='tag'>Merchant &amp; Payment Method</span>
+              <span className='tag'>Auto refresh 10 min</span>
+            </div>
+          </div>
+        </header>
 
-                  <Stack direction='row' spacing={1} useFlexGap flexWrap='wrap'>
-                    <Chip label='Avg Total Duration' color='primary' variant='outlined' />
-                    <Chip label='Avg Supplier Duration' color='warning' variant='outlined' />
-                    <Chip label='Avg Merchant Duration' color='success' variant='outlined' />
-                    <Chip label='Merchant & Payment Method' color='info' variant='outlined' />
-                    <Chip label='Auto refresh 10 min' color='default' variant='outlined' />
-                  </Stack>
-                  <Accordion
-                    disableGutters
-                    elevation={0}
-                    sx={{
-                      mt: 0.5,
-                      borderRadius: 2,
-                      border: '1px solid rgba(148, 163, 184, 0.14)',
-                      backgroundColor: 'background.paper',
-                      '&:before': { display: 'none' },
-                      '&.Mui-expanded': { margin: 0 },
-                    }}
-                  >
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
-                      sx={{
-                        px: 2,
-                        minHeight: 48,
-                        '& .MuiAccordionSummary-content': { my: 1 },
-                        '&.Mui-expanded': { minHeight: 48 },
-                      }}
-                    >
-                      <Typography variant='subtitle2' sx={{ fontWeight: 700, color: 'text.primary' }}>
-                        View details
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails sx={{ px: 2, pt: 0, pb: 2 }}>
-                      <Box
-                        sx={{
-                          display: 'grid',
-                          gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' },
-                          gap: 1.5,
-                          pt: 0.5,
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            p: 2,
-                            borderRadius: 2,
-                            bgcolor: 'background.paper',
-                            border: '1px solid rgba(148, 163, 184, 0.12)',
-                          }}
-                        >
-                          <Typography variant='subtitle2' sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5 }}>
-                            How to read the merchant cards
-                          </Typography>
-                          <Typography variant='body2' sx={{ color: 'text.secondary', lineHeight: 1.7 }}>
-                            Each card represents one merchant and payment method combination. The chart inside the card
-                            makes it easier to compare duration trends across channels without reading one crowded chart.
-                          </Typography>
-                        </Box>
+        <details className='mon-dur-help'>
+          <summary>View details</summary>
+          <div className='mon-dur-help-body'>
+            <div>
+              <h5>How to read the merchant cards</h5>
+              <p>
+                Each card represents one merchant and payment method combination. The chart inside the card makes it
+                easier to compare duration trends across channels without reading one crowded chart.
+              </p>
+            </div>
+            <div>
+              <h5>Available filters</h5>
+              <p>
+                Use merchant, payment method, status, and date range filters to narrow the dataset and make
+                investigation easier when a transaction starts to slow down.
+              </p>
+            </div>
+          </div>
+        </details>
 
-                        <Box
-                          sx={{
-                            p: 2,
-                            borderRadius: 2,
-                            bgcolor: 'background.paper',
-                            border: '1px solid rgba(148, 163, 184, 0.12)',
-                          }}
-                        >
-                          <Typography variant='subtitle2' sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5 }}>
-                            Available filters
-                          </Typography>
-                          <Typography variant='body2' sx={{ color: 'text.secondary', lineHeight: 1.7 }}>
-                            Use merchant, payment method, status, and date range filters to narrow the dataset and make
-                            investigation easier when a transaction starts to slow down.
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </AccordionDetails>
-                  </Accordion>
-                </Stack>
-              </CardContent>
-            </Card>
-            <DurationChart />
-          </Stack>
-        </Box>
-      </Box>
+        <DurationChart />
+      </section>
     </AppTheme>
   )
 }

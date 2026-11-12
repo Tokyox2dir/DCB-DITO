@@ -72,10 +72,33 @@ export default function ClientPerformance({ series, loading, referenceNow }: Pro
 
   return (
     <div className='mon-panel mon-panel-perf'>
-      <div className='mon-perf-title'>Client Performance</div>
+      <div className='mon-panel-head'>
+        <div className='mon-panel-title'>
+          <h4>Client Performance</h4>
+          <small>Share of transactions by status</small>
+        </div>
+        <div className='mon-perf-legend'>
+          <span>
+            <i className='g' /> Success
+          </span>
+          <span>
+            <i className='y' /> Pending
+          </span>
+          <span>
+            <i className='r' /> Failed
+          </span>
+        </div>
+      </div>
+      <div className='mon-perf-cols' aria-hidden='true'>
+        <span>Client</span>
+        <span className='num'>TRX</span>
+        <span className='num'>Success</span>
+        <span className='num'>Pending</span>
+        <span className='num'>Failed</span>
+      </div>
       <div className='mon-perf-scroll'>
         {loading && rows.length === 0 && <div className='mon-panel-empty'>Loading performance…</div>}
-        {!loading && rows.length === 0 && <div className='mon-panel-empty'>Belum ada data performance</div>}
+        {!loading && rows.length === 0 && <div className='mon-panel-empty'>No performance data yet</div>}
         {rows.map((r) => {
           const barTotal = r.successPct + r.pendingPct + r.failedPct
           const g = barTotal ? (r.successPct / barTotal) * 100 : 100
@@ -84,18 +107,13 @@ export default function ClientPerformance({ series, loading, referenceNow }: Pro
           return (
             <div className='mon-perf-item' key={r.client}>
               <div className='mon-perf-name'>
-                <span className='mon-perf-client'>{r.client}</span>
-                <div className='mon-perf-stats'>
-                  <div className='mon-perf-total'>
-                    {formatNum(r.total)}
-                    <span>TRX</span>
-                  </div>
-                  <div className='mon-perf-pct'>
-                    <span className='g'>{formatPct(r.successPct)}</span>
-                    <span className='y'>{formatPct(r.pendingPct)}</span>
-                    <span className='r'>{formatPct(r.failedPct)}</span>
-                  </div>
-                </div>
+                <span className='mon-perf-client' title={r.client}>
+                  {r.client}
+                </span>
+                <span className='mon-perf-total num'>{formatNum(r.total)}</span>
+                <span className='num g'>{formatPct(r.successPct)}</span>
+                <span className='num y'>{formatPct(r.pendingPct)}</span>
+                <span className='num r'>{formatPct(r.failedPct)}</span>
               </div>
               <div className='mon-perf-bar'>
                 <i className='g' style={{ width: `${g}%` }} />
@@ -105,17 +123,6 @@ export default function ClientPerformance({ series, loading, referenceNow }: Pro
             </div>
           )
         })}
-      </div>
-      <div className='mon-perf-legend'>
-        <span>
-          <i className='g' /> Success
-        </span>
-        <span>
-          <i className='y' /> Pending
-        </span>
-        <span>
-          <i className='r' /> Failed
-        </span>
       </div>
     </div>
   )

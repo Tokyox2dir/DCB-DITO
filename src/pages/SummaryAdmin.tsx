@@ -1,8 +1,3 @@
-import { useTheme } from '@mui/material/styles'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import { Collapse } from 'antd'
 import { LineChart } from '@mui/x-charts/LineChart'
 import dayjs from 'dayjs'
 
@@ -27,14 +22,33 @@ const mockData = [
   { datetime: 1741824000, success: 3327, canceled: 4500, failed: 500 },
 ]
 
-function Chart() {
-  const theme = useTheme()
+// Status series use the console status tokens, so the chart follows light and dark mode.
+const seriesColor: { [key: string]: string } = {
+  success: 'var(--positive)',
+  canceled: 'var(--warning)',
+  failed: 'var(--negative)',
+}
 
+function Chart() {
   return (
-    <Card variant='outlined' sx={{ width: '100%' }}>
-      <CardContent>
+    <section className='rpt-card'>
+      <div className='rp-card-head'>
+        <div>
+          <h3>Transactions by status</h3>
+          <small>Daily count per status</small>
+        </div>
+        <ul className='rpt-legend' aria-label='Legend'>
+          {Object.keys(keyToLabel).map((key) => (
+            <li key={key}>
+              <i style={{ ['--key' as string]: seriesColor[key] }} />
+              {keyToLabel[key]}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className='rpt-chart'>
         <LineChart
-          colors={[theme.palette.success.main, theme.palette.warning.main, theme.palette.error.main]}
+          colors={Object.keys(keyToLabel).map((key) => seriesColor[key])}
           dataset={mockData}
           xAxis={[
             {
@@ -47,20 +61,16 @@ function Chart() {
             dataKey: key,
             label: keyToLabel[key],
             showMark: false,
+            curve: 'monotoneX' as const,
           }))}
-          height={360}
-          margin={{ left: 50, right: 20, bottom: 20 }}
+          height={340}
+          margin={{ left: 48, right: 12, top: 12, bottom: 28 }}
           grid={{ horizontal: true }}
-          slotProps={{
-            legend: {
-              labelStyle: {
-                fontSize: 14,
-              },
-            },
-          }}
+          slotProps={{ legend: { hidden: true } }}
+          sx={{ '& .MuiLineElement-root': { strokeWidth: 2 } }}
         />
-      </CardContent>
-    </Card>
+      </div>
+    </section>
   )
 }
 
@@ -83,36 +93,23 @@ const clientTransaction = [
 
 const SummaryAdmin = () => {
   return (
-    <div className='space-y-4 px-6 py-8'>
-      <Typography component='h2' variant='h6'>
-        Summary
-      </Typography>
-      <Collapse
-        items={[
-          {
-            key: '1',
-            label: (
-              <Typography component='span' variant='subtitle1' fontSize='16px' fontWeight={700}>
-                Total Transaction All Client: {formatNumber(1000)}
-              </Typography>
-            ),
-            children: (
-              <div className='flex flex-col'>
-                {clientTransaction.map((item) => (
-                  <div key={item.name} className='py-2 border-b border-grey-100'>
-                    <Typography variant='body1' fontWeight={400} className='inline-block min-w-[160px]'>
-                      {item.name}
-                    </Typography>
-                    <Typography component='span' variant='body1' fontWeight={600}>
-                      {formatNumber(item.total)} Transactions
-                    </Typography>
-                  </div>
-                ))}
-              </div>
-            ),
-          },
-        ]}
-      />
+    <div className='rpt-page'>
+
+      <div className='rpt-kpis' style={{ ['--kpi-cols' as string]: clientTransaction.length + 1 }}>
+        <div className='rpt-kpi'>
+          <span className='rpt-kpi-label'>Total transaction all client</span>
+          <span className='rpt-kpi-value'>{formatNumber(1000)}</span>
+          <span className='rpt-kpi-sub'>{clientTransaction.length} clients</span>
+        </div>
+        {clientTransaction.map((item) => (
+          <div className='rpt-kpi' key={item.name}>
+            <span className='rpt-kpi-label'>{item.name}</span>
+            <span className='rpt-kpi-value'>{formatNumber(item.total)}</span>
+            <span className='rpt-kpi-sub'>Transactions</span>
+          </div>
+        ))}
+      </div>
+
       <Chart />
     </div>
   )

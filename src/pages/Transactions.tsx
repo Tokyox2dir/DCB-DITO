@@ -4,24 +4,11 @@ import { paymentMethods } from '../utils/paymentMethods'
 // import type {} from '@mui/x-data-grid/themeAugmentation';
 // import type {} from '@mui/x-tree-view/themeAugmentation';
 import { useState, useEffect, useRef, useCallback } from 'react'
-import Grid from '@mui/material/Grid2'
-// import CssBaseline from '@mui/material/CssBaseline'
 import { TextField, OutlinedInput, Select, MenuItem, Tooltip } from '@mui/material'
 import Button from '@mui/material/Button'
 import { Button as ButtonAnt } from 'antd'
-import Box from '@mui/material/Box'
-import Stack from '@mui/material/Stack'
-// import AppNavbar from '../components/AppNavbar'
-// import Header from '../components/Header'
-// import CustomizedDataGrid from '../components/CustomizedDataGrid'
-// import MainGrid from '../components/MainGrid'
-// import SideMenu from '../components/SideMenu'
-import Card from '@mui/material/Card'
-// import CardContent from '@mui/material/CardContent'
-import { FormLabel } from '@mui/material'
-
-import Typography from '@mui/material/Typography'
-// import AppTheme from '../styles/theme/shared-theme/AppTheme'
+import TuneRoundedIcon from '@mui/icons-material/TuneRounded'
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
 import { Table, DatePicker, Modal, Select as AntSelect } from 'antd'
 import { ColumnType } from 'antd/es/table'
 
@@ -39,37 +26,40 @@ import { useMerchants } from '../context/MerchantContext'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
+const copyCell = (text: string, label: string) =>
+  text ? (
+    <Tooltip title={`Copy ${label}`}>
+      <button type='button' className='tx-copy tx-mono' onClick={() => navigator.clipboard.writeText(text)}>
+        {text}
+      </button>
+    </Tooltip>
+  ) : (
+    <span className='tx-empty'>-</span>
+  )
+
 const columns: ColumnType<any>[] = [
   {
     title: 'Transaction ID',
-    width: 220,
     dataIndex: 'u_id',
     key: 'u_id',
-    render: (text: string) => (
-      <Tooltip title='Copy Transaction ID'>
-        <div onClick={() => navigator.clipboard.writeText(text)} style={{ display: 'flex', alignItems: 'center' }}>
-          {text}
-        </div>
-      </Tooltip>
-    ),
+    render: (text: string) => copyCell(text, 'Transaction ID'),
   },
   {
     title: 'User MDN',
-    width: 120,
     dataIndex: 'user_mdn',
     key: 'user_mdn',
+    render: (text: string) => <span className='tx-mono'>{text}</span>,
   },
   {
-    title: ' Date',
-    width: 100,
+    title: 'Date',
     dataIndex: 'created_at',
     key: 'created_at',
-    render: (text: string) => (text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : 'N/A'),
+    render: (text: string) => (
+      <span className='tx-mono dim'>{text ? dayjs(text).format('YYYY-MM-DD HH:mm:ss') : 'N/A'}</span>
+    ),
   },
   {
     title: 'Payment Method',
-    width: 140,
-    align: 'center',
     dataIndex: 'payment_method',
     key: 'payment_method',
     render: (paymentMethod: string) => {
@@ -90,12 +80,11 @@ const columns: ColumnType<any>[] = [
           paymentMethod = 'Tri'
           break
       }
-      return paymentMethod
+      return <span className='tx-method'>{paymentMethod}</span>
     },
   },
   {
     title: 'Merchant',
-    width: 220,
     dataIndex: 'merchant_name',
     key: 'merchant_name',
   },
@@ -103,22 +92,21 @@ const columns: ColumnType<any>[] = [
     title: 'App',
     dataIndex: 'app_name',
     key: 'app_name',
+    render: (text: string) => <span className='tx-dim'>{text}</span>,
   },
   {
     title: 'Denom',
-    width: 100,
-    align: 'center',
+    align: 'right',
     dataIndex: 'amount',
     key: 'amount',
     render: (denom: number) => {
-      return <p>{formatRupiah(denom)}</p>
+      return <span className='tx-amount'>{formatRupiah(denom)}</span>
     },
   },
   {
     title: 'Status',
     dataIndex: 'status_code',
     key: 'status_code',
-    align: 'center',
     render: (status: number) => {
       let color: 'success' | 'error' | 'pending' | 'waiting-callback' = 'pending'
       let text = 'Pending'
@@ -139,56 +127,44 @@ const columns: ColumnType<any>[] = [
   },
   {
     title: 'Route',
-    width: 170,
-    align: 'center',
     dataIndex: 'route',
     key: 'route',
+    render: (text: string) => <span className='tx-mono dim'>{text}</span>,
   },
 
   {
     title: 'Fail Reason',
-    width: 120,
-    align: 'center',
     dataIndex: 'fail_reason',
     key: 'fail_reason',
+    render: (text: string) => (text ? <span className='tx-fail'>{text}</span> : <span className='tx-empty'>-</span>),
   },
   {
     title: 'Merchant Trx ID',
-    width: 200,
     dataIndex: 'merchant_transaction_id',
     key: 'merchant_transaction_id',
-    render: (text: string) => (
-      <Tooltip title='Copy Merchant Trx ID'>
-        <div onClick={() => navigator.clipboard.writeText(text)} style={{ display: 'flex', alignItems: 'center' }}>
-          {text}
-        </div>
-      </Tooltip>
-    ),
+    render: (text: string) => copyCell(text, 'Merchant Trx ID'),
   },
   {
     title: 'Item Name',
-    width: 170,
-    align: 'center',
     dataIndex: 'item_name',
     key: 'item_name',
   },
   {
-    title: 'Action',
-    width: 120,
+    title: '',
+    width: 72,
     key: 'action',
-    align: 'center',
+    align: 'right',
     fixed: 'right',
     render: (record: any) => (
-      <Button
-        variant='outlined'
-        color='success'
-        className='h-6 text-sky-700 '
+      <button
+        type='button'
+        className='tx-link-btn'
         onClick={() => {
           window.location.href = `/transaction/${record.u_id}`
         }}
       >
         Detail
-      </Button>
+      </button>
     ),
   },
 ]
@@ -244,6 +220,7 @@ export default function Transactions() {
   const [loadingExport, setLoadingExport] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [selectedRows, setSelectedRows] = useState<any[]>([])
+  const [showMoreFilters, setShowMoreFilters] = useState(false)
   const { merchants } = useMerchants()
   const { RangePicker } = DatePicker
 
@@ -512,7 +489,7 @@ export default function Transactions() {
   const handleBatchManualCallback = async () => {
     try {
       const confirmed = window.confirm(
-        `Kamu yakin ingin mengirim manual callback untuk ${selectedRows.length} transaksi?`,
+        `Send a manual callback for ${selectedRows.length} transactions?`,
       )
       if (!confirmed) return
 
@@ -544,12 +521,12 @@ export default function Transactions() {
       if (failed.length === 0) {
         Modal.success({
           title: 'Batch Manual Callback Success',
-          content: `${results.length} transaksi berhasil dikirim manual callback.`,
+          content: `Manual callback sent for ${results.length} transactions.`,
         })
       } else {
         Modal.warning({
-          title: 'Sebagian Gagal',
-          content: `${failed.length} dari ${results.length} transaksi gagal dikirim. Cek log untuk detail.`,
+          title: 'Partially failed',
+          content: `${failed.length} of ${results.length} transactions failed to send. Check the log for details.`,
         })
         console.error('Failed callbacks:', failed)
       }
@@ -562,7 +539,7 @@ export default function Transactions() {
       console.error('Batch callback error:', error)
       Modal.error({
         title: 'Batch Callback Error',
-        content: 'Terjadi kesalahan saat menjalankan batch callback.',
+        content: 'Something went wrong while running the batch callback.',
       })
     }
   }
@@ -575,7 +552,7 @@ export default function Transactions() {
   const handleBatchMarkSuccess = async () => {
     try {
       const confirmed = window.confirm(
-        `Kamu yakin ingin mark success untuk ${eligibleMarkSuccessRows.length} transaksi?`,
+        `Mark ${eligibleMarkSuccessRows.length} transactions as success?`,
       )
       if (!confirmed) return
 
@@ -601,12 +578,12 @@ export default function Transactions() {
       if (failed.length === 0) {
         Modal.success({
           title: 'Mark Success',
-          content: `${results.length} transaksi berhasil di-mark success.`,
+          content: `${results.length} transactions marked as success.`,
         })
       } else {
         Modal.warning({
-          title: 'Sebagian Gagal',
-          content: `${failed.length} dari ${results.length} transaksi gagal di-mark success. Cek log untuk detail.`,
+          title: 'Partially failed',
+          content: `${failed.length} of ${results.length} transactions could not be marked as success. Check the log for details.`,
         })
         console.error('Failed mark success:', failed)
       }
@@ -619,342 +596,327 @@ export default function Transactions() {
       console.error('Batch mark success error:', error)
       Modal.error({
         title: 'Mark Success Error',
-        content: 'Terjadi kesalahan saat menjalankan mark success.',
+        content: 'Something went wrong while marking transactions as success.',
       })
     }
   }
 
+  // Display only: how many of the filters behind "More filters" are set.
+  const moreFilterCount = [
+    formData.merchant_transaction_id,
+    formData.user_id,
+    formData.selected_app_id,
+    formData.payment_method.length,
+    formData.otp,
+    formData.keyword,
+    formData.denom,
+  ].filter(Boolean).length
+
   return (
-    <Box
-      component='main'
-      sx={{
-        flexGrow: 1,
-        backgroundColor: 'background.default',
-        overflow: 'auto',
-        pt: 4,
-      }}
-    >
-      <Stack
-        spacing={2}
-        sx={{
-          alignItems: 'center',
-          mx: 0,
-          pb: 5,
-          mt: 0,
-        }}
-      >
-        {/* <Header /> */}
-        <Box sx={{ width: '100%', maxWidth: '96vw' }}>
-          {/* cards */}
-          <Typography component='h2' variant='h6' className='sf-page-title'>
-            Redpay Transactions
-          </Typography>
-          <Card variant='outlined' className='transaction-filter'>
-            <span className='font-semibold'>Filter Transaction</span>
-            <div className='mt-3'>
-              <form className='transaction-filter-form' onSubmit={handleSubmit}>
-                <Grid container rowSpacing={2} className='mb-2' columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <FormLabel className='font-medium'>User MDN</FormLabel>
-                    <TextField
-                      variant='outlined'
-                      fullWidth
-                      name='user_mdn'
-                      type='number'
-                      value={formData.user_mdn}
-                      onChange={handleChange}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <FormLabel className='font-medium'>Merchant Trx ID</FormLabel>
-                    <TextField
-                      variant='outlined'
-                      fullWidth
-                      name='merchant_transaction_id'
-                      value={formData.merchant_transaction_id}
-                      onChange={handleChange}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <FormLabel className='font-medium'>User ID</FormLabel>
-                    <TextField
-                      variant='outlined'
-                      fullWidth
-                      name='user_id'
-                      value={formData.user_id}
-                      onChange={handleChange}
-                    />
-                  </Grid>
-                </Grid>
-                <Grid container rowSpacing={1} className='mb-2' columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                  <Grid size={{ xs: 12, md: 4 }} className='flex flex-col'>
-                    <FormLabel className='font-medium'>Filter Date</FormLabel>
+    <div className='tx-page'>
+      <header className='tx-head'>
+        <div className='tx-actions'>
+          <Button
+            variant='outlined'
+            startIcon={<FileDownloadOutlinedIcon />}
+            disabled={loadingExport || total > 1400000}
+            onClick={() => handleExport('csv')}
+          >
+            {loadingExport ? 'Processing...' : 'Export CSV'}
+          </Button>
+          <Button
+            variant='contained'
+            startIcon={<FileDownloadOutlinedIcon />}
+            disabled={loadingExport || total > 120000}
+            onClick={() => handleExport('excel')}
+          >
+            {loadingExport ? 'Processing...' : 'Export Excel'}
+          </Button>
+        </div>
+      </header>
 
-                    <RangePicker
-                      size='large'
-                      showTime={{ format: 'HH:mm:ss' }}
-                      format='YYYY-MM-DD HH:mm'
-                      onChange={handleDateChange}
-                      value={[formData.start_date, formData.end_date]}
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <FormLabel className='font-medium'>Transaction ID</FormLabel>
-                    <TextField
-                      variant='outlined'
-                      fullWidth
-                      name='transaction_id'
-                      value={formData.transaction_id}
-                      onChange={handleChange}
-                    />
-                  </Grid>
+      <section className='tx-card'>
+        <form onSubmit={handleSubmit}>
+          <div className='tx-filterbar'>
+            <RangePicker
+              className='tx-f-date'
+              showTime={{ format: 'HH:mm:ss' }}
+              format='YYYY-MM-DD HH:mm'
+              onChange={handleDateChange}
+              value={[formData.start_date, formData.end_date]}
+            />
+            <TextField
+              className='tx-f-grow'
+              variant='outlined'
+              name='transaction_id'
+              placeholder='Transaction ID'
+              inputProps={{ 'aria-label': 'Transaction ID' }}
+              value={formData.transaction_id}
+              onChange={handleChange}
+            />
+            <TextField
+              className='tx-f-sm'
+              variant='outlined'
+              name='user_mdn'
+              type='number'
+              placeholder='User MDN'
+              inputProps={{ 'aria-label': 'User MDN' }}
+              value={formData.user_mdn}
+              onChange={handleChange}
+            />
+            <AntSelect
+              className='tx-f-md'
+              mode='multiple'
+              id='merchant_name'
+              aria-label='Merchant name'
+              value={formData.merchant_name}
+              onChange={(val) => handleChange({ target: { name: 'merchant_name', value: val } })}
+              maxTagCount='responsive'
+              showSearch
+              allowClear
+              filterOption={(input, option: any) =>
+                String(option?.children ?? '')
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              placeholder='Merchant'
+            >
+              {isAlif
+                ? merchantListAlif.map((merchant) => (
+                    <AntSelect.Option key={merchant.id} value={merchant.name}>
+                      {merchant.name}
+                    </AntSelect.Option>
+                  ))
+                : merchants.map((merchant) => (
+                    <AntSelect.Option key={merchant.u_id} value={merchant.client_name}>
+                      {merchant.client_name}
+                    </AntSelect.Option>
+                  ))}
+            </AntSelect>
+            <Select
+              className='tx-f-sm'
+              id='status'
+              onChange={handleChange}
+              name='status'
+              value={formData.status}
+              input={<OutlinedInput inputProps={{ 'aria-label': 'Status' }} />}
+              displayEmpty
+              renderValue={(v: any) =>
+                v === null || v === undefined || v === '' ? (
+                  <span className='tx-placeholder'>All statuses</span>
+                ) : (
+                  (status.find((s) => s.value === v)?.name ?? String(v))
+                )
+              }
+            >
+              {status.map((s) => (
+                <MenuItem key={s.value} value={s.value}>
+                  {s.name}
+                </MenuItem>
+              ))}
+            </Select>
+            <Button
+              type='button'
+              variant='outlined'
+              className='tx-more-btn'
+              aria-expanded={showMoreFilters}
+              startIcon={<TuneRoundedIcon />}
+              onClick={() => setShowMoreFilters((v) => !v)}
+            >
+              More filters
+              {moreFilterCount > 0 && <span className='tx-more-count'>{moreFilterCount}</span>}
+            </Button>
+            <div className='tx-filter-btns'>
+              <Button type='button' variant='outlined' onClick={handleReset}>
+                Reset
+              </Button>
+              <Button type='submit' variant='contained'>
+                Apply
+              </Button>
+            </div>
+          </div>
 
-                  <Grid size={{ xs: 12, md: 4 }} className='flex flex-col'>
-                    <FormLabel className='font-medium'>App</FormLabel>
-                    <AntSelect
-                      id='selected_app_id'
-                      value={formData.selected_app_id || undefined}
-                      onChange={(val) => handleChange({ target: { name: 'selected_app_id', value: val || '' } })}
-                      style={{ width: '100%', height: 38 }}
-                      showSearch
-                      allowClear
-                      filterOption={(input, option: any) =>
-                        String(option?.children ?? '')
-                          .toLowerCase()
-                          .includes(input.toLowerCase())
-                      }
-                      placeholder='Select App'
-                    >
-                      {isAlif
-                        ? appListAlif.map((app) => (
-                            <AntSelect.Option key={app.id} value={app.id}>
-                              {app.name}
-                            </AntSelect.Option>
-                          ))
-                        : appList.map((app) => (
-                            <AntSelect.Option key={app.appid} value={app.appid}>
-                              {app.app_name}
-                            </AntSelect.Option>
-                          ))}
-                    </AntSelect>
-                  </Grid>
-                </Grid>
-
-                <Grid container rowSpacing={1} className='mb-2' columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-                  <Grid size={{ xs: 12, md: 4 }} className='flex flex-col'>
-                    <FormLabel className='font-medium'>Payment Method</FormLabel>
-                    <AntSelect
-                      mode='multiple'
-                      id='payment-method'
-                      value={formData.payment_method}
-                      onChange={(val) => handleChange({ target: { name: 'payment_method', value: val } })}
-                      style={{ width: '100%', minHeight: 38 }}
-                      showSearch
-                      allowClear
-                      filterOption={(input, option: any) =>
-                        String(option?.children ?? '')
-                          .toLowerCase()
-                          .includes(input.toLowerCase())
-                      }
-                      placeholder='Select Payment Method'
-                    >
-                      {routes.map((method) => (
-                        <AntSelect.Option key={method.value} value={method.value}>
-                          {method.name}
+          {showMoreFilters && (
+            <div className='tx-filter-more'>
+              <div className='tx-field'>
+                <label htmlFor='f-merchant-trx'>Merchant Trx ID</label>
+                <TextField
+                  id='f-merchant-trx'
+                  variant='outlined'
+                  fullWidth
+                  name='merchant_transaction_id'
+                  value={formData.merchant_transaction_id}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className='tx-field'>
+                <label htmlFor='f-user-id'>User ID</label>
+                <TextField
+                  id='f-user-id'
+                  variant='outlined'
+                  fullWidth
+                  name='user_id'
+                  value={formData.user_id}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className='tx-field'>
+                <label htmlFor='selected_app_id'>App</label>
+                <AntSelect
+                  id='selected_app_id'
+                  value={formData.selected_app_id || undefined}
+                  onChange={(val) => handleChange({ target: { name: 'selected_app_id', value: val || '' } })}
+                  style={{ width: '100%' }}
+                  showSearch
+                  allowClear
+                  filterOption={(input, option: any) =>
+                    String(option?.children ?? '')
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  placeholder='Select App'
+                >
+                  {isAlif
+                    ? appListAlif.map((app) => (
+                        <AntSelect.Option key={app.id} value={app.id}>
+                          {app.name}
+                        </AntSelect.Option>
+                      ))
+                    : appList.map((app) => (
+                        <AntSelect.Option key={app.appid} value={app.appid}>
+                          {app.app_name}
                         </AntSelect.Option>
                       ))}
-                    </AntSelect>
-                  </Grid>
-
-                  <Grid size={{ xs: 12, md: 4 }} className='flex flex-col'>
-                    <FormLabel className='font-medium'>Status</FormLabel>
-
-                    <Select
-                      labelId='status-label'
-                      id='status'
-                      onChange={handleChange}
-                      name='status'
-                      value={formData.status}
-                      input={<OutlinedInput />}
-                    >
-                      {status.map((s) => (
-                        <MenuItem key={s.value} value={s.value}>
-                          {s.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </Grid>
-
-                  <Grid size={{ xs: 12, md: 4 }} className='flex flex-col'>
-                    <FormLabel className='font-medium'>Merchant Name</FormLabel>
-
-                    <AntSelect
-                      mode='multiple'
-                      id='merchant_name'
-                      value={formData.merchant_name}
-                      onChange={(val) => handleChange({ target: { name: 'merchant_name', value: val } })}
-                      style={{ width: '100%', minHeight: 38 }}
-                      showSearch
-                      allowClear
-                      filterOption={(input, option: any) =>
-                        String(option?.children ?? '')
-                          .toLowerCase()
-                          .includes(input.toLowerCase())
-                      }
-                      placeholder='Select Merchant Name'
-                    >
-                      {isAlif
-                        ? merchantListAlif.map((merchant) => (
-                            <AntSelect.Option key={merchant.id} value={merchant.name}>
-                              {merchant.name}
-                            </AntSelect.Option>
-                          ))
-                        : merchants.map((merchant) => (
-                            <AntSelect.Option key={merchant.u_id} value={merchant.client_name}>
-                              {merchant.client_name}
-                            </AntSelect.Option>
-                          ))}
-                    </AntSelect>
-                  </Grid>
-
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <FormLabel className='font-medium'>OTP</FormLabel>
-                    <TextField variant='outlined' fullWidth name='otp' value={formData.otp} onChange={handleChange} />
-                  </Grid>
-
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <FormLabel className='font-medium'>Keyword Tsel</FormLabel>
-                    <TextField
-                      variant='outlined'
-                      fullWidth
-                      name='keyword'
-                      value={formData.keyword}
-                      onChange={handleChange}
-                    />
-                  </Grid>
-
-                  <Grid size={{ xs: 12, md: 4 }}>
-                    <FormLabel className='font-medium'>Denom</FormLabel>
-                    <Select
-
-                      fullWidth
-                      labelId='denom-label'
-                      id='denom'
-                      name='denom'
-                      type='number'
-                      value={formData.denom}
-                      onChange={handleChange}
-                      input={<OutlinedInput />}
-                    >
-                      <MenuItem key='all' value={0}>
-                        All
-                      </MenuItem>
-                      {denomList.map((denom) => (
-                        <MenuItem key={denom} value={denom}>
-                          {denom}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </Grid>
-                </Grid>
-                {/* <Grid container rowSpacing={1} className='mb-2' columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
-
-                </Grid> */}
-                <Grid container rowSpacing={1} className='mb-2' columnSpacing={{ xs: 1, sm: 2, md: 3 }}></Grid>
-                <div className='transaction-filter-actions'>
-                <Button type='submit' variant='contained' color='primary'>
-                  Submit
-                </Button>
-                <Button type='button' variant='outlined' color='inherit' onClick={handleReset}>
-                  Reset
-                </Button>
-                </div>
-              </form>
+                </AntSelect>
+              </div>
+              <div className='tx-field'>
+                <label htmlFor='payment-method'>Payment Method</label>
+                <AntSelect
+                  mode='multiple'
+                  id='payment-method'
+                  value={formData.payment_method}
+                  onChange={(val) => handleChange({ target: { name: 'payment_method', value: val } })}
+                  style={{ width: '100%' }}
+                  maxTagCount='responsive'
+                  showSearch
+                  allowClear
+                  filterOption={(input, option: any) =>
+                    String(option?.children ?? '')
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  placeholder='Select Payment Method'
+                >
+                  {routes.map((method) => (
+                    <AntSelect.Option key={method.value} value={method.value}>
+                      {method.name}
+                    </AntSelect.Option>
+                  ))}
+                </AntSelect>
+              </div>
+              <div className='tx-field'>
+                <label htmlFor='f-otp'>OTP</label>
+                <TextField
+                  id='f-otp'
+                  variant='outlined'
+                  fullWidth
+                  name='otp'
+                  value={formData.otp}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className='tx-field'>
+                <label htmlFor='f-keyword'>Keyword Tsel</label>
+                <TextField
+                  id='f-keyword'
+                  variant='outlined'
+                  fullWidth
+                  name='keyword'
+                  value={formData.keyword}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className='tx-field'>
+                <label htmlFor='denom'>Denom</label>
+                <Select
+                  fullWidth
+                  id='denom'
+                  name='denom'
+                  type='number'
+                  value={formData.denom}
+                  onChange={handleChange}
+                  input={<OutlinedInput />}
+                  displayEmpty
+                  renderValue={(v: any) =>
+                    v === null || v === undefined ? (
+                      <span className='tx-placeholder'>Any</span>
+                    ) : v === 0 ? (
+                      'All'
+                    ) : (
+                      String(v)
+                    )
+                  }
+                >
+                  <MenuItem key='all' value={0}>
+                    All
+                  </MenuItem>
+                  {denomList.map((denom) => (
+                    <MenuItem key={denom} value={denom}>
+                      {denom}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </div>
             </div>
-          </Card>
-          <Grid container spacing={2} columns={12} sx={{ mb: (theme) => theme.spacing(4) }}>
-            <Grid size={{ xs: 12, sm: 6, lg: 3 }}>{/* <HighlightedCard /> */}</Grid>
-            <Grid size={{ xs: 12, md: 6 }}>{/* <SessionsChart /> */}</Grid>
-            <Grid size={{ xs: 12, md: 6 }}>{/* <PageViewsBarChart /> */}</Grid>
-          </Grid>
-          <Typography component='h2' variant='h6' className='sf-section-title'>
-            Transaction Details
-          </Typography>
-          <div className='flex items-center justify-between'>
-            <div>
-              <Button
-                size='small'
-                className='border-sky-400'
-                variant='outlined'
-                disabled={loadingExport || total > 1400000}
-                color='primary'
-                onClick={() => handleExport('csv')}
-              >
-                {loadingExport ? 'Processing...' : 'Export CSV'}
-              </Button>
-
-              <Button
-                size='small'
-                disabled={loadingExport || total > 120000}
-                className='border-sky-400 ml-4'
-                variant='contained'
-                color='primary'
-                onClick={() => handleExport('excel')}
-              >
-                {loadingExport ? 'Processing...' : 'Export Excel'}
-              </Button>
-            </div>
-          </div>
-          <div className='flex '>
-            <span className='ml-auto'>
-              {isFiltered && <Typography variant='subtitle1'>Total Items: {total}</Typography>}
-            </span>
-          </div>
-
-          {/* 1540px */}
-          {formData.status === 1003 && isFiltered && (
-            <Stack direction='row' spacing={2} sx={{ alignItems: 'center' }}>
-              <ButtonAnt
-                type='primary'
-                disabled={formData.status !== 1003 || selectedRows.length === 0}
-                onClick={handleBatchManualCallback}
-              >
-                Manual Callback Selected
-              </ButtonAnt>
-              <ButtonAnt
-                type='primary'
-                disabled={eligibleMarkSuccessRows.length === 0}
-                onClick={handleBatchMarkSuccess}
-              >
-                Mark Success Selected
-              </ButtonAnt>
-            </Stack>
           )}
-          <div className='mt-5'>
-            <Table
-              rowKey='u_id'
-              columns={columns}
-              dataSource={data}
-              rowSelection={{
-                selectedRowKeys,
-                onChange: (keys, rows) => {
-                  setSelectedRowKeys(keys)
-                  setSelectedRows(rows)
-                },
-              }}
-              pagination={{
-                current: currentPage,
-                pageSize: pageSize,
-                total: total,
-                onChange: handlePageChange,
-              }}
-              size='small'
-              className='transactions-table'
-              scroll={{ x: 'max-content' }}
-            />
+        </form>
+
+        <div className='tx-card-head'>
+          <h3>Transaction Details</h3>
+          <span className='tx-count'>{total.toLocaleString('id-ID')} items</span>
+        </div>
+
+        {formData.status === 1003 && isFiltered && (
+          <div className='tx-batchbar'>
+            <span>
+              <strong>{selectedRows.length}</strong> selected
+            </span>
+            <ButtonAnt
+              type='primary'
+              disabled={formData.status !== 1003 || selectedRows.length === 0}
+              onClick={handleBatchManualCallback}
+            >
+              Manual Callback Selected
+            </ButtonAnt>
+            <ButtonAnt type='default' disabled={eligibleMarkSuccessRows.length === 0} onClick={handleBatchMarkSuccess}>
+              Mark Success Selected
+            </ButtonAnt>
           </div>
-        </Box>
-      </Stack>
-    </Box>
+        )}
+
+        <Table
+          rowKey='u_id'
+          columns={columns}
+          dataSource={data}
+          rowSelection={{
+            selectedRowKeys,
+            onChange: (keys, rows) => {
+              setSelectedRowKeys(keys)
+              setSelectedRows(rows)
+            },
+          }}
+          pagination={{
+            current: currentPage,
+            pageSize: pageSize,
+            total: total,
+            onChange: handlePageChange,
+            showTotal: (t, range) => `${range[0]}–${range[1]} of ${t.toLocaleString('id-ID')}`,
+          }}
+          size='small'
+          className='transactions-table'
+          scroll={{ x: 'max-content' }}
+        />
+      </section>
+    </div>
   )
 }

@@ -3,14 +3,9 @@ import axios from 'axios'
 import { message, DatePicker } from 'antd'
 import dayjs from 'dayjs'
 
-import Card from '@mui/material/Card'
-import CardActions from '@mui/material/CardActions'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
 import MenuItem from '@mui/material/MenuItem'
 import Skeleton from '@mui/material/Skeleton'
 import Select from '@mui/material/Select'
-import { CancelOutlined, CheckCircleOutlined, RemoveCircleOutline } from '@mui/icons-material'
 import Chart from './Chart'
 import { useAuth } from '../provider/AuthProvider'
 import { useClient } from '../context/ClientContext'
@@ -41,36 +36,18 @@ interface Props {
 const getStatus = (status: Status) => {
   switch (status) {
     case 'failed':
-      return {
-        label: 'Failed',
-        variant: {
-          background: 'bg-red-700',
-          border: 'border-red-700',
-        },
-        icon: <CancelOutlined className='size-10 lg:size-[72px]' />,
-      }
+      return { label: 'Failed', tone: 'bad' }
     case 'success':
-      return {
-        label: 'Success',
-        variant: { background: 'bg-teal-500', border: 'border-teal-500' },
-        icon: <CheckCircleOutlined className='size-10 lg:size-[72px]' />,
-      }
+      return { label: 'Success', tone: 'good' }
     case 'pending':
-      return {
-        label: 'Pending',
-        variant: {
-          background: 'bg-yellow-500',
-          border: 'border-yellow-500',
-        },
-        icon: <RemoveCircleOutline className='size-10 lg:size-[72px]' />,
-      }
+      return { label: 'Pending', tone: 'warn' }
   }
 }
 
 const formatNumber = (num: number) => new Intl.NumberFormat('en-US').format(num)
 
 const SummaryCard = ({ status, value, previousValue }: Props) => {
-  const { label, variant, icon } = getStatus(status)
+  const { label, tone } = getStatus(status)
 
   const getChangeSummary = (current?: number, previous?: number, status?: string) => {
     if (current === undefined || previous === undefined) return null
@@ -93,47 +70,32 @@ const SummaryCard = ({ status, value, previousValue }: Props) => {
   }
 
   return (
-    <Card variant='outlined' className={`flex-1 ${variant.border}`}>
-      <>
-        <CardContent className={variant.background}>
-          <div className='flex justify-between items-center text-white '>
-            {icon}
-            <div className='flex flex-col items-end'>
-              <Typography variant='h2' component='div'>
-                {value === undefined ? <Skeleton width={100} /> : formatNumber(value)}
-              </Typography>
-              <Typography variant='h5'>{label}</Typography>
-            </div>
-          </div>
-        </CardContent>
-        <CardActions>
-          {/* <Button sx={{ lineHeight: '14px' }} size='small' variant='text' endIcon={<ChevronRight />}>
-            View Detail
-          </Button> */}
+    <div className='dm-kpi' role='listitem'>
+      <span className='dm-kpi-label'>
+        <i className={`ov-dot ${tone}`} aria-hidden='true' />
+        {label}
+      </span>
+      <strong>{value === undefined ? <Skeleton width={100} /> : formatNumber(value)}</strong>
+      {value !== undefined && previousValue !== undefined ? (
+        (() => {
+          const change = getChangeSummary(value, previousValue, status)
+          if (!change) return null
 
-          {value !== undefined && previousValue !== undefined ? (
-            (() => {
-              const change = getChangeSummary(value, previousValue, status)
-              if (!change) return null
-
-              const color = change.isGoodChange ? 'text-green-600' : 'text-red-600'
-
-              return (
-                <div className={`flex items-center gap-1 mt-2 text-sm ${color}`}>
-                  <span className='text-xl font-bold'>
-                    {change.isPositive ? '+' : '-'}
-                    {formatNumber(Math.abs(change.diff))} ({change.isPositive ? '+' : '-'}
-                    {change.percent}%)
-                  </span>
-                </div>
-              )
-            })()
-          ) : (
-            <Skeleton width={80} height={20} />
-          )}
-        </CardActions>
-      </>
-    </Card>
+          return (
+            <small className={`dm-delta ${change.isGoodChange ? 'good' : 'bad'}`}>
+              <b>
+                {change.isPositive ? '▲ +' : '▼ -'}
+                {formatNumber(Math.abs(change.diff))} ({change.isPositive ? '+' : '-'}
+                {change.percent}%)
+              </b>
+              <span>vs previous period</span>
+            </small>
+          )
+        })()
+      ) : (
+        <Skeleton width={80} height={20} />
+      )}
+    </div>
   )
 }
 
@@ -402,18 +364,13 @@ const SummaryMerchant = () => {
   }, [summaryFreq, summaryPaymentMethod, summaryDate]) // Chart data mengikuti filter summary
 
   return (
-    <div className='space-y-4 w-full'>
-      <div className='flex gap-4 items-end justify-between'>
-        <Typography variant='h2' fontWeight='bold' fontSize={24}>
-          Summary
-        </Typography>
-        <div className='flex gap-4 items-start justify-between'>
-          <div className='flex flex-col'>
-            <Typography variant='body2' className='text-lg mb-1'>
-              Payment Method
-            </Typography>
+    <div className='dm-summary'>
+      <header className='dm-head'>
+        <div className='dm-filters'>
+          <label className='dm-field'>
+            <span>Payment Method</span>
             <Select
-              sx={{ width: '160px', padding: '8px 12px', height: '40px', borderRadius: 1 }}
+              size='small'
               labelId='summaryPaymentMethod'
               id='summaryPaymentMethod'
               value={summaryPaymentMethod}
@@ -424,13 +381,11 @@ const SummaryMerchant = () => {
               <MenuItem value='qris'>Qris</MenuItem>
               <MenuItem value='pulsa'>Pulsa</MenuItem>
             </Select>
-          </div>
-          <div className='flex flex-col'>
-            <Typography variant='body2' className='text-lg mb-1'>
-              Frequency
-            </Typography>
+          </label>
+          <label className='dm-field'>
+            <span>Frequency</span>
             <Select
-              sx={{ width: '160px', padding: '8px 12px', height: '40px', borderRadius: 1 }}
+              size='small'
               labelId='summaryFrequency'
               id='summaryFrequency'
               value={summaryFreq}
@@ -440,49 +395,40 @@ const SummaryMerchant = () => {
               <MenuItem value='daily'>Daily</MenuItem>
               <MenuItem value='monthly'>Monthly</MenuItem>
             </Select>
-          </div>
-          <div className='flex flex-col'>
-            <Typography variant='body2' className='text-lg mb-1'>
-              Custom Date
-            </Typography>
+          </label>
+          <label className='dm-field'>
+            <span>Custom Date</span>
             <DatePicker
               value={summaryDate}
               onChange={(date) => setSummaryDate(date)}
               format='YYYY-MM-DD'
               placeholder='Select Date'
-              style={{ width: '160px', height: '40px' }}
             />
+          </label>
+        </div>
+      </header>
+
+      <div className='dm-kpis' role='list'>
+        <SummaryCard status='success' value={summaryData.success} previousValue={previousSummaryData.success} />
+        <SummaryCard status='pending' value={summaryData.pending} previousValue={previousSummaryData.pending} />
+        <SummaryCard status='failed' value={summaryData.failed} previousValue={previousSummaryData.failed} />
+        <div className='dm-kpi dm-kpi-totals' role='listitem'>
+          <div>
+            <span className='dm-kpi-label'>Total Transactions</span>
+            <strong>{formatNumber(summaryData.total)}</strong>
+          </div>
+          <div>
+            <span className='dm-kpi-label'>Total Gross Revenue</span>
+            <strong>
+              <em>Rp</em> {formatNumber(summaryData.revenue)}
+            </strong>
           </div>
         </div>
       </div>
 
-      <div className='flex gap-4 justify-between w-full overflow-auto !mb-16'>
-        <SummaryCard status='success' value={summaryData.success} previousValue={previousSummaryData.success} />
-        <SummaryCard status='pending' value={summaryData.pending} previousValue={previousSummaryData.pending} />
-        <SummaryCard status='failed' value={summaryData.failed} previousValue={previousSummaryData.failed} />
-        <Card variant='outlined' className='flex-1'>
-          <CardContent className='flex flex-col gap-4 !p-4'>
-            <div>
-              <Typography component='h2' variant='subtitle2'>
-                Total Transactions
-              </Typography>
-              <Typography variant='h4' component='span'>
-                {formatNumber(summaryData.total)}
-              </Typography>
-            </div>
-            <div>
-              <Typography component='h2' variant='subtitle2'>
-                Total Gross Revenue
-              </Typography>
-              <Typography variant='h4' component='span'>
-                Rp {formatNumber(summaryData.revenue)}
-              </Typography>
-            </div>
-          </CardContent>
-        </Card>
+      <div className='dm-chart'>
+        <Chart data={chartData} title={`${summaryFreq === 'daily' ? 'Daily' : 'Monthly'} Transaction Summary`} />
       </div>
-
-      <Chart data={chartData} title={`${summaryFreq === 'daily' ? 'Daily' : 'Monthly'} Transaction Summary`} />
     </div>
   )
 }

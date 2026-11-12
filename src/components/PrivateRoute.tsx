@@ -15,7 +15,7 @@ const PrivateRoute = ({ children, allowedRoles }: PrivateRouteProps) => {
   }
 
   if (role == null) {
-    return <div className='p-4 text-center'>Loading...</div>
+    return <div className='p-4'>Loading...</div>
   }
 
   const hasAccess = allowedRoles ? allowedRoles.includes(role) : true

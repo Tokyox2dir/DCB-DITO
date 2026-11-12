@@ -4,7 +4,6 @@ import type { ColumnsType } from 'antd/es/table'
 import axios from 'axios'
 import dayjs, { Dayjs } from 'dayjs'
 import utc from 'dayjs/plugin/utc'
-import Badge from './Badge'
 import MonitoringTransactionDetailModal from './MonitoringTransactionDetailModal'
 import { MetricStatus } from './VolumePerHourChart'
 import { useAuth } from '../provider/AuthProvider'
@@ -96,10 +95,11 @@ export default function MonitoringTransactionList({
         dataIndex: 'user_mdn',
         key: 'user_mdn',
         ellipsis: true,
+        render: (text: string) => <span className='mon-trx-mono'>{text}</span>,
       },
       {
         title: 'Date',
-        width: 130,
+        width: 176,
         dataIndex: 'created_at',
         key: 'created_at',
         render: (text: string) => (
@@ -108,8 +108,7 @@ export default function MonitoringTransactionList({
       },
       {
         title: 'Payment Method',
-        width: 110,
-        align: 'center',
+        width: 130,
         dataIndex: 'payment_method',
         key: 'payment_method',
         render: (value: string) => formatPaymentMethod(value),
@@ -134,34 +133,32 @@ export default function MonitoringTransactionList({
         align: 'right',
         dataIndex: 'amount',
         key: 'amount',
-        render: (denom: number) => formatRupiah(denom),
+        render: (denom: number) => <span className='mon-trx-num'>{formatRupiah(denom)}</span>,
       },
       {
         title: 'Status',
         width: 90,
         dataIndex: 'status_code',
         key: 'status_code',
-        align: 'center',
         render: (code: number) => {
-          let color: 'success' | 'error' | 'pending' | 'waiting-callback' = 'pending'
+          let tone = 'pending'
           let text = 'Pending'
           if (code === 1000) {
-            color = 'success'
+            tone = 'success'
             text = 'Success'
           } else if (code === 1005) {
-            color = 'error'
+            tone = 'failed'
             text = 'Failed'
           } else if (code === 1003) {
-            color = 'waiting-callback'
+            tone = 'waiting'
             text = 'Waiting'
           }
-          return <Badge color={color} text={text} />
+          return <span className={`mon-status ${tone}`}>{text}</span>
         },
       },
       {
         title: 'Route',
         width: 100,
-        align: 'center',
         dataIndex: 'route',
         key: 'route',
         ellipsis: true,
@@ -169,7 +166,6 @@ export default function MonitoringTransactionList({
       {
         title: 'Fail Reason',
         width: 100,
-        align: 'center',
         dataIndex: 'fail_reason',
         key: 'fail_reason',
         ellipsis: true,
@@ -194,7 +190,6 @@ export default function MonitoringTransactionList({
       {
         title: 'Item Name',
         width: 120,
-        align: 'center',
         dataIndex: 'item_name',
         key: 'item_name',
         ellipsis: true,
@@ -203,7 +198,7 @@ export default function MonitoringTransactionList({
         title: 'Action',
         width: 80,
         key: 'action',
-        align: 'center',
+        align: 'right',
         fixed: 'right',
         render: (_: unknown, record: any) => (
           <Button
@@ -273,11 +268,14 @@ export default function MonitoringTransactionList({
 
   return (
     <div className='mon-panel mon-panel-trx'>
-      <div className='mon-panel-head mon-panel-head-border'>
+      <div className='mon-panel-head'>
         <div className='mon-panel-title'>
           <h4>Transaction List</h4>
+          <small>Follows the filters above</small>
         </div>
-        <span className='mon-panel-meta'>{total.toLocaleString('id-ID')} transactions</span>
+        <span className='mon-panel-meta'>
+          <b>{total.toLocaleString('id-ID')}</b> transactions
+        </span>
       </div>
       <div className='mon-trx-body'>
         <Table

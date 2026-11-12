@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react'
 
-import { Box, Stack, Typography } from '@mui/material'
-import { Table, Button, Input, Space } from 'antd'
+import { Table, Button, Input } from 'antd'
 import { ColumnType } from 'antd/es/table'
 import axios from 'axios'
 import { useAuth } from '../../provider/AuthProvider'
 import { Link } from 'react-router-dom'
 import EditMerchant from './components/EditMerchant'
 import AddMerchant from './components/AddMerchant'
-import { EyeOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons'
+import { EyeOutlined, DeleteOutlined } from '@ant-design/icons'
 
 const { Search } = Input
 
@@ -133,101 +132,66 @@ const Merchant = () => {
     setFilteredData(filtered)
   }
 
+  const dash = <span className='tx-empty'>-</span>
+
   const columns: ColumnType<any>[] = [
     {
       title: 'Merchant Name',
       dataIndex: 'clientName',
       key: 'clientName',
-      align: 'center',
-      render: (text) => {
-        if (!text) return <span style={{ paddingLeft: '8px' }}>-</span>
-        return <span style={{ paddingLeft: '8px' }}>{text}</span>
-      },
+      render: (text) => (text ? <span style={{ fontWeight: 500 }}>{text}</span> : dash),
     },
     {
       title: 'User ID',
       dataIndex: 'uid',
       key: 'uid',
-      align: 'center',
-      render: (text) => {
-        if (!text) return <span style={{ paddingLeft: '8px' }}>-</span>
-        return <span style={{ paddingLeft: '8px' }}>{text}</span>
-      },
+      render: (text) => (text ? <span className='tx-mono dim'>{text}</span> : dash),
     },
 
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
-      align: 'center',
-      render: (text) => {
-        if (!text) return <span style={{ paddingLeft: '8px' }}>-</span>
-        return <span style={{ paddingLeft: '8px' }}>{text}</span>
-      },
+      render: (text) => (text ? <span className='tx-dim'>{text}</span> : dash),
     },
     {
       title: 'Phone',
       dataIndex: 'phone',
       key: 'phone',
-      align: 'center',
-      render: (text) => {
-        if (!text) return <span style={{ paddingLeft: '8px' }}>-</span>
-        return <span style={{ paddingLeft: '8px' }}>{text}</span>
-      },
+      render: (text) => (text ? <span className='tx-mono'>{text}</span> : dash),
     },
     {
       title: 'App Name',
       dataIndex: 'apps',
       key: 'firstAppName',
-      align: 'center',
       render: (apps) => {
         const firstApp = apps && apps.length > 0 ? apps[0] : null
         const appName = firstApp?.appName || '-'
-        return <span style={{ paddingLeft: '8px' }}>{appName}</span>
+        return <span>{appName}</span>
       },
     },
     {
-      title: 'Action',
+      title: '',
       key: 'action',
       dataIndex: 'uid',
-      width: 300,
-      align: 'center',
+      align: 'right',
+      fixed: 'right',
       render: (uid, record) => {
         // const isValidClientid = uid && uid !== 'undefined' && uid.trim() !== ''
 
         return (
-          <Stack direction='row' justifyContent='center' alignItems='center' spacing={1} sx={{ minHeight: 40 }}>
-            <Link to={`/merchant/${uid}`}>
-              <Button
-                type='primary'
-                size='small'
-                icon={<EyeOutlined />}
-                style={{
-                  borderRadius: '6px',
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  height: 28,
-                  minWidth: 70,
-                }}
-              >
-                View
-              </Button>
+          <span className='tx-row-actions'>
+            <Link to={`/merchant/${uid}`} className='tx-link-btn'>
+              <EyeOutlined />
+              View
             </Link>
 
             <EditMerchant id={uid} data={record} />
 
             <Button
-              type='primary'
-              danger
               size='small'
+              danger
               icon={<DeleteOutlined />}
-              style={{
-                borderRadius: '6px',
-                fontSize: '11px',
-                fontWeight: 600,
-                height: 28,
-                minWidth: 70,
-              }}
               onClick={() => {
                 // TODO: Implement delete functionality
                 console.log('[Merchant] Delete merchant:', uid, record)
@@ -236,7 +200,7 @@ const Merchant = () => {
             >
               Delete
             </Button>
-          </Stack>
+          </span>
         )
       },
     },
@@ -247,67 +211,48 @@ const Merchant = () => {
   }, [])
 
   return (
-    <Box
-      component='main'
-      sx={{
-        flexGrow: 1,
-        backgroundColor: 'background.default',
-        overflow: 'auto',
-        pt: 4,
-      }}
-    >
-      <Stack
-        spacing={2}
-        sx={{
-          alignItems: 'center',
-          mx: 0,
-          pb: 5,
-          mt: 0,
-        }}
-      >
-        <Box sx={{ width: '100%', maxWidth: '96vw' }}>
-          <Typography component='h2' variant='h6' className='sf-page-title'>
-            Merchant Data
-          </Typography>
+    <div className='tx-page'>
+      <header className='tx-head'>
+        <div className='tx-actions'>
+          <AddMerchant onSuccess={onGetMerchant} />
+        </div>
+      </header>
 
-          <Space direction='vertical' style={{ width: '100%', marginBottom: 16 }}>
-            <div className='sf-toolbar'>
-              <AddMerchant onSuccess={onGetMerchant} />
-              <Search
-                placeholder='Cari merchant (nama, email, phone, UID, app name...)'
-                allowClear
-                enterButton={<SearchOutlined />}
-                size='middle'
-                className='sf-toolbar-search'
-                onSearch={handleSearch}
-                onChange={(e) => {
-                  setSearchText(e.target.value)
-                  if (!e.target.value) {
-                    handleSearch('')
-                  }
-                }}
-                value={searchText}
-              />
-            </div>
-          </Space>
-
-          <Table
-            columns={columns}
-            dataSource={filteredData}
-            loading={isLoading}
-            size='small'
-            className='transactions-table'
-            pagination={{
-              total: filteredData.length,
-              pageSize: 10,
-              showSizeChanger: true,
-              showQuickJumper: true,
-              showTotal: (total, range) => `${range[0]}-${range[1]} dari ${total} merchant`,
+      <section className='tx-card'>
+        <div className='tx-filterbar'>
+          <Search
+            placeholder='Search merchants (name, email, phone, UID, app name...)'
+            allowClear
+            className='tx-search'
+            onSearch={handleSearch}
+            onChange={(e) => {
+              setSearchText(e.target.value)
+              if (!e.target.value) {
+                handleSearch('')
+              }
             }}
+            value={searchText}
           />
-        </Box>
-      </Stack>
-    </Box>
+        </div>
+
+        <Table
+          columns={columns}
+          dataSource={filteredData}
+          loading={isLoading}
+          size='small'
+          className='transactions-table'
+          rowKey='uid'
+          scroll={{ x: 'max-content' }}
+          pagination={{
+            total: filteredData.length,
+            pageSize: 10,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} merchants`,
+          }}
+        />
+      </section>
+    </div>
   )
 }
 

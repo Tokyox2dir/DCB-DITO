@@ -1,0 +1,672 @@
+/* Ops Console: monitoring (/monitoring and /monitoring/duration). Builds on the tokens in core.css.
+   A live control room: one filter row, a divided KPI strip, then bordered panels with dense tables. */
+
+/* ---------- Page ---------- */
+html[data-theme] .sf-shell .mon-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+}
+html[data-theme] .sf-shell .mon-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  flex-wrap: wrap;
+}
+html[data-theme] .sf-shell .mon-head h2 {
+  margin: 0;
+  font: 600 20px/1.3 var(--font);
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+html[data-theme] .sf-shell .mon-head p { margin: 2px 0 0; font-size: 13px; color: var(--muted); }
+
+/* Live indicator: a 6px dot that breathes while the page polls. */
+html[data-theme] .sf-shell .mon-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  color: var(--muted);
+  font: 500 12px var(--mono);
+  white-space: nowrap;
+}
+html[data-theme] .sf-shell .mon-live-dot {
+  display: inline-block;
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+html[data-theme] .sf-shell :is(.mon-live.on .mon-live-dot, .mon-live-dot.on) {
+  background: var(--positive);
+  animation: rp-live 1.6s ease-in-out infinite;
+}
+
+/* ---------- Filter bar: one row of 32px controls ---------- */
+html[data-theme] .sf-shell .mon-filter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+html[data-theme] .sf-shell .mon-filter-field { flex: 1 1 180px; min-width: 0; max-width: 260px; }
+html[data-theme] .sf-shell .mon-filter-field.mon-filter-range { flex: 1.3 1 240px; max-width: 300px; }
+/* The placeholders name each field; the labels stay for screen readers. */
+html[data-theme] .sf-shell .mon-filter-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+html[data-theme] .sf-shell .mon-filter-actions { display: flex; gap: 8px; margin-left: auto; }
+
+/* ---------- Notices ---------- */
+html[data-theme] .sf-shell .mon-error {
+  padding: 9px 12px 9px 14px;
+  border: 1px solid color-mix(in srgb, var(--negative) 30%, var(--border));
+  border-left: 3px solid var(--negative);
+  border-radius: var(--radius-control);
+  background: var(--pill-negative-bg);
+  color: var(--pill-negative-ink);
+  font-size: 13px;
+}
+
+/* ---------- KPI strip: one container, split by hairlines ---------- */
+html[data-theme] .sf-shell .mon-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+html[data-theme] .sf-shell .mon-kpi-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  padding: 14px 16px 13px;
+  border: 0;
+  border-left: 1px solid var(--rule);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+html[data-theme] .sf-shell .mon-kpi-card:first-child { border-left: 0; }
+html[data-theme] .sf-shell .mon-kpi-card:hover { background: var(--raised); }
+html[data-theme] .sf-shell .mon-kpi-card:focus-visible { outline: 2px solid var(--data); outline-offset: -2px; }
+html[data-theme] .sf-shell .mon-kpi-card.is-active { background: var(--raised); }
+html[data-theme] .sf-shell .mon-kpi-card.is-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--data);
+}
+html[data-theme] .sf-shell .mon-kpi-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 600 11px/1.3 var(--font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+html[data-theme] .sf-shell .mon-kpi-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--data); }
+html[data-theme] .sf-shell .mon-kpi-success .mon-kpi-dot { background: var(--positive); }
+html[data-theme] .sf-shell .mon-kpi-pending .mon-kpi-dot { background: var(--warning); }
+html[data-theme] .sf-shell .mon-kpi-waiting .mon-kpi-dot { background: var(--info); }
+html[data-theme] .sf-shell .mon-kpi-failed .mon-kpi-dot { background: var(--negative); }
+html[data-theme] .sf-shell .mon-kpi-card.is-live .mon-kpi-dot { animation: rp-live 1.6s ease-in-out infinite; }
+html[data-theme] .sf-shell .mon-kpi-card strong {
+  font: 500 26px/1.1 var(--mono);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+html[data-theme] .sf-shell .mon-kpi-sub { font: 400 12px var(--mono); color: var(--muted); }
+
+/* ---------- Panels ---------- */
+html[data-theme] .sf-shell .mon-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+html[data-theme] .sf-shell .mon-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px 12px;
+  flex-wrap: wrap;
+  padding: 14px 16px 12px;
+}
+html[data-theme] .sf-shell .mon-panel-title { min-width: 0; }
+html[data-theme] .sf-shell .mon-panel-title h4 { margin: 0; font: 600 14px/1.3 var(--font); color: var(--text); }
+html[data-theme] .sf-shell .mon-panel-title small { display: block; margin-top: 2px; font-size: 12px; color: var(--faint); }
+html[data-theme] .sf-shell .mon-panel-meta { font: 400 12px var(--mono); color: var(--faint); white-space: nowrap; }
+html[data-theme] .sf-shell .mon-panel-meta b { font-weight: 500; color: var(--text); }
+html[data-theme] .sf-shell .mon-panel-empty {
+  display: grid;
+  align-items: center;
+  justify-items: start;
+  min-height: 72px;
+  padding: 16px;
+  color: var(--faint);
+  font-size: 12px;
+  text-align: left;
+}
+html[data-theme] .sf-shell td.mon-panel-empty { display: table-cell; }
+html[data-theme] .sf-shell .mon-panel-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--rule);
+  font-size: 11px;
+  color: var(--faint);
+}
+
+/* Legends: 8px squares or short lines, faint text */
+html[data-theme] .sf-shell :is(.mon-panel-legend, .mon-perf-legend, .mon-donut-legend) {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+html[data-theme] .sf-shell :is(.mon-panel-legend, .mon-perf-legend, .mon-donut-legend) > span { display: inline-flex; align-items: center; gap: 6px; }
+html[data-theme] .sf-shell .mon-dot { display: inline-block; width: 14px; height: 0; border-top: 2px solid var(--data); }
+html[data-theme] .sf-shell .mon-dot.yesterday { border-top: 2px dashed var(--faint); }
+html[data-theme] .sf-shell :is(.mon-perf-legend, .mon-donut-legend) i { width: 8px; height: 8px; border-radius: 2px; }
+html[data-theme] .sf-shell :is(.mon-perf-legend, .mon-donut-legend, .mon-perf-bar) i.g { background: var(--positive); }
+html[data-theme] .sf-shell :is(.mon-perf-legend, .mon-donut-legend, .mon-perf-bar) i.y { background: var(--warning); }
+html[data-theme] .sf-shell :is(.mon-perf-legend, .mon-donut-legend, .mon-perf-bar) i.r { background: var(--negative); }
+
+/* ---------- Grids ---------- */
+html[data-theme] .sf-shell .mon-top-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 3fr) minmax(0, 4fr);
+  gap: var(--gap);
+}
+html[data-theme] .sf-shell .mon-top-grid > .mon-panel { height: 340px; }
+html[data-theme] .sf-shell .mon-bottom-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+  gap: var(--gap);
+  align-items: start;
+}
+html[data-theme] .sf-shell .mon-bottom-grid > * { min-width: 0; }
+html[data-theme] .sf-shell .mon-bottom-alert { display: flex; flex-direction: column; min-height: 0; }
+html[data-theme] .sf-shell .mon-bottom-alert .mon-panel-alert { flex: 1; min-height: 0; }
+html[data-theme] .sf-shell .mon-perf-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--gap);
+}
+html[data-theme] .sf-shell .mon-perf-grid .mon-panel-perf { height: 380px; }
+
+/* ---------- Volume per hour ---------- */
+html[data-theme] .sf-shell .mon-panel-chart-body { position: relative; flex: 1; min-height: 0; padding: 0 12px 12px 8px; }
+
+/* ---------- Status donut ---------- */
+html[data-theme] .sf-shell .mon-donut-body { flex: 1; min-height: 0; display: grid; place-items: center; padding: 0 16px; }
+html[data-theme] .sf-shell .mon-donut-wrap { position: relative; width: 172px; height: 172px; }
+html[data-theme] .sf-shell .mon-donut-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+html[data-theme] .sf-shell .mon-donut-center strong {
+  font: 500 26px/1 var(--mono);
+  letter-spacing: -0.02em;
+  color: var(--muted);
+}
+html[data-theme] .sf-shell .mon-donut-center strong.good { color: var(--text); }
+html[data-theme] .sf-shell .mon-donut-center span {
+  margin-top: 6px;
+  font: 600 10px var(--font);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+html[data-theme] .sf-shell .mon-donut-legend {
+  justify-content: flex-start;
+  column-gap: 10px;
+  font-size: 11px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--rule);
+}
+html[data-theme] .sf-shell .mon-donut-legend b { font: 500 12px var(--mono); color: var(--text); }
+
+/* ---------- Traffic per client / payment ---------- */
+html[data-theme] .sf-shell .mon-tpc-head-right { display: flex; align-items: center; gap: 10px; }
+/* The two slides switch with a small segmented control. */
+html[data-theme] .sf-shell .mon-tpc-dots {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--raised);
+}
+html[data-theme] .sf-shell .mon-tpc-dots button {
+  height: 22px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--faint);
+  font: 500 12px var(--font);
+  cursor: pointer;
+}
+html[data-theme] .sf-shell .mon-tpc-dots button:hover { color: var(--text); }
+html[data-theme] .sf-shell .mon-tpc-dots button.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 0 0 1px var(--border);
+}
+html[data-theme] .sf-shell .mon-tpc-pager {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+html[data-theme] .sf-shell .mon-tpc-pager::-webkit-scrollbar { display: none; }
+html[data-theme] .sf-shell .mon-tpc-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+html[data-theme] .sf-shell .mon-tpc-scroll { flex: 1; min-height: 0; overflow: auto; }
+
+/* Dense tables shared by traffic and alerts */
+html[data-theme] .sf-shell :is(.mon-tpc-table, .mon-alert-table) {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 12px;
+}
+html[data-theme] .sf-shell :is(.mon-tpc-table, .mon-alert-table) th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 7px 8px;
+  background: var(--raised);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--border);
+  font: 600 11px/1.3 var(--font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+  white-space: nowrap;
+}
+html[data-theme] .sf-shell :is(.mon-tpc-table, .mon-alert-table) td {
+  height: 34px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--text);
+  white-space: nowrap;
+}
+html[data-theme] .sf-shell :is(.mon-tpc-table, .mon-alert-table) :is(th, td):first-child { padding-left: 16px; }
+html[data-theme] .sf-shell :is(.mon-tpc-table, .mon-alert-table) :is(th, td):last-child { padding-right: 16px; }
+html[data-theme] .sf-shell :is(.mon-tpc-table, .mon-alert-table) tbody tr:hover td { background: var(--raised); }
+html[data-theme] .sf-shell .mon-tpc-table .num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+html[data-theme] .sf-shell .mon-tpc-table th.num { font-family: var(--font); }
+html[data-theme] .sf-shell .mon-tpc-table .muted { color: var(--muted); }
+html[data-theme] .sf-shell .mon-tpc-client {
+  display: inline-block;
+  vertical-align: middle;
+  max-width: 132px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+html[data-theme] .sf-shell .mon-tpc-client i { display: inline-block; width: 6px; height: 6px; margin: 0 8px 1px 0; border-radius: 50%; }
+html[data-theme] .sf-shell .mon-tpc-today { color: var(--text); }
+html[data-theme] .sf-shell .mon-tpc-delta-pill {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 4px;
+  border-radius: var(--radius-chip);
+  font: 500 11px/17px var(--mono);
+}
+html[data-theme] .sf-shell .mon-tpc-pct { font-weight: 500; font-size: 12px; }
+html[data-theme] .sf-shell .mon-tpc-table .bar-col { width: 44px; }
+html[data-theme] .sf-shell .mon-tpc-table th.bar-col { font-size: 0; }
+html[data-theme] .sf-shell .mon-tpc-table :is(th, td) { padding-inline: 6px; }
+html[data-theme] .sf-shell .mon-tpc-bar { height: 4px; border-radius: 2px; background: var(--rule); overflow: hidden; }
+html[data-theme] .sf-shell .mon-tpc-bar i { display: block; height: 100%; border-radius: 2px; background: var(--data); }
+html[data-theme] .sf-shell .mon-tpc-table tr.up :is(.mon-tpc-client i) { background: var(--positive); }
+html[data-theme] .sf-shell .mon-tpc-table tr.down :is(.mon-tpc-client i) { background: var(--negative); }
+html[data-theme] .sf-shell .mon-tpc-table tr.up .mon-tpc-pct { color: var(--positive); }
+html[data-theme] .sf-shell .mon-tpc-table tr.down .mon-tpc-pct { color: var(--negative); }
+html[data-theme] .sf-shell .mon-tpc-table tr.up .mon-tpc-delta-pill { background: var(--pill-positive-bg); color: var(--pill-positive-ink); }
+html[data-theme] .sf-shell .mon-tpc-table tr.down .mon-tpc-delta-pill { background: var(--pill-negative-bg); color: var(--pill-negative-ink); }
+html[data-theme] .sf-shell .mon-tpc-table tr.down .mon-tpc-bar i { background: var(--faint); }
+
+/* ---------- Alert monitor ---------- */
+html[data-theme] .sf-shell .mon-panel-alert { height: 100%; }
+html[data-theme] .sf-shell .mon-alert-badges { display: inline-flex; gap: 4px; }
+html[data-theme] .sf-shell .mon-alert-badges span {
+  padding: 0 7px;
+  border-radius: var(--radius-chip);
+  font: 500 12px/22px var(--mono);
+  white-space: nowrap;
+}
+html[data-theme] .sf-shell .mon-alert-badges .crit { background: var(--pill-negative-bg); color: var(--pill-negative-ink); }
+html[data-theme] .sf-shell .mon-alert-badges .warn { background: var(--pill-warning-bg); color: var(--pill-warning-ink); }
+html[data-theme] .sf-shell .mon-alert-badges .ok { background: var(--pill-neutral-bg); color: var(--pill-neutral-ink); }
+html[data-theme] .sf-shell .mon-alert-section {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--rule);
+}
+html[data-theme] .sf-shell .mon-alert-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px 8px;
+  font: 600 11px/1.3 var(--font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+html[data-theme] .sf-shell .mon-alert-section-title::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+html[data-theme] .sf-shell .mon-alert-section-title.crit::before { background: var(--negative); }
+html[data-theme] .sf-shell .mon-alert-section-title.warn::before { background: var(--warning); }
+html[data-theme] .sf-shell .mon-alert-section-title span { margin-left: auto; font: 500 11px var(--mono); color: var(--muted); }
+html[data-theme] .sf-shell .mon-alert-scroll { flex: 1; min-height: 0; overflow: auto; }
+html[data-theme] .sf-shell .mon-alert-scroll .mon-panel-empty { min-height: 56px; }
+html[data-theme] .sf-shell .mon-alert-client { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+html[data-theme] .sf-shell .mon-alert-client .dot { display: inline-block; width: 6px; height: 6px; margin: 0 8px 1px 0; border-radius: 50%; }
+html[data-theme] .sf-shell .mon-alert-client .dot.crit { background: var(--negative); }
+html[data-theme] .sf-shell .mon-alert-client .dot.warn { background: var(--warning); }
+html[data-theme] .sf-shell .mon-alert-table :is(.product, .since) { font-family: var(--mono); color: var(--muted); }
+html[data-theme] .sf-shell .mon-alert-table { table-layout: fixed; }
+html[data-theme] .sf-shell .mon-alert-table th:first-child { width: 32%; }
+html[data-theme] .sf-shell .mon-alert-table:has(th:nth-child(4)) th:nth-child(2) { width: 76px; }
+html[data-theme] .sf-shell .mon-alert-table th:last-child { width: 88px; }
+html[data-theme] .sf-shell .mon-alert-table td { overflow: hidden; text-overflow: ellipsis; }
+html[data-theme] .sf-shell .mon-alert-table .detail { color: var(--muted); white-space: normal; padding-block: 6px; line-height: 1.4; }
+
+/* ---------- Performance lists ---------- */
+html[data-theme] .sf-shell .mon-perf-cols,
+html[data-theme] .sf-shell .mon-perf-name {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px 64px 64px 64px;
+  align-items: center;
+  gap: 8px;
+}
+html[data-theme] .sf-shell .mon-perf-cols {
+  padding: 7px 16px;
+  background: var(--raised);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--border);
+  font: 600 11px/1.3 var(--font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+html[data-theme] .sf-shell :is(.mon-perf-cols, .mon-perf-name) .num { text-align: right; }
+html[data-theme] .sf-shell .mon-perf-scroll { flex: 1; min-height: 0; overflow: auto; }
+html[data-theme] .sf-shell .mon-perf-item { padding: 8px 16px 9px; border-bottom: 1px solid var(--rule); }
+html[data-theme] .sf-shell .mon-perf-item:hover { background: var(--raised); }
+html[data-theme] .sf-shell .mon-perf-name { font-size: 12px; }
+html[data-theme] .sf-shell .mon-perf-name .num { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--muted); }
+html[data-theme] .sf-shell .mon-perf-client { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; font-weight: 500; color: var(--text); }
+html[data-theme] .sf-shell .mon-perf-name .mon-perf-total { color: var(--text); font-weight: 500; }
+html[data-theme] .sf-shell .mon-perf-name .num.g { color: var(--positive); }
+html[data-theme] .sf-shell .mon-perf-bar {
+  display: flex;
+  gap: 1px;
+  height: 4px;
+  margin-top: 6px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--rule);
+}
+html[data-theme] .sf-shell .mon-perf-bar i { display: block; height: 100%; }
+
+/* ---------- Transaction list ---------- */
+html[data-theme] .sf-shell .mon-trx-body { min-width: 0; }
+html[data-theme] .sf-shell .mon-trx-table .ant-table-thead > tr > th { white-space: nowrap; }
+html[data-theme] .sf-shell .mon-trx-table .ant-table-tbody > tr > td { font-size: 12px; padding-top: 7px; padding-bottom: 7px; }
+html[data-theme] .sf-shell .mon-trx-table .ant-table-thead > tr > th:first-child,
+html[data-theme] .sf-shell .mon-trx-table .ant-table-tbody > tr > td:first-child { padding-left: 16px; }
+html[data-theme] .sf-shell .mon-trx-table .ant-pagination { margin: 12px 16px; }
+html[data-theme] .sf-shell :is(.mon-trx-copy, .mon-trx-date, .mon-trx-mono, .mon-trx-num) {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+html[data-theme] .sf-shell .mon-trx-copy {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+  cursor: copy;
+}
+html[data-theme] .sf-shell .mon-trx-copy:hover { color: var(--data); }
+html[data-theme] .sf-shell .mon-trx-date { color: var(--muted); white-space: nowrap; }
+html[data-theme] .mon-trx-modal .mon-trx-mono { font-family: var(--mono); font-size: 12px; }
+
+/* Status tag: square-cornered, tinted, with a leading dot. Also used in the detail dialog (outside the shell). */
+html[data-theme] .mon-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: var(--radius-chip);
+  font: 500 12px/1 var(--font);
+  white-space: nowrap;
+}
+html[data-theme] .mon-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+html[data-theme] .mon-status.success { background: var(--pill-positive-bg); color: var(--pill-positive-ink); }
+html[data-theme] .mon-status.pending { background: var(--pill-warning-bg); color: var(--pill-warning-ink); }
+html[data-theme] .mon-status.waiting { background: var(--pill-info-bg); color: var(--pill-info-ink); }
+html[data-theme] .mon-status.failed { background: var(--pill-negative-bg); color: var(--pill-negative-ink); }
+
+/* ---------- Duration monitoring ---------- */
+html[data-theme] .sf-shell .mon-dur-page { display: flex; flex-direction: column; gap: var(--gap); min-width: 0; }
+html[data-theme] .sf-shell .mon-dur-series { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+html[data-theme] .sf-shell .mon-dur-series span { display: inline-flex; align-items: center; gap: 6px; }
+html[data-theme] .sf-shell .mon-dur-series i { width: 14px; height: 0; border-top: 2px solid var(--data); }
+html[data-theme] .sf-shell .mon-dur-series i.supplier { border-top-color: var(--warning); }
+html[data-theme] .sf-shell .mon-dur-series i.merchant { border-top: 2px dashed var(--positive); }
+html[data-theme] .sf-shell .mon-dur-series .tag {
+  padding: 0 7px;
+  border-radius: var(--radius-chip);
+  background: var(--pill-neutral-bg);
+  color: var(--pill-neutral-ink);
+  font: 500 11px/20px var(--mono);
+}
+html[data-theme] .sf-shell .mon-dur-help { border: 1px solid var(--border); border-radius: var(--radius-card); background: var(--surface); }
+html[data-theme] .sf-shell .mon-dur-help > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  list-style: none;
+  font: 500 13px var(--font);
+  color: var(--muted);
+  cursor: pointer;
+}
+html[data-theme] .sf-shell .mon-dur-help > summary::-webkit-details-marker { display: none; }
+html[data-theme] .sf-shell .mon-dur-help > summary::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s;
+}
+html[data-theme] .sf-shell .mon-dur-help[open] > summary::before { transform: rotate(45deg); }
+html[data-theme] .sf-shell .mon-dur-help > summary:hover { color: var(--text); }
+html[data-theme] .sf-shell .mon-dur-help-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid var(--rule);
+}
+html[data-theme] .sf-shell .mon-dur-help-body > div { padding: 12px 16px 14px; }
+html[data-theme] .sf-shell .mon-dur-help-body > div + div { border-left: 1px solid var(--rule); }
+html[data-theme] .sf-shell .mon-dur-help-body h5 {
+  margin: 0 0 4px;
+  font: 600 11px/1.3 var(--font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+html[data-theme] .sf-shell .mon-dur-help-body p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--muted); }
+
+/* Summary strip: same divided container as the KPI strip */
+html[data-theme] .sf-shell .mon-dur-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+html[data-theme] .sf-shell .mon-dur-kpis > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
+  box-shadow: -1px 0 0 var(--rule);
+}
+html[data-theme] .sf-shell .mon-dur-kpis span {
+  font: 600 11px/1.3 var(--font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+html[data-theme] .sf-shell .mon-dur-kpis > div { min-width: 0; }
+html[data-theme] .sf-shell .mon-dur-kpis strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 500 22px/1.15 var(--mono);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+html[data-theme] .sf-shell .mon-dur-kpis.small { border: 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); border-radius: 0; }
+html[data-theme] .sf-shell .mon-dur-kpis.small > div { padding: 10px 16px; }
+html[data-theme] .sf-shell .mon-dur-kpis.small strong { font-size: 17px; }
+
+html[data-theme] .sf-shell .mon-dur-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  color: var(--faint);
+  font-size: 13px;
+}
+html[data-theme] .sf-shell .mon-dur-state.error { color: var(--negative); }
+html[data-theme] .sf-shell .mon-dur-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr));
+  gap: var(--gap);
+}
+html[data-theme] .sf-shell .mon-dur-card .mon-panel-title h4 { font-size: 14px; }
+html[data-theme] .sf-shell .mon-dur-card .mon-panel-title small { font-family: var(--mono); text-transform: uppercase; letter-spacing: 0.02em; }
+html[data-theme] .sf-shell .mon-dur-card-tags { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+html[data-theme] .sf-shell .mon-dur-card-tags span {
+  padding: 0 7px;
+  border-radius: var(--radius-chip);
+  background: var(--pill-neutral-bg);
+  color: var(--pill-neutral-ink);
+  font: 500 11px/20px var(--mono);
+  white-space: nowrap;
+}
+html[data-theme] .sf-shell .mon-dur-chart { position: relative; height: 300px; padding: 12px 12px 12px 8px; }
+
+/* ---------- Narrower screens ---------- */
+@media (max-width: 1280px) {
+  html[data-theme] .sf-shell .mon-top-grid { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); }
+  html[data-theme] .sf-shell .mon-top-grid > .mon-panel-tpc { grid-column: 1 / -1; height: 360px; }
+}
+@media (max-width: 1100px) {
+  html[data-theme] .sf-shell .mon-kpi-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  html[data-theme] .sf-shell .mon-kpi-card:nth-child(n + 4) { border-top: 1px solid var(--rule); }
+  html[data-theme] .sf-shell .mon-kpi-card:nth-child(4) { border-left: 0; }
+  html[data-theme] .sf-shell .mon-bottom-grid { grid-template-columns: minmax(0, 1fr); }
+  html[data-theme] .sf-shell .mon-bottom-alert { height: auto !important; max-height: none !important; }
+  html[data-theme] .sf-shell .mon-bottom-alert .mon-panel-alert { height: auto; }
+  html[data-theme] .sf-shell .mon-bottom-alert .mon-alert-section { flex: none; }
+  html[data-theme] .sf-shell .mon-bottom-alert .mon-alert-scroll { flex: none; max-height: 240px; }
+  html[data-theme] .sf-shell .mon-perf-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  html[data-theme] .sf-shell .mon-top-grid { grid-template-columns: minmax(0, 1fr); }
+  html[data-theme] .sf-shell .mon-top-grid > .mon-panel { height: auto; }
+  html[data-theme] .sf-shell .mon-top-grid > .mon-panel-chart .mon-panel-chart-body { height: 240px; flex: none; }
+  html[data-theme] .sf-shell .mon-top-grid > .mon-panel-donut .mon-donut-body { padding-block: 8px 16px; }
+  html[data-theme] .sf-shell .mon-top-grid > .mon-panel-tpc { height: 380px; }
+  html[data-theme] .sf-shell .mon-filter-field,
+  html[data-theme] .sf-shell .mon-filter-field.mon-filter-range { flex: 1 1 calc(50% - 4px); max-width: none; }
+  html[data-theme] .sf-shell .mon-filter-actions { margin-left: 0; flex: 1 1 100%; }
+  html[data-theme] .sf-shell .mon-filter-actions > * { flex: 1; }
+  html[data-theme] .sf-shell .mon-dur-help-body { grid-template-columns: minmax(0, 1fr); }
+  html[data-theme] .sf-shell .mon-dur-help-body > div + div { border-left: 0; border-top: 1px solid var(--rule); }
+}
+@media (max-width: 600px) {
+  html[data-theme] .sf-shell .mon-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html[data-theme] .sf-shell .mon-kpi-card:nth-child(n) { border-left: 1px solid var(--rule); border-top: 1px solid var(--rule); }
+  html[data-theme] .sf-shell .mon-kpi-card:first-child { grid-column: 1 / -1; border-top: 0; border-left: 0; }
+  html[data-theme] .sf-shell .mon-kpi-card:nth-child(even) { border-left: 0; }
+  html[data-theme] .sf-shell .mon-kpi-card strong { font-size: 22px; }
+  html[data-theme] .sf-shell .mon-filter-field,
+  html[data-theme] .sf-shell .mon-filter-field.mon-filter-range { flex-basis: 100%; }
+  html[data-theme] .sf-shell .mon-live { white-space: normal; height: auto; padding-block: 4px; }
+  html[data-theme] .sf-shell .mon-perf-cols,
+  html[data-theme] .sf-shell .mon-perf-name { grid-template-columns: minmax(0, 1fr) 52px 56px 56px 56px; gap: 4px; }
+  html[data-theme] .sf-shell .mon-tpc-table .bar-col { display: none; }
+  html[data-theme] .sf-shell .mon-dur-chart { height: 240px; }
+}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Table, Tag, Typography, Spin, message, DatePicker, Select, Input, Button, Row, Col, Space } from 'antd'
+import { Table, Typography, Spin, message, DatePicker, Select, Input, Button } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useAuth } from '../provider/AuthProvider'
 import { useMerchants } from '../context/MerchantContext'
@@ -131,23 +131,29 @@ const TransactionSummaryPage: React.FC = () => {
       title: 'Date',
       dataIndex: 'date',
       key: 'date',
-      render: (date) => dayjs(date).format('DD MMMM YYYY'),
+      render: (date) => <span className='rpt-num'>{dayjs(date).format('DD MMMM YYYY')}</span>,
     },
     {
       title: 'Merchant',
       dataIndex: 'merchant_name',
       key: 'merchant_name',
+      render: (v: string) => <span className='rpt-strong'>{v}</span>,
     },
     {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
       render: (status) => {
-        let color = 'default'
-        if (status === 'success') color = 'green'
-        else if (status === 'pending') color = 'orange'
-        else if (status === 'failed') color = 'red'
-        return <Tag color={color}>{status}</Tag>
+        let tone = ''
+        if (status === 'success') tone = 'positive'
+        else if (status === 'pending') tone = 'warning'
+        else if (status === 'failed') tone = 'negative'
+        return (
+          <span className='rpt-status'>
+            <i className={`rpt-dot ${tone}`} />
+            {status}
+          </span>
+        )
       },
     },
     {
@@ -180,26 +186,33 @@ const TransactionSummaryPage: React.FC = () => {
       title: 'Channel',
       dataIndex: 'route',
       key: 'route',
-      render: (text) => <Text ellipsis={{ tooltip: text }}>{text}</Text>,
+      render: (text) => (
+        <Text ellipsis={{ tooltip: text }} className='rpt-mono'>
+          {text}
+        </Text>
+      ),
     },
     {
       title: 'Price',
       dataIndex: 'price',
       key: 'price',
+      align: 'right',
       render: (price: number) => `Rp ${price?.toLocaleString('id-ID')}`,
     },
     {
       title: 'Total',
       dataIndex: 'total',
       key: 'total',
+      align: 'right',
     },
     {
       title: 'Revenue',
       dataIndex: 'revenue',
       key: 'revenue',
+      align: 'right',
       render: (revenue: number, record) => {
         if (record.status?.toLowerCase() !== 'success') {
-          return '-'
+          return <span className='rpt-muted'>-</span>
         }
         return `Rp ${revenue?.toLocaleString('id-ID')}`
       },
@@ -220,63 +233,63 @@ const TransactionSummaryPage: React.FC = () => {
   }
 
   return (
-    <div className='sf-page'>
-      <h2 className='sf-page-title'>Transaction Daily Summary</h2>
+    <div className='rpt-page'>
+      <div className='rpt-head'>
+        <div className='rpt-actions'>
+          <Button onClick={() => handleExport('csv')}>Export CSV</Button>
+          <Button onClick={() => handleExport('xlsx')}>Export Excel</Button>
+        </div>
+      </div>
 
-      <div className='sf-panel'>
-      <Row gutter={[16, 8]} style={{ marginBottom: 8 }}>
-        <Col xs={24} sm={12} md={12} lg={8}>
-          <Text>Date Range</Text>
+      <div className='rpt-filters'>
+        <div className='rpt-field'>
+          <span>Date</span>
           <RangePicker
             value={dateRange}
             onChange={(dates) => setDateRange(dates as [Dayjs, Dayjs])}
-            style={{ width: '100%' }}
+            style={{ width: 240 }}
           />
-        </Col>
-        <Col xs={24} sm={12} md={12} lg={8}>
-          <Text>Merchant</Text>
-            <Select
-             showSearch
-             placeholder='Select merchant'
-             value={merchantName}
-             onChange={(value) => setMerchantName(value)}
-             allowClear
-             style={{ width: '100%' }}
-             optionFilterProp='children'
-             filterOption={(input, option: any) =>
-               (option?.children?.toString() || '').toLowerCase().includes(input.toLowerCase())
-             }
-             loading={!merchants.length && !error}
-            >
+        </div>
+        <div className='rpt-field'>
+          <span>Merchant</span>
+          <Select
+            showSearch
+            placeholder='Select merchant'
+            value={merchantName}
+            onChange={(value) => setMerchantName(value)}
+            allowClear
+            style={{ width: 200 }}
+            optionFilterProp='children'
+            filterOption={(input, option: any) =>
+              (option?.children?.toString() || '').toLowerCase().includes(input.toLowerCase())
+            }
+            loading={!merchants.length && !error}
+          >
             {merchants.map((merchant) => (
               <Option key={merchant.u_id} value={merchant.client_name}>
                 {merchant.client_name}
               </Option>
             ))}
           </Select>
-        </Col>
-      </Row>
-
-      {/* Baris 2 */}
-      <Row gutter={[16, 8]} style={{ marginBottom: 8 }}>
-        <Col xs={24} sm={12} md={12} lg={8}>
-          <Text>Status</Text>
+        </div>
+        <div className='rpt-field'>
+          <span>Status</span>
           <Select
             placeholder='Select status'
             value={status}
             onChange={(value) => setStatus(value)}
             allowClear
-            style={{ width: '100%' }}
+            style={{ width: 120 }}
           >
             <Option value='success'>Success</Option>
             <Option value='pending'>Pending</Option>
             <Option value='failed'>Failed</Option>
           </Select>
-        </Col>
-        <Col xs={24} sm={12} md={12} lg={8} className='flex flex-col'>
-          <Text>Payment Method</Text>
+        </div>
+        <div className='rpt-field'>
+          <span>Method</span>
           <Select
-            // style={{ width: 200 }}
+            style={{ width: 140 }}
             placeholder='Select Payment Method'
             value={paymentMethod}
             onChange={(value) => setPaymentMethod(value)}
@@ -290,41 +303,19 @@ const TransactionSummaryPage: React.FC = () => {
               </Select.Option>
             ))}
           </Select>
-        </Col>
-      </Row>
-
-      {/* Baris 3 */}
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} md={12} lg={8}>
-          <Text>Route</Text>
-          <Input placeholder='Route' value={route} onChange={(e) => setRoute(e.target.value)} />
-        </Col>
-        <Col xs={24} sm={12} md={12} lg={8}>
-          <Text>&nbsp;</Text>
-          <Space style={{ marginTop: 20 }}>
-            <Button type='primary' onClick={handleFilter}>
-              Filter
-            </Button>
-            <Button onClick={handleReset}>Reset</Button>
-          </Space>
-        </Col>
-      </Row>
+        </div>
+        <div className='rpt-field'>
+          <span>Route</span>
+          <Input placeholder='Route' value={route} onChange={(e) => setRoute(e.target.value)} style={{ width: 130 }} />
+        </div>
+        <span className='rpt-spacer' />
+        <Button onClick={handleReset}>Reset</Button>
+        <Button type='primary' onClick={handleFilter}>
+          Filter
+        </Button>
       </div>
 
-      <Row justify='start' gutter={8}>
-        <Col>
-          <Button variant='outlined' color='primary' onClick={() => handleExport('csv')}>
-            Export CSV
-          </Button>
-        </Col>
-        <Col>
-          <Button variant='solid' color='default' onClick={() => handleExport('xlsx')}>
-            Export Excel
-          </Button>
-        </Col>
-      </Row>
-
-      <div className='sf-panel'>
+      <div className='rpt-table'>
         <Spin spinning={loading}>
           <Table
             columns={columns}

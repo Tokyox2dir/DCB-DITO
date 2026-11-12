@@ -1,0 +1,425 @@
+/* Ops Console: reports and summaries. Builds on the tokens in core.css.
+   Pages: /report, /report/merchant, /report-margin, /report-margin-payment-method,
+   /summary/hourly, /summary/daily, /summary/monthly, /admin/summary. */
+
+/* ---------- Page stack ---------- */
+html[data-theme] .sf-shell .rpt-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+}
+
+/* ---------- Page header: title left, actions right ---------- */
+html[data-theme] .sf-shell .rpt-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+}
+html[data-theme] .sf-shell .rpt-head > div:first-child { min-width: 0; }
+html[data-theme] .sf-shell .rp-page .rpt-head h2.rpt-title {
+  margin: 0;
+  font: 600 20px/1.3 var(--font);
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+html[data-theme] .sf-shell .rpt-sub {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+html[data-theme] .sf-shell .rpt-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---------- Filter bar: one row of 32px controls ---------- */
+html[data-theme] .sf-shell .rpt-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+}
+html[data-theme] .sf-shell .rpt-filters .rpt-spacer { flex: 1 1 auto; }
+html[data-theme] .sf-shell .rpt-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+}
+html[data-theme] .sf-shell .rpt-field > span:first-child,
+html[data-theme] .sf-shell .rpt-label {
+  flex: none;
+  font: 600 11px var(--font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+  white-space: nowrap;
+}
+html[data-theme] .sf-shell .rpt-filters :is(.ant-select, .ant-picker, .ant-input, .ant-input-affix-wrapper) { height: var(--ctl-h); }
+html[data-theme] .sf-shell .rpt-filters .ant-input { font-size: 13px; }
+html[data-theme] .sf-shell .rpt-filters .rpt-divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: var(--border);
+}
+
+/* Stacked form grid (labels above fields) for the longer filter forms. */
+html[data-theme] .sf-shell .rpt-form {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+html[data-theme] .sf-shell .rpt-form .rpt-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+html[data-theme] .sf-shell .rpt-form .rpt-stack > .rpt-label { line-height: 1.2; }
+html[data-theme] .sf-shell .rpt-form .ant-select-selector { min-height: var(--ctl-h); }
+html[data-theme] .sf-shell .rpt-form-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--rule);
+}
+
+/* ---------- KPI strip: one container, hairline dividers ---------- */
+html[data-theme] .sf-shell .rpt-kpis {
+  display: grid;
+  grid-template-columns: repeat(var(--kpi-cols, 4), minmax(0, 1fr));
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+html[data-theme] .sf-shell .rpt-kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 14px 16px 16px;
+  border-left: 1px solid var(--border);
+}
+html[data-theme] .sf-shell .rpt-kpi:first-child { border-left: 0; }
+html[data-theme] .sf-shell .rpt-kpi-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 600 11px var(--font);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+html[data-theme] .sf-shell .rpt-kpi-value {
+  font: 500 24px/1.15 var(--mono);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html[data-theme] .sf-shell .rpt-kpi-value.is-empty { color: var(--faint); }
+html[data-theme] .sf-shell .rpt-kpi-sub { font-size: 12px; color: var(--muted); }
+
+/* ---------- Status / series dot ---------- */
+html[data-theme] .sf-shell .rpt-dot {
+  display: inline-block;
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--faint);
+}
+html[data-theme] .sf-shell .rpt-dot.positive { background: var(--positive); }
+html[data-theme] .sf-shell .rpt-dot.warning { background: var(--warning); }
+html[data-theme] .sf-shell .rpt-dot.negative { background: var(--negative); }
+html[data-theme] .sf-shell .rpt-dot.data { background: var(--data); }
+html[data-theme] .sf-shell .rpt-dot.data-2 { background: var(--data-2); }
+
+/* Line-style legend key for chart cards. */
+html[data-theme] .sf-shell .rpt-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  color: var(--muted);
+}
+html[data-theme] .sf-shell .rpt-legend li { display: inline-flex; align-items: center; gap: 6px; }
+html[data-theme] .sf-shell .rpt-legend i {
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--key, var(--data));
+}
+html[data-theme] .sf-shell .rpt-legend i.dash {
+  background: repeating-linear-gradient(90deg, var(--key, var(--data)) 0 4px, transparent 4px 7px);
+}
+
+/* ---------- Cards ---------- */
+html[data-theme] .sf-shell .rpt-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  min-width: 0;
+}
+html[data-theme] .sf-shell .rpt-card .rp-card-head { margin-bottom: 12px; }
+html[data-theme] .sf-shell .rpt-card-flush { padding: 0; overflow: hidden; }
+html[data-theme] .sf-shell .rpt-card-flush > .rp-card-head {
+  margin: 0;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ---------- Report tables ---------- */
+html[data-theme] .sf-shell .rpt-table {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  min-width: 0;
+}
+html[data-theme] .sf-shell .rpt-card-flush .rpt-table,
+html[data-theme] .sf-shell .rpt-card .rpt-table.is-bare { border: 0; border-radius: 0; }
+html[data-theme] .sf-shell :is(.rpt-table, .report-margin-table) .ant-table { font-size: 13px; }
+html[data-theme] .sf-shell :is(.rpt-table, .report-margin-table) .ant-table-thead > tr > th { white-space: nowrap; }
+html[data-theme] .sf-shell :is(.rpt-table, .report-margin-table) .ant-table-tbody > tr > td { padding-top: 9px; padding-bottom: 9px; }
+html[data-theme] .sf-shell :is(.rpt-table, .report-margin-table) .ant-table-cell.ant-table-cell-align-right,
+html[data-theme] .sf-shell :is(.rpt-table, .report-margin-table) td[style*='text-align: right'] {
+  font-variant-numeric: tabular-nums;
+}
+html[data-theme] .sf-shell :is(.rpt-table, .report-margin-table) .ant-table-summary > tr > td {
+  background: var(--raised);
+  border-bottom: 0 !important;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+html[data-theme] .sf-shell :is(.rpt-table, .report-margin-table) .ant-table-summary strong { font-weight: 600; }
+html[data-theme] .sf-shell :is(.rpt-table, .report-margin-table) .ant-table-tbody > tr:last-child > td { border-bottom: 0 !important; }
+html[data-theme] .sf-shell :is(.rpt-table, .report-margin-table) .ant-table-pagination { margin: 12px 16px !important; }
+html[data-theme] .sf-shell .rpt-table .ant-table-placeholder .ant-table-cell { border-bottom: 0 !important; }
+html[data-theme] .sf-shell :is(.rpt-table, .report-margin-table) .ant-table-container::before,
+html[data-theme] .sf-shell :is(.rpt-table, .report-margin-table) .ant-table-container::after { box-shadow: none !important; }
+html[data-theme] .sf-shell :is(.rpt-table, .report-margin-table) .ant-table-ping-right .ant-table-container::after { border-right: 1px solid var(--border); }
+html[data-theme] .sf-shell :is(.rpt-table, .report-margin-table) .ant-table-ping-left .ant-table-container::before { border-left: 1px solid var(--border); }
+html[data-theme] .sf-shell .rpt-total-label { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+
+/* Figures inside tables */
+html[data-theme] .sf-shell .rpt-num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+html[data-theme] .sf-shell .rpt-mono { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+html[data-theme] .sf-shell .rpt-pos { color: var(--positive); }
+html[data-theme] .sf-shell .rpt-neg { color: var(--negative); }
+html[data-theme] .sf-shell .rpt-strong { font-weight: 600; color: var(--text); }
+html[data-theme] .sf-shell .rpt-muted { color: var(--faint); }
+
+/* Status label: dot plus text */
+html[data-theme] .sf-shell .rpt-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text);
+  text-transform: capitalize;
+}
+
+/* ---------- Report margin: expandable merchant rows ---------- */
+html[data-theme] .sf-shell .report-margin-table .ant-table-row-expand-icon-cell,
+html[data-theme] .sf-shell .report-margin-table .ant-table-expand-icon-col { width: 44px; }
+html[data-theme] .sf-shell .rpt-expand {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-chip);
+  background: transparent;
+  color: var(--faint);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.2s var(--ease);
+}
+html[data-theme] .sf-shell .rpt-expand:hover { background: var(--raised); border-color: var(--border); color: var(--text); }
+html[data-theme] .sf-shell .rpt-expand svg { font-size: 16px; transition: transform 0.2s var(--ease); }
+html[data-theme] .sf-shell .rpt-expand.open svg { transform: rotate(90deg); }
+html[data-theme] .sf-shell .rpt-expand.open { color: var(--text); }
+html[data-theme] .sf-shell .report-margin-table.parent > .ant-spin-nested-loading > .ant-spin-container > .ant-table > .ant-table-container > .ant-table-content > table > .ant-table-tbody > tr.ant-table-expanded-row > td,
+html[data-theme] .sf-shell .report-margin-table.parent .ant-table-expanded-row > td {
+  padding: 12px 16px 14px 44px !important;
+  background: var(--raised) !important;
+}
+html[data-theme] .sf-shell .report-margin-table.child {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+  overflow: hidden;
+}
+html[data-theme] .sf-shell .report-margin-table.child .ant-table { background: var(--surface); margin: 0 !important; }
+html[data-theme] .sf-shell .report-margin-table.child .ant-table-thead > tr > th { background: var(--surface) !important; }
+html[data-theme] .sf-shell .report-margin-table.child .ant-table-tbody > tr > td { padding-top: 7px; padding-bottom: 7px; font-size: 12.5px; }
+
+/* ---------- Chart cards ---------- */
+html[data-theme] .sf-shell .rpt-chart { position: relative; min-width: 0; }
+html[data-theme] .sf-shell .rpt-chart :is(.MuiChartsGrid-line) { stroke: var(--rule); stroke-dasharray: none; }
+html[data-theme] .sf-shell .rpt-chart :is(.MuiChartsAxis-line, .MuiChartsAxis-tick) { stroke: var(--border); }
+html[data-theme] .sf-shell .rpt-chart .MuiChartsAxis-tickLabel { fill: var(--faint) !important; font: 400 11px var(--font) !important; }
+html[data-theme] .sf-shell .rpt-chart .MuiChartsAxisHighlight-root { stroke: var(--control); stroke-dasharray: 3 3; }
+html[data-theme] .MuiChartsTooltip-root .MuiChartsTooltip-paper,
+html[data-theme] .MuiChartsTooltip-paper {
+  background: #0b111d !important;
+  color: #fff !important;
+  border: 0 !important;
+  border-radius: 5px !important;
+  box-shadow: var(--float-shadow) !important;
+}
+html[data-theme] :is(.MuiChartsTooltip-root, .MuiPopper-root) .MuiChartsTooltip-table :is(td, th, .MuiTypography-root) {
+  color: #fff !important;
+  font-family: var(--font) !important;
+  font-size: 12px !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* By-client list on /admin/summary */
+html[data-theme] .sf-shell .rpt-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 340px);
+  gap: var(--gap);
+  align-items: start;
+}
+html[data-theme] .sf-shell .rpt-list { margin: 0; padding: 0; list-style: none; }
+html[data-theme] .sf-shell .rpt-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 12px;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--rule);
+  font-size: 13px;
+}
+html[data-theme] .sf-shell .rpt-list li:last-child { border-bottom: 0; }
+html[data-theme] .sf-shell .rpt-list li > span:first-child { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html[data-theme] .sf-shell .rpt-list li > span:nth-child(2) { font: 500 13px var(--mono); font-variant-numeric: tabular-nums; color: var(--text); }
+html[data-theme] .sf-shell .rpt-list li > small { color: var(--faint); font-size: 12px; }
+html[data-theme] .sf-shell .rpt-bar {
+  grid-column: 1 / -1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--active);
+  overflow: hidden;
+}
+html[data-theme] .sf-shell .rpt-bar > i { display: block; height: 100%; background: var(--data); border-radius: 2px; }
+
+/* ---------- Monitoring chart carousel (TransactionChartCard*) ---------- */
+html[data-theme] .sf-shell .rpt-carousel { position: relative; }
+html[data-theme] .sf-shell .rpt-carousel-nav { display: flex; gap: 6px; }
+html[data-theme] .sf-shell .rpt-carousel .slick-dots li button { background: var(--control) !important; }
+html[data-theme] .sf-shell .rpt-carousel .slick-dots li.slick-active button { background: var(--text) !important; }
+html[data-theme] .sf-shell .rpt-carousel .slick-dots { position: static; margin-top: 14px; }
+html[data-theme] .sf-shell .rpt-mon-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gap);
+}
+html[data-theme] .sf-shell .rpt-mon-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 440px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+html[data-theme] .sf-shell .rpt-mon-card.is-abnormal { border-color: color-mix(in srgb, var(--negative) 55%, var(--border)); }
+html[data-theme] .sf-shell .rpt-mon-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--rule);
+}
+html[data-theme] .sf-shell .rpt-mon-card > header h3 {
+  margin: 0;
+  min-width: 0;
+  font: 600 14px/1.3 var(--font);
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html[data-theme] .sf-shell .rpt-mon-card > header h3 small { margin-left: 6px; font: 400 12px var(--mono); color: var(--faint); }
+html[data-theme] .sf-shell .rpt-mon-body { display: flex; flex-direction: column; flex: 1; gap: 12px; min-height: 0; padding: 12px 16px 16px; }
+html[data-theme] .sf-shell .rpt-mon-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+}
+html[data-theme] .sf-shell .rpt-mon-stats > div { padding: 8px 10px; border-left: 1px solid var(--border); min-width: 0; }
+html[data-theme] .sf-shell .rpt-mon-stats > div:first-child { border-left: 0; }
+html[data-theme] .sf-shell .rpt-mon-stats .rpt-kpi-label { font-size: 10px; }
+html[data-theme] .sf-shell .rpt-mon-stats strong { display: block; margin-top: 2px; font: 500 16px var(--mono); color: var(--text); }
+html[data-theme] .sf-shell .rpt-mon-stats strong small { margin-left: 6px; font: 400 11px var(--mono); color: var(--faint); }
+html[data-theme] .sf-shell .rpt-mon-reasons {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: var(--radius-control);
+  background: var(--pill-negative-bg);
+  color: var(--pill-negative-ink);
+  font-size: 12px;
+  line-height: 1.5;
+}
+html[data-theme] .sf-shell .rpt-mon-chart { position: relative; flex: 1; min-height: 0; }
+html[data-theme] .sf-shell .rpt-note { font-size: 13px; color: var(--muted); }
+html[data-theme] .sf-shell .rpt-note.is-error { color: var(--negative); }
+
+/* ---------- Narrower screens ---------- */
+@media (max-width: 1200px) {
+  html[data-theme] .sf-shell .rpt-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html[data-theme] .sf-shell .rpt-mon-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 1100px) {
+  html[data-theme] .sf-shell .rpt-split { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+  html[data-theme] .sf-shell .rpt-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html[data-theme] .sf-shell .rpt-kpi { border-left: 0; border-top: 1px solid var(--border); }
+  html[data-theme] .sf-shell .rpt-kpi:nth-child(-n + 2) { border-top: 0; }
+  html[data-theme] .sf-shell .rpt-kpi:nth-child(2n) { border-left: 1px solid var(--border); }
+  html[data-theme] .sf-shell .rpt-kpi-value { font-size: 22px; }
+  html[data-theme] .sf-shell .rpt-mon-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  html[data-theme] .sf-shell .rpt-head { align-items: stretch; }
+  html[data-theme] .sf-shell .rpt-actions > * { flex: 1 1 auto; }
+  html[data-theme] .sf-shell .rpt-filters { padding: 10px; }
+  html[data-theme] .sf-shell .rpt-field { flex: 1 1 100%; }
+  html[data-theme] .sf-shell .rpt-field > span:first-child { width: 108px; }
+  html[data-theme] .sf-shell .rpt-field > :not(span:first-child) { flex: 1 1 auto; width: auto !important; min-width: 0; }
+  html[data-theme] .sf-shell .rpt-filters .rpt-divider,
+  html[data-theme] .sf-shell .rpt-filters .rpt-spacer { display: none; }
+  html[data-theme] .sf-shell .rpt-filters > :is(.ant-btn, .sf-btn, .rp-btn) { flex: 1 1 auto; }
+  html[data-theme] .sf-shell .rpt-form { grid-template-columns: minmax(0, 1fr); }
+  html[data-theme] .sf-shell .rpt-kpi { padding: 12px; }
+  html[data-theme] .sf-shell .rpt-kpi-value { font-size: 18px; }
+}

@@ -1,6 +1,6 @@
 import { paymentMethods } from '../utils/paymentMethods'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Button, Col, DatePicker, Row, Select, Space, Typography } from 'antd'
+import { Button, DatePicker, Select } from 'antd'
 import axios from 'axios'
 import dayjs, { Dayjs } from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -18,7 +18,6 @@ import { fetchTodayLastSeen, overlayTrafficBuckets, type LiveTrxRow } from '../u
 
 dayjs.extend(utc)
 
-const { Text } = Typography
 const { RangePicker } = DatePicker
 const { Option } = Select
 
@@ -114,7 +113,6 @@ export default function Monitoring() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [trafficTimedOut, setTrafficTimedOut] = useState(false)
-  const [updatedAt, setUpdatedAt] = useState('')
   const [refreshKey, setRefreshKey] = useState(0)
   const [referenceNow, setReferenceNow] = useState<Dayjs>(() => dayjs())
   const trxWrapRef = useRef<HTMLDivElement>(null)
@@ -264,7 +262,6 @@ export default function Monitoring() {
                   if (kpiScopeRef.current !== kpiScope) return
                   const next: KpiCounts = { total: success + pending + waiting + failed, success, pending, waiting, failed }
                   setKpi(next)
-                  setUpdatedAt(dayjs().format('HH:mm:ss'))
                 })
                 .catch((e) => {
                   // Keep the last good numbers instead of dropping the cards to 0.
@@ -389,7 +386,7 @@ export default function Monitoring() {
     } catch (e) {
       if (gen !== loadGenRef.current) return
       console.error('Monitoring overview fetch error:', e)
-      setError('Gagal memuat overview monitoring')
+      setError('Could not load the monitoring overview')
     } finally {
       if (gen === loadGenRef.current) setLoading(false)
       loadingRef.current = false
@@ -529,109 +526,91 @@ export default function Monitoring() {
   }
 
   return (
-    <section className='dash-page mon-page'>
-      <header className='dash-header'>
-        <div>
-          <h1 className='dash-title'>Monitoring</h1>
-          <p className='dash-subtitle'>Volume hari ini vs kemarin dan traffic per client.</p>
+    <section className='mon-page'>
+      <div className='mon-filter' role='search' aria-label='Monitoring filters'>
+        <div className='mon-filter-field mon-filter-range'>
+          <span className='mon-filter-label'>Date Range</span>
+          <RangePicker
+            value={draft.dateRange}
+            onChange={(dates) => setDraft((prev) => ({ ...prev, dateRange: dates as [Dayjs, Dayjs] | null }))}
+            style={{ width: '100%' }}
+            allowClear
+          />
         </div>
-        <div className='dash-live'>
-          {updatedAt
-            ? isLiveView
-              ? `Updated ${updatedAt} · refresh ${REFRESH_MS / 1000}s`
-              : `Data ${referenceNow.format('DD MMM YYYY')} · tidak auto-refresh`
-            : 'Live overview'}
+        <div className='mon-filter-field'>
+          <span className='mon-filter-label'>Merchant</span>
+          <Select
+            showSearch
+            allowClear
+            placeholder='All merchants'
+            value={draft.merchant || undefined}
+            onChange={(value) => setDraft((prev) => ({ ...prev, merchant: value || '' }))}
+            style={{ width: '100%' }}
+            optionFilterProp='children'
+            filterOption={(input, option: any) =>
+              (option?.children?.toString() || '').toLowerCase().includes(input.toLowerCase())
+            }
+            loading={!merchants.length && !merchantsError}
+          >
+            {merchants.map((m) => (
+              <Option key={m.u_id} value={m.client_name}>
+                {m.client_name}
+              </Option>
+            ))}
+          </Select>
         </div>
-      </header>
-
-      <div className='mon-filter'>
-        <Row gutter={[16, 12]}>
-          <Col xs={24} sm={12} md={12} lg={6}>
-            <Text className='mon-filter-label'>Date Range</Text>
-            <RangePicker
-              value={draft.dateRange}
-              onChange={(dates) => setDraft((prev) => ({ ...prev, dateRange: dates as [Dayjs, Dayjs] | null }))}
-              style={{ width: '100%' }}
-              allowClear
-            />
-          </Col>
-          <Col xs={24} sm={12} md={12} lg={6}>
-            <Text className='mon-filter-label'>Merchant</Text>
-            <Select
-              showSearch
-              allowClear
-              placeholder='All merchants'
-              value={draft.merchant || undefined}
-              onChange={(value) => setDraft((prev) => ({ ...prev, merchant: value || '' }))}
-              style={{ width: '100%' }}
-              optionFilterProp='children'
-              filterOption={(input, option: any) =>
-                (option?.children?.toString() || '').toLowerCase().includes(input.toLowerCase())
-              }
-              loading={!merchants.length && !merchantsError}
-            >
-              {merchants.map((m) => (
-                <Option key={m.u_id} value={m.client_name}>
-                  {m.client_name}
+        <div className='mon-filter-field'>
+          <span className='mon-filter-label'>Status</span>
+          <Select
+            allowClear
+            placeholder='All statuses'
+            value={draft.status || undefined}
+            onChange={(value) => setDraft((prev) => ({ ...prev, status: (value || '') as MetricStatus }))}
+            style={{ width: '100%' }}
+          >
+            <Option value='success'>Success</Option>
+            <Option value='pending'>Pending</Option>
+            <Option value='waiting'>Waiting</Option>
+            <Option value='failed'>Failed</Option>
+          </Select>
+        </div>
+        <div className='mon-filter-field'>
+          <span className='mon-filter-label'>Payment Method</span>
+          <Select
+            showSearch
+            allowClear
+            placeholder='All methods'
+            value={draft.paymentMethod || undefined}
+            onChange={(value) => setDraft((prev) => ({ ...prev, paymentMethod: value || '' }))}
+            style={{ width: '100%' }}
+            optionFilterProp='children'
+          >
+            {paymentMethods
+              .filter((pm) => pm.value)
+              .map((pm) => (
+                <Option key={pm.value} value={pm.value}>
+                  {pm.name}
                 </Option>
               ))}
-            </Select>
-          </Col>
-          <Col xs={24} sm={12} md={12} lg={6}>
-            <Text className='mon-filter-label'>Status</Text>
-            <Select
-              allowClear
-              placeholder='All statuses'
-              value={draft.status || undefined}
-              onChange={(value) => setDraft((prev) => ({ ...prev, status: (value || '') as MetricStatus }))}
-              style={{ width: '100%' }}
-            >
-              <Option value='success'>Success</Option>
-              <Option value='pending'>Pending</Option>
-              <Option value='waiting'>Waiting</Option>
-              <Option value='failed'>Failed</Option>
-            </Select>
-          </Col>
-          <Col xs={24} sm={12} md={12} lg={6}>
-            <Text className='mon-filter-label'>Payment Method</Text>
-            <Select
-              showSearch
-              allowClear
-              placeholder='All methods'
-              value={draft.paymentMethod || undefined}
-              onChange={(value) => setDraft((prev) => ({ ...prev, paymentMethod: value || '' }))}
-              style={{ width: '100%' }}
-              optionFilterProp='children'
-            >
-              {paymentMethods
-                .filter((pm) => pm.value)
-                .map((pm) => (
-                  <Option key={pm.value} value={pm.value}>
-                    {pm.name}
-                  </Option>
-                ))}
-            </Select>
-          </Col>
-        </Row>
+          </Select>
+        </div>
         <div className='mon-filter-actions'>
-          <Space>
-            <Button type='primary' onClick={handleFilter}>
-              Filter
-            </Button>
-            <Button onClick={handleReset}>Reset</Button>
-          </Space>
+          <Button type='primary' onClick={handleFilter}>
+            Filter
+          </Button>
+          <Button onClick={handleReset}>Reset</Button>
         </div>
       </div>
 
       {error && <div className='mon-error'>{error}</div>}
       {trafficTimedOut && (
         <div className='mon-error'>
-          Server traffic tidak menjawab dalam {REQUEST_TIMEOUT_MS / 1000} detik. Grafik menampilkan data terakhir yang berhasil dimuat
-          dan dicoba lagi otomatis setiap {REFRESH_MS / 1000} detik.
+          The traffic server did not respond within {REQUEST_TIMEOUT_MS / 1000} seconds. The charts show the last data that loaded
+          and retry automatically every {REFRESH_MS / 1000} seconds.
         </div>
       )}
 
-      <MonitoringKpiCards kpi={kpi} loading={loading} onSelectStatus={handleKpiStatus} />
+      <MonitoringKpiCards kpi={kpi} loading={loading} onSelectStatus={handleKpiStatus} activeStatus={applied.status} />
 
       <div className='mon-top-grid'>
         <VolumePerHourChart

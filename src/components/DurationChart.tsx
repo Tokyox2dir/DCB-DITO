@@ -1,6 +1,5 @@
-import { useColorScheme } from '@mui/material/styles'
 import React, { useEffect, useMemo, useState, useCallback } from 'react'
-import { Card, Select, Spin, Empty, DatePicker, Tag, Space } from 'antd'
+import { Select, Spin, DatePicker } from 'antd'
 import { Line } from 'react-chartjs-2'
 import {
   Chart as ChartJS,
@@ -17,6 +16,7 @@ import axios from 'axios'
 import dayjs from 'dayjs'
 import { useAuth } from '../provider/AuthProvider'
 import { parseDurationToSeconds, formatSecondsToDuration } from '../utils/durationParser'
+import { chartAxis, chartTooltip, useChartTokens, withAlpha } from './VolumePerHourChart'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler)
 
@@ -62,8 +62,7 @@ interface DurationCardGroup {
 const AUTO_REFRESH_INTERVAL = 10 * 60 * 1000
 
 const DurationChart: React.FC = () => {
-  const { mode, systemMode } = useColorScheme()
-  const chartText = (mode === 'system' ? systemMode : mode) === 'light' ? '#52637a' : '#94a3b8'
+  const t = useChartTokens()
   const { token, apiUrl } = useAuth()
 
   // === State ===
@@ -233,183 +232,156 @@ const DurationChart: React.FC = () => {
       })
   }, [filteredData])
 
-  const buildCardChartData = useCallback((points: AggregatedDurationPoint[]) => {
-    return {
-      labels: points.map((d) => d.dateFormatted),
-      datasets: [
-        {
-          label: 'Avg Total Duration',
-          data: points.map((d) => d.totalSeconds),
-          borderColor: '#3b74f0',
-          backgroundColor: 'rgba(59, 116, 240, 0.08)',
-          tension: 0.4,
-          fill: true,
-          borderWidth: 2.5,
-          pointRadius: 3,
-          pointHoverRadius: 7,
-          pointBackgroundColor: '#3b74f0',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointHoverBackgroundColor: '#3b74f0',
-          pointHoverBorderColor: '#fff',
-          pointHoverBorderWidth: 3,
-        },
-        {
-          label: 'Avg Supplier Duration',
-          data: points.map((d) => d.supplierSeconds),
-          borderColor: '#f59e0b',
-          backgroundColor: 'rgba(245, 158, 11, 0.06)',
-          tension: 0.4,
-          fill: true,
-          borderWidth: 2,
-          pointRadius: 2,
-          pointHoverRadius: 6,
-          pointBackgroundColor: '#f59e0b',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointHoverBackgroundColor: '#f59e0b',
-          pointHoverBorderColor: '#fff',
-          pointHoverBorderWidth: 3,
-        },
-        {
-          label: 'Avg Merchant Duration',
-          data: points.map((d) => d.merchantSeconds),
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.06)',
-          tension: 0.4,
-          fill: true,
-          borderWidth: 2,
-          pointRadius: 2,
-          pointHoverRadius: 6,
-          pointBackgroundColor: '#10b981',
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointHoverBackgroundColor: '#10b981',
-          pointHoverBorderColor: '#fff',
-          pointHoverBorderWidth: 3,
-        },
-      ],
-    }
-  }, [])
+  const buildCardChartData = useCallback(
+    (points: AggregatedDurationPoint[]) => {
+      const line = (color: string) => ({
+        borderColor: color,
+        pointRadius: points.length > 1 ? 0 : 3,
+        pointHoverRadius: 4,
+        pointBackgroundColor: color,
+        pointBorderColor: t.surface,
+        pointBorderWidth: 1.5,
+        pointHoverBackgroundColor: color,
+        pointHoverBorderColor: t.surface,
+        pointHoverBorderWidth: 2,
+        tension: 0.25,
+      })
+      return {
+        labels: points.map((d) => d.dateFormatted),
+        datasets: [
+          {
+            label: 'Avg Total Duration',
+            data: points.map((d) => d.totalSeconds),
+            ...line(t.data),
+            backgroundColor: withAlpha(t.data, 0.1),
+            fill: true,
+            borderWidth: 2,
+          },
+          {
+            label: 'Avg Supplier Duration',
+            data: points.map((d) => d.supplierSeconds),
+            ...line(t.warning),
+            backgroundColor: 'transparent',
+            fill: false,
+            borderWidth: 1.5,
+          },
+          {
+            label: 'Avg Merchant Duration',
+            data: points.map((d) => d.merchantSeconds),
+            ...line(t.positive),
+            backgroundColor: 'transparent',
+            fill: false,
+            borderWidth: 1.5,
+            borderDash: [4, 3],
+          },
+        ],
+      }
+    },
+    [t],
+  )
 
   const buildCardChartOptions = useCallback(
-    (points: AggregatedDurationPoint[], merchantName: string, paymentMethod: string) => ({
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: points.length > 1,
-          position: 'top' as const,
-          labels: {
-            color: chartText,
-            usePointStyle: true,
-            pointStyle: 'circle',
-            padding: 20,
-            font: { size: 13, weight: 500 as const },
+    (points: AggregatedDurationPoint[], merchantName: string, paymentMethod: string) => {
+      const axis = chartAxis(t)
+      const axisTitle = (text: string) => ({
+        display: true,
+        text,
+        color: t.faint,
+        font: { family: t.font, size: 11, weight: 500 as const },
+      })
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: points.length > 1,
+            position: 'top' as const,
+            align: 'end' as const,
+            labels: {
+              color: t.muted,
+              usePointStyle: true,
+              pointStyle: 'circle',
+              boxWidth: 6,
+              boxHeight: 6,
+              padding: 12,
+              font: { family: t.font, size: 12 },
+            },
           },
-        },
-        tooltip: {
-          mode: 'index' as const,
-          intersect: false,
-          backgroundColor: 'rgba(22, 24, 27, 0.95)',
-          titleColor: '#e2e8f0',
-          bodyColor: '#cbd5e1',
-          borderColor: 'rgba(59, 116, 240, 0.3)',
-          borderWidth: 1,
-          cornerRadius: 12,
-          padding: 14,
-          titleFont: { size: 13, weight: 600 as const },
-          bodyFont: { size: 12 },
-          bodySpacing: 6,
-          callbacks: {
-            title: (items: any[]) => {
-              if (!items || !items[0]) return ''
-              const idx = items[0].dataIndex
-              const point = points[idx]
-              if (!point) return ''
-              return `${dayjs(point.date).format('ddd, DD MMM YYYY HH:mm')}`
-            },
-            afterTitle: () => {
-              return `${merchantName} • ${paymentMethod.toUpperCase()}`
-            },
-            label: (item: any) => {
-              const idx = item.dataIndex
-              const point = points[idx]
-              if (!point) return ''
+          tooltip: {
+            ...chartTooltip(t),
+            mode: 'index' as const,
+            intersect: false,
+            callbacks: {
+              title: (items: any[]) => {
+                if (!items || !items[0]) return ''
+                const idx = items[0].dataIndex
+                const point = points[idx]
+                if (!point) return ''
+                return `${dayjs(point.date).format('ddd, DD MMM YYYY HH:mm')}`
+              },
+              afterTitle: () => {
+                return `${merchantName} • ${paymentMethod.toUpperCase()}`
+              },
+              label: (item: any) => {
+                const idx = item.dataIndex
+                const point = points[idx]
+                if (!point) return ''
 
-              const labels: Record<string, string> = {
-                'Avg Total Duration': formatSecondsToDuration(Math.round(point.totalSeconds)),
-                'Avg Supplier Duration': formatSecondsToDuration(Math.round(point.supplierSeconds)),
-                'Avg Merchant Duration': formatSecondsToDuration(Math.round(point.merchantSeconds)),
-              }
-              return `  ${item.dataset.label}: ${labels[item.dataset.label] || formatSecondsToDuration(item.raw)}`
-            },
-            afterBody: (items: any[]) => {
-              const idx = items[0]?.dataIndex
-              const point = points[idx]
-              if (!point) return ''
-              return `\n  📦 Total Transactions: ${point.total_transactions}`
+                const labels: Record<string, string> = {
+                  'Avg Total Duration': formatSecondsToDuration(Math.round(point.totalSeconds)),
+                  'Avg Supplier Duration': formatSecondsToDuration(Math.round(point.supplierSeconds)),
+                  'Avg Merchant Duration': formatSecondsToDuration(Math.round(point.merchantSeconds)),
+                }
+                return ` ${item.dataset.label}: ${labels[item.dataset.label] || formatSecondsToDuration(item.raw)}`
+              },
+              footer: (items: any[]) => {
+                const idx = items[0]?.dataIndex
+                const point = points[idx]
+                if (!point) return ''
+                return `Total Transactions: ${point.total_transactions}`
+              },
             },
           },
         },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          grid: {
-            color: 'rgba(148, 163, 184, 0.08)',
-            drawBorder: false,
-          },
-          border: { display: false },
-          ticks: {
-            padding: 12,
-            font: { size: 12 },
-            color: chartText,
-            callback: function (value: any) {
-              return formatSecondsToDuration(Number(value))
+        scales: {
+          y: {
+            ...axis,
+            beginAtZero: true,
+            ticks: {
+              ...axis.ticks,
+              padding: 6,
+              font: { family: t.mono, size: 11 },
+              callback: function (value: any) {
+                return formatSecondsToDuration(Number(value))
+              },
             },
+            title: axisTitle('Duration (seconds)'),
           },
-          title: {
-            display: true,
-            text: 'Duration (seconds)',
-            font: { size: 12, weight: 500 as const },
-            color: chartText,
-            padding: { bottom: 8 },
-          },
-        },
-        x: {
-          grid: {
-            color: 'rgba(148, 163, 184, 0.06)',
-            drawBorder: false,
-          },
-          border: { display: false },
-          ticks: {
-            padding: 10,
-            maxTicksLimit: 12,
-            font: { size: 12 },
-            color: chartText,
-            maxRotation: 45,
-            minRotation: 0,
-          },
-          title: {
-            display: true,
-            text: 'Time (per 10 minutes)',
-            font: { size: 12, weight: 500 as const },
-            color: chartText,
-            padding: { top: 8 },
+          x: {
+            ...axis,
+            grid: { display: false },
+            ticks: {
+              ...axis.ticks,
+              padding: 6,
+              maxTicksLimit: 12,
+              font: { family: t.mono, size: 11 },
+              maxRotation: 0,
+              minRotation: 0,
+            },
+            title: axisTitle('Time (per 10 minutes)'),
           },
         },
-      },
-      interaction: {
-        intersect: false,
-        mode: 'index' as const,
-      },
-      animation: {
-        duration: 800,
-        easing: 'easeOutQuart' as const,
-      },
-    }),
-    [chartText],
+        interaction: {
+          intersect: false,
+          mode: 'index' as const,
+        },
+        animation: {
+          duration: 400,
+          easing: 'easeOutQuart' as const,
+        },
+      }
+    },
+    [t],
   )
 
   // === Stats Summary ===
@@ -433,396 +405,150 @@ const DurationChart: React.FC = () => {
 
   // === Render ===
   return (
-    <div style={{ width: '100%' }}>
-      <Card
-        style={{
-          borderRadius: 16,
-          border: '1px solid transparent',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 6px 24px rgba(0,0,0,0.03)',
-        }}
-        bodyStyle={{ padding: '24px' }}
-      >
-        {/* Title + Filters */}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            gap: 16,
-            marginBottom: 24,
-          }}
-        >
-          <div>
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 22,
-                fontWeight: 700,
-                background: 'var(--sf-sky-bar)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                letterSpacing: '-0.3px',
-              }}
-            >
-              ⏱️ Transaction Duration Monitoring
-            </h2>
-            <p style={{ margin: '4px 0 0', color: 'var(--dash-muted)', fontSize: 13 }}>
-              Average transaction completion duration (per 10 minutes)
-              <Tag
-                color='blue'
-                style={{ marginLeft: 8, fontSize: 11 }}
-              >
-                Auto-refresh 10 min
-              </Tag>
-            </p>
-          </div>
+    <>
+      <div className='mon-filter' role='search' aria-label='Duration filters'>
+        <div className='mon-filter-field mon-filter-range'>
+          <span className='mon-filter-label'>Date range</span>
+          <RangePicker
+            value={dateRange}
+            onChange={(dates) => {
+              if (dates && dates[0] && dates[1]) {
+                setDateRange([dates[0], dates[1]])
+              }
+            }}
+            format='YYYY-MM-DD'
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div className='mon-filter-field'>
+          <span className='mon-filter-label'>Merchant</span>
+          <Select
+            value={selectedMerchant}
+            onChange={setSelectedMerchant}
+            style={{ width: '100%' }}
+            options={[{ value: 'all', label: 'All Merchants' }, ...merchants.map((m) => ({ value: m, label: m }))]}
+          />
+        </div>
+        <div className='mon-filter-field'>
+          <span className='mon-filter-label'>Payment Method</span>
+          <Select
+            value={selectedPaymentMethod}
+            onChange={setSelectedPaymentMethod}
+            style={{ width: '100%' }}
+            options={[
+              { value: 'all', label: 'All Payment Methods' },
+              ...paymentMethods.map((m) => ({ value: m, label: m.toUpperCase() })),
+            ]}
+          />
+        </div>
+        <div className='mon-filter-field'>
+          <span className='mon-filter-label'>Status</span>
+          <Select
+            value={selectedStatus}
+            onChange={setSelectedStatus}
+            style={{ width: '100%' }}
+            options={[
+              { value: 'all', label: 'All Status' },
+              ...statuses.map((s) => ({
+                value: s,
+                label: s.charAt(0).toUpperCase() + s.slice(1),
+              })),
+            ]}
+          />
+        </div>
+        <span className='mon-panel-meta mon-filter-actions'>Avg completion duration per 10 min · auto-refresh 10 min</span>
+      </div>
 
+      {stats && (
+        <div className='mon-dur-kpis'>
           <div>
-            <RangePicker
-              value={dateRange}
-              onChange={(dates) => {
-                if (dates && dates[0] && dates[1]) {
-                  setDateRange([dates[0], dates[1]])
-                }
-              }}
-              format='YYYY-MM-DD'
-              style={{ minWidth: 260 }}
-            />
+            <span>Avg Duration</span>
+            <strong>{stats.avgTotal}</strong>
+          </div>
+          <div>
+            <span>Max Duration</span>
+            <strong>{stats.maxTotal}</strong>
+          </div>
+          <div>
+            <span>Min Duration</span>
+            <strong>{stats.minTotal}</strong>
+          </div>
+          <div>
+            <span>Total Transactions</span>
+            <strong>{stats.totalTransactions.toLocaleString()}</strong>
+          </div>
+          <div>
+            <span>Data Points</span>
+            <strong>{stats.dataPoints}</strong>
           </div>
         </div>
+      )}
 
-        {/* Filters Row */}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: 12,
-            marginBottom: 20,
-            padding: '16px',
-            background: 'var(--sf-card-2)',
-            borderRadius: 12,
-            border: '1px solid transparent',
-          }}
-        >
-          <div style={{ flex: '1 1 200px' }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--dash-muted)', marginBottom: 6 }}>
-              Merchant
-            </label>
-            <Select
-              value={selectedMerchant}
-              onChange={setSelectedMerchant}
-              style={{ width: '100%' }}
-              options={[
-                { value: 'all', label: 'All Merchants' },
-                ...merchants.map((m) => ({ value: m, label: m })),
-              ]}
-            />
-          </div>
-
-          <div style={{ flex: '1 1 200px' }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--dash-muted)', marginBottom: 6 }}>
-              Payment Method
-            </label>
-            <Select
-              value={selectedPaymentMethod}
-              onChange={setSelectedPaymentMethod}
-              style={{ width: '100%' }}
-              options={[
-                { value: 'all', label: 'All Payment Methods' },
-                ...paymentMethods.map((m) => ({ value: m, label: m.toUpperCase() })),
-              ]}
-            />
-          </div>
-
-          <div style={{ flex: '1 1 150px' }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--dash-muted)', marginBottom: 6 }}>
-              Status
-            </label>
-            <Select
-              value={selectedStatus}
-              onChange={setSelectedStatus}
-              style={{ width: '100%' }}
-              options={[
-                { value: 'all', label: 'All Status' },
-                ...statuses.map((s) => ({
-                  value: s,
-                  label: s.charAt(0).toUpperCase() + s.slice(1),
-                })),
-              ]}
-            />
-          </div>
+      {loading && (
+        <div className='mon-dur-state'>
+          <Spin />
+          <span>Loading duration data...</span>
         </div>
+      )}
 
-        {/* Stats Summary */}
-        {stats && (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-              gap: 12,
-              marginBottom: 20,
-            }}
-          >
-            <div
-              style={{
-                padding: '14px 16px',
-                borderRadius: 12,
-                background: 'var(--sf-sky)',
-                border: '1px solid transparent',
-              }}
-            >
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--dash-accent)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Avg Duration
-              </div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--dash-accent)', marginTop: 4 }}>
-                {stats.avgTotal}
-              </div>
-            </div>
+      {error && <div className='mon-dur-state error'>{error}</div>}
 
-            <div
-              style={{
-                padding: '14px 16px',
-                borderRadius: 12,
-                background: 'var(--sf-rose)',
-                border: '1px solid transparent',
-              }}
-            >
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sf-bad)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Max Duration
-              </div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-danger)', marginTop: 4 }}>
-                {stats.maxTotal}
-              </div>
-            </div>
+      {!loading && !error && filteredData.length === 0 && (
+        <div className='mon-dur-state'>No data available for the selected filters</div>
+      )}
 
-            <div
-              style={{
-                padding: '14px 16px',
-                borderRadius: 12,
-                background: 'color-mix(in srgb, var(--sf-good) 14%, var(--sf-card))',
-                border: '1px solid transparent',
-              }}
-            >
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sf-good)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Min Duration
-              </div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-success)', marginTop: 4 }}>
-                {stats.minTotal}
-              </div>
-            </div>
+      {!loading && !error && filteredData.length > 0 && (
+        <div className='mon-dur-grid'>
+          {groupedCards.map((group) => {
+            const cardData = buildCardChartData(group.points)
+            const cardOptions = buildCardChartOptions(group.points, group.merchant_name, group.payment_method)
+            const totalTransactions = group.points.reduce((sum, point) => sum + point.total_transactions, 0)
+            const totalDurations = group.points.map((point) => point.totalSeconds)
+            const avgTotal = totalDurations.reduce((sum, value) => sum + value, 0) / totalDurations.length
+            const maxTotal = Math.max(...totalDurations)
+            const minTotal = Math.min(...totalDurations)
 
-            <div
-              style={{
-                padding: '14px 16px',
-                borderRadius: 12,
-                background: 'var(--sf-peach)',
-                border: '1px solid transparent',
-              }}
-            >
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sf-warn)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Total Transactions
-              </div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-warning)', marginTop: 4 }}>
-                {stats.totalTransactions.toLocaleString()}
-              </div>
-            </div>
-
-            <div
-              style={{
-                padding: '14px 16px',
-                borderRadius: 12,
-                background: 'var(--sf-card-2)',
-                border: '1px solid transparent',
-              }}
-            >
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--dash-muted)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                Data Points
-              </div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--dash-text)', marginTop: 4 }}>
-                {stats.dataPoints}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {loading && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '28px 0 12px',
-            }}
-          >
-            <Space direction='vertical' align='center'>
-              <Spin size='large' />
-              <span style={{ color: 'var(--dash-muted)', fontSize: 13 }}>Loading duration data...</span>
-            </Space>
-          </div>
-        )}
-
-        {error && (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0 8px' }}>
-            <Empty description={<span style={{ color: 'var(--sf-bad)' }}>{error}</span>} />
-          </div>
-        )}
-
-        {!loading && !error && filteredData.length === 0 && (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0 8px' }}>
-            <Empty description='No data available for the selected filters' />
-          </div>
-        )}
-
-        {!loading && !error && filteredData.length > 0 && (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
-              gap: 16,
-              alignItems: 'stretch',
-            }}
-          >
-            {groupedCards.map((group) => {
-              const cardData = buildCardChartData(group.points)
-              const cardOptions = buildCardChartOptions(group.points, group.merchant_name, group.payment_method)
-              const totalTransactions = group.points.reduce((sum, point) => sum + point.total_transactions, 0)
-              const totalDurations = group.points.map((point) => point.totalSeconds)
-              const avgTotal = totalDurations.reduce((sum, value) => sum + value, 0) / totalDurations.length
-              const maxTotal = Math.max(...totalDurations)
-              const minTotal = Math.min(...totalDurations)
-
-              return (
-                <Card
-                  key={group.key}
-                  style={{
-                    borderRadius: 16,
-                    border: '1px solid transparent',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 6px 24px rgba(0,0,0,0.03)',
-                    height: '100%',
-                  }}
-                  bodyStyle={{ padding: '20px' }}
-                >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      gap: 12,
-                      marginBottom: 14,
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <div style={{ minWidth: 0 }}>
-                      <h3
-                        style={{
-                          margin: 0,
-                          fontSize: 18,
-                          fontWeight: 700,
-                          color: 'var(--dash-text)',
-                          letterSpacing: '-0.2px',
-                        }}
-                      >
-                        {group.merchant_name}
-                      </h3>
-                      <div style={{ marginTop: 4, color: 'var(--dash-accent)', fontSize: 13, fontWeight: 600 }}>
-                        {group.payment_method.toUpperCase()}
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, justifyContent: 'flex-end' }}>
-                      <Tag color='blue' style={{ margin: 0 }}>
-                        {group.points.length} points
-                      </Tag>
-                      <Tag color='geekblue' style={{ margin: 0 }}>
-                        {group.statuses.length === 1 ? group.statuses[0] : `${group.statuses.length} statuses`}
-                      </Tag>
-                    </div>
+            return (
+              <div className='mon-panel mon-dur-card' key={group.key}>
+                <div className='mon-panel-head'>
+                  <div className='mon-panel-title'>
+                    <h4>{group.merchant_name}</h4>
+                    <small>{group.payment_method.toUpperCase()}</small>
                   </div>
-
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-                      gap: 10,
-                      marginBottom: 14,
-                    }}
-                  >
-                    <div
-                      style={{
-                        padding: '12px 14px',
-                        borderRadius: 12,
-                        background: 'var(--sf-sky)',
-                        border: '1px solid transparent',
-                      }}
-                    >
-                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--dash-accent)', textTransform: 'uppercase' }}>
-                        Avg Duration
-                      </div>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--dash-accent)', marginTop: 4 }}>
-                        {formatSecondsToDuration(Math.round(avgTotal))}
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        padding: '12px 14px',
-                        borderRadius: 12,
-                        background: 'var(--sf-rose)',
-                        border: '1px solid transparent',
-                      }}
-                    >
-                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sf-bad)', textTransform: 'uppercase' }}>
-                        Max Duration
-                      </div>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-danger)', marginTop: 4 }}>
-                        {formatSecondsToDuration(maxTotal)}
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        padding: '12px 14px',
-                        borderRadius: 12,
-                        background: 'color-mix(in srgb, var(--sf-good) 14%, var(--sf-card))',
-                        border: '1px solid transparent',
-                      }}
-                    >
-                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sf-good)', textTransform: 'uppercase' }}>
-                        Min Duration
-                      </div>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-success)', marginTop: 4 }}>
-                        {formatSecondsToDuration(minTotal)}
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        padding: '12px 14px',
-                        borderRadius: 12,
-                        background: 'var(--sf-peach)',
-                        border: '1px solid transparent',
-                      }}
-                    >
-                      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--sf-warn)', textTransform: 'uppercase' }}>
-                        Total Transactions
-                      </div>
-                      <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--theme-warning)', marginTop: 4 }}>
-                        {totalTransactions.toLocaleString('id-ID')}
-                      </div>
-                    </div>
+                  <div className='mon-dur-card-tags'>
+                    <span>{group.points.length} points</span>
+                    <span>{group.statuses.length === 1 ? group.statuses[0] : `${group.statuses.length} statuses`}</span>
                   </div>
+                </div>
 
-                  <div style={{ position: 'relative', height: 320 }}>
-                    <Line data={cardData} options={cardOptions} />
+                <div className='mon-dur-kpis small'>
+                  <div>
+                    <span>Avg Duration</span>
+                    <strong>{formatSecondsToDuration(Math.round(avgTotal))}</strong>
                   </div>
-                </Card>
-              )
-            })}
-          </div>
-        )}
-      </Card>
-    </div>
+                  <div>
+                    <span>Max Duration</span>
+                    <strong>{formatSecondsToDuration(Math.round(maxTotal))}</strong>
+                  </div>
+                  <div>
+                    <span>Min Duration</span>
+                    <strong>{formatSecondsToDuration(Math.round(minTotal))}</strong>
+                  </div>
+                  <div>
+                    <span>Total Transactions</span>
+                    <strong>{totalTransactions.toLocaleString('id-ID')}</strong>
+                  </div>
+                </div>
+
+                <div className='mon-dur-chart'>
+                  <Line data={cardData} options={cardOptions} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+    </>
   )
 }
 

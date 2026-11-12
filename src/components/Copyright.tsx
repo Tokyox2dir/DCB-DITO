@@ -5,7 +5,7 @@ export default function Copyright(props: any) {
   return (
     <Typography
       variant='body2'
-      align='center'
+      align='left'
       {...props}
       sx={[
         {

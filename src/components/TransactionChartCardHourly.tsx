@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Card, Row, Col, Carousel, Tag, Button, Input } from 'antd'
+import { Carousel, Tag, Button, Input } from 'antd'
 import { LeftOutlined, RightOutlined } from '@ant-design/icons'
 import { Line } from 'react-chartjs-2'
 import {
@@ -14,8 +14,8 @@ import {
 } from 'chart.js'
 import axios from 'axios'
 import dayjs from 'dayjs'
-import { useColorScheme } from '@mui/material/styles'
 import { useAuth } from '../provider/AuthProvider'
+import { alpha, consoleChartOptions, useConsoleColors } from './TransactionChartCard'
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
 
@@ -63,7 +63,7 @@ interface ApiSeries {
 
 export function checkAbnormal(values: number[], latest: number, type: 'success' | 'pending' | 'failed') {
   if (values.length === 0) {
-    return { isNormal: true, mean: 0, stdDev: 0, reason: 'Tidak ada data' }
+    return { isNormal: true, mean: 0, stdDev: 0, reason: 'No data' }
   }
 
   const mean = values.reduce((s, v) => s + v, 0) / values.length
@@ -106,18 +106,8 @@ export function checkAbnormal(values: number[], latest: number, type: 'success' 
 
 const TransactionChartCardHourly: React.FC = () => {
   const { token, apiUrl } = useAuth()
-  const { mode, systemMode } = useColorScheme()
-  const isDark = ((mode === 'system' ? systemMode : mode) || 'dark') !== 'light'
-  const theme = {
-    text: isDark ? '#e9ecf2' : '#20242c',
-    muted: isDark ? '#a8b8cc' : '#626a78',
-    card: isDark ? '#1d2027' : '#ffffff',
-    header: isDark ? '#272b34' : '#f5f6f8',
-    border: isDark ? '#363b46' : '#e0e3e9',
-    abnormalBg: isDark ? '#3a2020' : '#fff1f0',
-    abnormalHeader: isDark ? '#8f3030' : '#ffccc7',
-    grid: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)',
-  }
+  const c = useConsoleColors()
+  const look = consoleChartOptions(c)
   const [monitorData, setMonitorData] = useState<TransactionData[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -181,7 +171,7 @@ const TransactionChartCardHourly: React.FC = () => {
         setMonitorData(transformed)
       } catch (e: any) {
         console.error('Monitoring fetch error:', e)
-        setError('Gagal memuat data monitoring')
+        setError('Could not load monitoring data')
       } finally {
         setLoading(false)
       }
@@ -198,22 +188,22 @@ const TransactionChartCardHourly: React.FC = () => {
       {
         label: 'Success',
         data: data.data.success,
-        borderColor: '#52c41a',
-        backgroundColor: 'rgba(82, 196, 26, 0.1)',
+        borderColor: c.positive,
+        backgroundColor: alpha(c.positive, 0.1),
         tension: 0.4,
         fill: false,
         borderWidth: 2,
         pointRadius: 0,
-        pointHoverRadius: 5,
+        pointHoverRadius: 4,
       },
       ...(data.data.avg7Success
         ? [
             {
               label: 'Avg7 Success',
               data: data.data.avg7Success,
-              borderColor: '#73d13d',
-              backgroundColor: 'rgba(115, 209, 61, 0.08)',
-              borderDash: [6, 6],
+              borderColor: alpha(c.positive, 0.5),
+              backgroundColor: alpha(c.positive, 0.08),
+              borderDash: [4, 4],
               tension: 0.4,
               fill: false,
               borderWidth: 2,
@@ -225,22 +215,22 @@ const TransactionChartCardHourly: React.FC = () => {
       {
         label: 'Failed',
         data: data.data.failed,
-        borderColor: '#ff4d4f',
-        backgroundColor: 'rgba(255, 77, 79, 0.1)',
+        borderColor: c.negative,
+        backgroundColor: alpha(c.negative, 0.1),
         tension: 0.4,
         fill: false,
         borderWidth: 2,
         pointRadius: 0,
-        pointHoverRadius: 5,
+        pointHoverRadius: 4,
       },
       ...(data.data.avg7Failed
         ? [
             {
               label: 'Avg7 Failed',
               data: data.data.avg7Failed,
-              borderColor: '#ff7875',
-              backgroundColor: 'rgba(255, 120, 117, 0.08)',
-              borderDash: [6, 6],
+              borderColor: alpha(c.negative, 0.5),
+              backgroundColor: alpha(c.negative, 0.08),
+              borderDash: [4, 4],
               tension: 0.4,
               fill: false,
               borderWidth: 2,
@@ -261,19 +251,14 @@ const TransactionChartCardHourly: React.FC = () => {
       legend: {
         display: true,
         position: 'top' as const,
-        labels: { usePointStyle: true, color: theme.text },
+        align: 'end' as const,
+        labels: { usePointStyle: true, pointStyle: 'line', boxWidth: 12, color: c.muted, font: { size: 11 } },
       },
       title: {
         display: false,
       },
       tooltip: {
-        mode: 'index' as const,
-        intersect: false,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        borderColor: '#fff',
-        borderWidth: 1,
+        ...look.tooltip,
         callbacks: {
           title: (items: any[]) => {
             const first = items && items[0]
@@ -293,29 +278,23 @@ const TransactionChartCardHourly: React.FC = () => {
       y: {
         beginAtZero: true,
         suggestedMax: 8,
-        grid: {
-          color: theme.grid,
-        },
+        grid: look.grid,
+        border: look.border,
         ticks: {
-          color: theme.muted,
+          ...look.ticks,
           stepSize: 1,
           callback: function (value: any) {
             return Number(value) % 1 === 0 ? value : null
           },
-          font: { size: 14 },
         },
       },
       x: {
-        grid: {
-          color: theme.grid,
-        },
+        grid: { display: false },
+        border: look.border,
         ticks: {
-          color: theme.muted,
-          padding: 10,
+          ...look.ticks,
+          padding: 6,
           maxTicksLimit: 6,
-          font: {
-            size: 14,
-          },
         },
       },
     },
@@ -324,7 +303,7 @@ const TransactionChartCardHourly: React.FC = () => {
       mode: 'index' as const,
     },
   }),
-    [theme.grid, theme.muted, theme.text],
+    [look, c.muted],
   )
 
   //   const getLatestStats = (data: TransactionData) => {
@@ -372,75 +351,31 @@ const TransactionChartCardHourly: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: '30px', width: '100%' }}>
-      <h2
-        style={{
-          marginBottom: '20px',
-          fontSize: '24px',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          color: '#1890ff',
-        }}
-      >
-        Transaction Charts 2 Day & Average 7 Day
-      </h2>
-
-      {error && <div style={{ color: '#ff4d4f', textAlign: 'center', marginBottom: 16 }}>{error}</div>}
-      {loading && <div style={{ textAlign: 'center', marginBottom: 16 }}>Loading monitoring data...</div>}
-
-      <div style={{ maxWidth: 480, margin: '0 auto 16px auto' }}>
-        <Input
-          allowClear
-          placeholder='Cari merchant...'
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          size='large'
-        />
+    <div className='rpt-page'>
+      <div className='rpt-head'>
+        <div>
+          <h2 className='rpt-title'>Transaction Charts 2 Day & Average 7 Day</h2>
+          <p className='rpt-sub'>Hourly success and failed for the last 48 hours, dashed lines are the 7-day average.</p>
+        </div>
+        <div className='rpt-actions'>
+          <Input
+            allowClear
+            placeholder='Search merchant...'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ width: 240 }}
+          />
+          <div className='rpt-carousel-nav'>
+            <Button icon={<LeftOutlined />} onClick={handlePrev} aria-label='Previous' />
+            <Button icon={<RightOutlined />} onClick={handleNext} aria-label='Next' />
+          </div>
+        </div>
       </div>
 
-      <div style={{ position: 'relative' }}>
-        {/* Left Arrow Button */}
-        <Button
-          type='primary'
-          shape='circle'
-          icon={<LeftOutlined />}
-          onClick={handlePrev}
-          style={{
-            position: 'absolute',
-            left: '-50px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            zIndex: 10,
-            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-            width: '40px',
-            height: '40px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        />
+      {error && <div className='rpt-note is-error'>{error}</div>}
+      {loading && <div className='rpt-note'>Loading monitoring data...</div>}
 
-        {/* Right Arrow Button */}
-        <Button
-          type='primary'
-          shape='circle'
-          icon={<RightOutlined />}
-          onClick={handleNext}
-          style={{
-            position: 'absolute',
-            right: '-50px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            zIndex: 10,
-            boxShadow: '0 1px 6px rgba(0,0,0,0.15)',
-            width: '40px',
-            height: '40px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        />
-
+      <div className='rpt-carousel'>
         <Carousel
           ref={carouselRef}
           autoplay={searchQuery.trim() === ''}
@@ -451,90 +386,36 @@ const TransactionChartCardHourly: React.FC = () => {
         >
           {slides.map((slide, slideIndex) => (
             <div key={slideIndex}>
-              <Row gutter={[16, 16]}>
+              <div className='rpt-mon-grid'>
                 {slide.map((item, index) => {
                   const isAbnormal = item.isNormal === false
                   // const isHigo = item.merchant === 'HIGO GAME PTE LTD'
 
                   return (
-                    <Col xs={24} sm={24} md={8} key={index}>
-                      <Card
-                        className='mb-2 mx-1'
-                        title={
-                          <div
-                            style={{
-                              fontSize: '14px',
-                              fontWeight: 'bold',
-                              color: theme.text,
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                            }}
-                          >
-                            <span className='text-lg'>
-                              {isAbnormal && <span style={{ marginRight: '8px', fontSize: '16px' }}>⚠️</span>}
-                              {item.merchant} - {item.paymentMethod}
-                            </span>
-                            {isAbnormal && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <Tag
-                                  color='red'
-                                  style={{
-                                    color: 'var(--theme-danger)',
-                                    border: '1px solid #2563eb',
-                                    background: 'var(--theme-danger-bg)',
-                                    fontSize: '10px',
-                                    padding: '0 6px',
-                                    height: '20px',
-                                    lineHeight: '18px',
-                                  }}
-                                >
-                                  ABNORMAL
-                                </Tag>
-                              </div>
-                            )}
-                          </div>
-                        }
-                        style={{
-                          height: '500px',
-                          boxShadow: isAbnormal ? '0 4px 12px rgba(255,77,79,0.3)' : '0 4px 12px rgba(0,0,0,0.08)',
-                          borderRadius: '12px',
-                          border: isAbnormal ? '2px solid #ff4d4f' : `1px solid ${theme.border}`,
-                          background: theme.card,
-                        }}
-                        styles={{
-                          header: {
-                            backgroundColor: isAbnormal ? theme.abnormalHeader : theme.header,
-                            borderBottom: isAbnormal ? '1px solid #2563eb' : `1px solid ${theme.border}`,
-                            borderRadius: '12px 12px 0 0',
-                            padding: '12px 16px',
-                            color: theme.text,
-                          },
-                        }}
-                        bodyStyle={{
-                          padding: '16px',
-                          height: 'calc(100% - 60px)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          backgroundColor: isAbnormal ? theme.abnormalBg : theme.card,
-                          color: theme.text,
-                        }}
-                      >
+                    <article key={index} className={`rpt-mon-card${isAbnormal ? ' is-abnormal' : ''}`}>
+                      <header>
+                        <h3 title={`${item.merchant} - ${item.paymentMethod}`}>
+                          {item.merchant}
+                          <small>{item.paymentMethod}</small>
+                        </h3>
+                        {isAbnormal && <Tag color='error'>ABNORMAL</Tag>}
+                      </header>
+                      <div className='rpt-mon-body'>
                         {isAbnormal && item.reasons && (
-                          <div style={{ marginBottom: 12, color: '#cf1322', fontSize: 16, fontWeight: 'bold' }}>
+                          <div className='rpt-mon-reasons'>
                             {item.reasons.success && <div>Success: {item.reasons.success}</div>}
                             {item.reasons.pending && <div>Pending: {item.reasons.pending}</div>}
                             {item.reasons.failed && <div>Failed: {item.reasons.failed}</div>}
                           </div>
                         )}
-                        <div style={{ flex: 1, minHeight: '310px' }}>
+                        <div className='rpt-mon-chart'>
                           <Line data={createChartData(item)} options={chartOptions} />
                         </div>
-                      </Card>
-                    </Col>
+                      </div>
+                    </article>
                   )
                 })}
-              </Row>
+              </div>
             </div>
           ))}
         </Carousel>
