@@ -2,8 +2,10 @@ import axios from 'axios'
 import { createContext, useContext, useEffect, useMemo, useState, ReactNode } from 'react'
 import { jwtDecode } from 'jwt-decode'
 
-const API_DEV = 'https://sandbox-payment.redision.com/api'
-const API_PROD = 'https://new-payment.redision.com/api'
+// A build can point both environments at its own API (staging uses a local mock), e.g. VITE_API_URL=http://host:8081/api.
+const API_OVERRIDE = import.meta.env.VITE_API_URL as string | undefined
+const API_DEV = API_OVERRIDE || 'https://sandbox-payment.redision.com/api'
+const API_PROD = API_OVERRIDE || 'https://new-payment.redision.com/api'
 
 interface AuthContextType {
   token: string | null
