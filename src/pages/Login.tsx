@@ -115,121 +115,29 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
     }
   }
 
+  const inputSx = {
+    '& .MuiOutlinedInput-root': {
+      minHeight: 52,
+      borderRadius: '14px',
+      background: 'var(--sf-card-2)',
+      color: 'var(--sf-ink)',
+      '& fieldset': { borderColor: 'transparent' },
+      '&:hover fieldset': { borderColor: 'var(--sf-line)' },
+      '&.Mui-focused fieldset': { borderColor: 'var(--sf-ink)', borderWidth: '1.5px' },
+      '&.Mui-error fieldset': { borderColor: 'var(--sf-bad)' },
+    },
+    '& .MuiInputLabel-root': { color: 'var(--sf-muted)', fontWeight: 600 },
+    '& .MuiInputLabel-root.Mui-focused': { color: 'var(--sf-ink)' },
+    '& .MuiFormHelperText-root': { color: 'var(--sf-bad)', mx: 0.5 },
+    '& .MuiInputBase-input::placeholder': { color: 'var(--sf-muted)', opacity: 1 },
+  }
+
   return (
     <AppTheme {...props}>
       <main className={`sf-login${entered ? ' is-entered' : ''}`}>
-        <section className='sf-login-panel'>
-          <div className='sf-login-panel-top'>
-            <span className='sf-login-logo'>
-              <img className='on-light' src='/logo.png' alt='Redpay' />
-              <img className='on-dark' src='/logo-white.png' alt='' />
-            </span>
-            <span className='sf-login-mode'>
-              <ColorModeIconDropdown aria-label='Change color theme' />
-            </span>
-          </div>
-
-          <Box
-            className='sf-login-card'
-            sx={{
-              animation: shake ? 'loginShake 0.4s ease' : 'none',
-              '@keyframes loginShake': {
-                '0%, 100%': { transform: 'translateX(0)' },
-                '25%': { transform: 'translateX(-5px)' },
-                '50%': { transform: 'translateX(5px)' },
-                '75%': { transform: 'translateX(-3px)' },
-              },
-            }}
-          >
-            <h1 className='sf-login-title'>Sign in</h1>
-            <p className='sf-login-sub'>Use your Redpay panel account to continue.</p>
-
-            {formError && (
-              <div role='alert' className='sf-login-error'>
-                <ErrorOutlineIcon />
-                <span>{formError}</span>
-              </div>
-            )}
-
-            <Box component='form' onSubmit={handleSubmit} noValidate className='sf-login-form'>
-              <div className='sf-login-field'>
-                <label htmlFor='username'>Username</label>
-                <TextField
-                  id='username'
-                  name='username'
-                  placeholder='Enter your username'
-                  autoComplete='username'
-                  autoFocus
-                  required
-                  fullWidth
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position='start'>
-                        <PersonOutlineIcon />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </div>
-
-              <div className='sf-login-field'>
-                <label htmlFor='password'>Password</label>
-                <TextField
-                  id='password'
-                  name='password'
-                  placeholder='Enter your password'
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete='current-password'
-                  required
-                  fullWidth
-                  error={passwordError}
-                  helperText={passwordErrorMessage}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position='start'>
-                        <LockOutlinedIcon />
-                      </InputAdornment>
-                    ),
-                    endAdornment: (
-                      <InputAdornment position='end'>
-                        <IconButton
-                          aria-label={showPassword ? 'Hide password' : 'Show password'}
-                          aria-pressed={showPassword}
-                          onClick={() => setShowPassword((v) => !v)}
-                          edge='end'
-                          size='small'
-                          className='sf-login-eye'
-                        >
-                          {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </div>
-
-              <button type='submit' className='sf-login-submit' disabled={loading} aria-busy={loading}>
-                {loading ? <CircularProgress size={16} sx={{ color: 'inherit' }} /> : 'Sign in'}
-                {!loading && <ArrowForwardRoundedIcon />}
-              </button>
-            </Box>
-
-            <div className='sf-login-badges' aria-hidden='true'>
-              <span>
-                <HttpsOutlinedIcon /> Encrypted sign-in
-              </span>
-              <span>
-                <SwapHorizRoundedIcon /> Prod &amp; Dev API
-              </span>
-            </div>
-          </Box>
-
-          <p className='sf-login-foot'>Redpay · Payment Management</p>
-        </section>
-
         <section className='sf-login-showcase' aria-hidden='true'>
           <div className='sf-login-top'>
-            <img className='sf-login-showcase-logo' src='/logo-white.png' alt='' />
+            <img className='sf-login-logo' src='/logo-white.png' alt='' />
             <span className='sf-login-live'>
               <i /> Live payment monitoring
             </span>
@@ -238,37 +146,53 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
           <div className='sf-login-copy'>
             <h2>Every payment, one calm view.</h2>
             <p>Track traffic, catch failing merchants early and pull settlement reports from a single panel.</p>
-          </div>
-
-          <div className='sf-login-block sf-login-status'>
-            <div className='sf-login-block-head'>
-              <span>Every status, tracked</span>
-              <span className='mono'>sample</span>
-            </div>
-            <div className='sf-login-status-bar'>
-              <i className='ok' />
-              <i className='pend' />
-              <i className='wait' />
-              <i className='bad' />
-            </div>
-            <div className='sf-login-status-pills'>
-              <span className='ok'>
-                <i /> Success <b>92.4%</b>
-              </span>
-              <span className='pend'>
-                <i /> Pending <b>4.1%</b>
-              </span>
-              <span className='wait'>
-                <i /> Waiting <b>2.3%</b>
-              </span>
-              <span className='bad'>
-                <i /> Failed <b>1.2%</b>
-              </span>
+            <div className='sf-login-status'>
+              <small>Every status, tracked</small>
+              <div className='sf-login-status-pills'>
+                <span className='ok'>Success</span>
+                <span className='pend'>Pending</span>
+                <span className='wait'>Waiting</span>
+                <span className='bad'>Failed</span>
+              </div>
+              <div className='sf-login-status-bar'>
+                <i className='ok' />
+                <i className='pend' />
+                <i className='wait' />
+                <i className='bad' />
+              </div>
             </div>
           </div>
 
-          <div className='sf-login-block sf-login-heat-wrap'>
-            <div className='sf-login-block-head'>
+          <div className='sf-login-marquee'>
+            <div className='sf-login-marquee-track'>
+              {[...METHOD_NAMES, ...METHOD_NAMES].map((name, i) => (
+                <span key={i} className={`tone-${i % 4}`}>
+                  {name}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className='sf-login-tiles'>
+            <div className='sf-login-tile peach'>
+              <MonitorHeartOutlinedIcon />
+              <strong>Live monitoring</strong>
+              <small>Real-time charts per merchant</small>
+            </div>
+            <div className='sf-login-tile sky'>
+              <GridViewRoundedIcon />
+              <strong>Traffic heatmap</strong>
+              <small>10-minute slots at a glance</small>
+            </div>
+            <div className='sf-login-tile rose'>
+              <NotificationsActiveOutlinedIcon />
+              <strong>Failure alerts</strong>
+              <small>Spot problems before users do</small>
+            </div>
+          </div>
+
+          <div className='sf-login-heat-wrap'>
+            <div className='sf-login-heat-head'>
               <span>Traffic heatmap · preview</span>
               <span className='sf-login-legend'>
                 <i className='mid' /> Busy <i className='high' /> Peak <i className='alert' /> Failed <i className='now' /> Now
@@ -279,39 +203,115 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
                 <i key={i} className={level} />
               ))}
             </div>
-            <div className='sf-login-heat-axis mono'>
-              <span>00:00</span>
-              <span>06:00</span>
-              <span>12:00</span>
-              <span>18:00</span>
-              <span>now</span>
-            </div>
           </div>
+        </section>
 
-          <div className='sf-login-tiles'>
-            <div className='sf-login-tile'>
-              <MonitorHeartOutlinedIcon />
-              <strong>Live monitoring</strong>
-              <small>Real-time charts per merchant</small>
+        <section className='sf-login-panel'>
+          <i className='sf-login-blob one' aria-hidden='true' />
+          <i className='sf-login-blob two' aria-hidden='true' />
+          <Box
+            className='sf-login-card'
+            sx={{
+              animation: shake ? 'loginShake 0.5s ease' : 'none',
+              '@keyframes loginShake': {
+                '0%, 100%': { transform: 'translateX(0)' },
+                '20%': { transform: 'translateX(-10px)' },
+                '40%': { transform: 'translateX(10px)' },
+                '60%': { transform: 'translateX(-7px)' },
+                '80%': { transform: 'translateX(7px)' },
+              },
+            }}
+          >
+            <div className='sf-login-card-head'>
+              <span className='sf-logo sf-login-logo'>
+                <img className='on-light' src='/logo.png' alt='Redpay' />
+                <img className='on-dark' src='/logo-white.png' alt='' />
+              </span>
+              <ColorModeIconDropdown aria-label='Change color theme' />
             </div>
-            <div className='sf-login-tile'>
-              <GridViewRoundedIcon />
-              <strong>Traffic heatmap</strong>
-              <small>10-minute slots at a glance</small>
-            </div>
-            <div className='sf-login-tile'>
-              <NotificationsActiveOutlinedIcon />
-              <strong>Failure alerts</strong>
-              <small>Spot problems before users do</small>
-            </div>
-          </div>
 
-          <div className='sf-login-marquee'>
-            <div className='sf-login-marquee-track'>
-              {[...METHOD_NAMES, ...METHOD_NAMES].map((name, i) => (
-                <span key={i}>{name}</span>
-              ))}
-            </div>
+            <h1 className='sf-login-title'>Welcome back</h1>
+            <p className='sf-login-sub'>Sign in to your Redpay panel to continue.</p>
+
+            {formError && (
+              <div role='alert' className='sf-login-error'>
+                <ErrorOutlineIcon sx={{ fontSize: 18 }} />
+                {formError}
+              </div>
+            )}
+
+            <Box component='form' onSubmit={handleSubmit} noValidate className='sf-login-form'>
+              <TextField
+                id='username'
+                name='username'
+                label='Username'
+                placeholder='Enter your username'
+                InputLabelProps={{ shrink: true }}
+                autoComplete='username'
+                autoFocus
+                required
+                fullWidth
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position='start'>
+                      <PersonOutlineIcon sx={{ color: 'var(--sf-muted)', fontSize: 20 }} />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={inputSx}
+              />
+
+              <TextField
+                id='password'
+                name='password'
+                label='Password'
+                placeholder='Enter your password'
+                InputLabelProps={{ shrink: true }}
+                type={showPassword ? 'text' : 'password'}
+                autoComplete='current-password'
+                required
+                fullWidth
+                error={passwordError}
+                helperText={passwordErrorMessage}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position='start'>
+                      <LockOutlinedIcon sx={{ color: 'var(--sf-muted)', fontSize: 20 }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        aria-pressed={showPassword}
+                        onClick={() => setShowPassword((v) => !v)}
+                        edge='end'
+                        sx={{ color: 'var(--sf-muted)' }}
+                      >
+                        {showPassword ? <VisibilityOffOutlinedIcon /> : <VisibilityOutlinedIcon />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                sx={inputSx}
+              />
+
+              <button type='submit' className='sf-login-submit' disabled={loading} aria-busy={loading}>
+                {loading ? <CircularProgress size={20} sx={{ color: 'inherit' }} /> : 'Sign in'}
+                {!loading && <ArrowForwardRoundedIcon sx={{ fontSize: 18 }} />}
+              </button>
+            </Box>
+
+            <p className='sf-login-foot'>Redpay · Payment Management</p>
+          </Box>
+
+          <div className='sf-login-badges' aria-hidden='true'>
+            <span>
+              <HttpsOutlinedIcon /> Encrypted sign-in
+            </span>
+            <span>
+              <SwapHorizRoundedIcon /> Prod &amp; Dev API
+            </span>
           </div>
         </section>
       </main>
