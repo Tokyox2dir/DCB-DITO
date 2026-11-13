@@ -44,6 +44,10 @@ const FINE_FULL_RESYNC_MS = 10 * 60_000
 const HOURLY_TAIL_HOURS = 2
 const HOURLY_FULL_RESYNC_MS = 30 * 60_000
 const KPI_STATUSES = [1000, 1001, 1003, 1005] as const
+// KPI counts take one /transactions request per status. They are counted in full this often; in between,
+// the new transactions the live tail already fetches are added on top, so a refresh costs no extra requests.
+// Status changes of older transactions (pending -> success) show up at the next full count.
+const KPI_FULL_RESYNC_MS = 5 * 60_000
 
 /** The aggregate only fills a bucket once it has closed: the open bucket starts here. */
 function aggregateCoverageEnd(series: TrafficSeries[]): number | null {
@@ -122,6 +126,8 @@ export default function Monitoring() {
   const loadingRef = useRef(false)
   const kpiScopeRef = useRef('')
   const kpiInFlightRef = useRef<string | null>(null)
+  // Last full KPI count: covers transactions created up to `at` (ms).
+  const kpiBaseRef = useRef<{ scope: string; at: number; fullAt: number; counts: KpiCounts } | null>(null)
   const fineCacheRef = useRef<{ scope: string; data: TrafficSeries[]; fullAt: number } | null>(null)
   const hourlyCacheRef = useRef<{ scope: string; data: TrafficSeries[]; fullAt: number } | null>(null)
   const lastLoadAtRef = useRef(0)
@@ -182,6 +188,7 @@ export default function Monitoring() {
     } | null = null
     let bgFineData: TrafficSeries[] | null = null
     let bgLiveScope = ''
+    let bgKpiScope = ''
     let bgIsLiveRange = false
 
     try {
@@ -253,8 +260,17 @@ export default function Monitoring() {
         applied.paymentMethod,
       ])
       kpiScopeRef.current = kpiScope
+      bgKpiScope = kpiScope
+      const kpiBase = kpiBaseRef.current
+      const kpiBaseFresh =
+        bgIsLiveRange &&
+        !!kpiBase &&
+        kpiBase.scope === kpiScope &&
+        now.valueOf() - kpiBase.fullAt < KPI_FULL_RESYNC_MS
+      // The API compares end_date to the second, so the count covers rows up to the start of that second.
+      const kpiAt = Math.floor(end.valueOf() / 1000) * 1000
       const kpiPromise =
-        kpiInFlightRef.current === kpiScope
+        kpiBaseFresh || kpiInFlightRef.current === kpiScope
           ? Promise.resolve()
           : (() => {
               kpiInFlightRef.current = kpiScope
@@ -262,6 +278,7 @@ export default function Monitoring() {
                 .then(([success, pending, waiting, failed]) => {
                   if (kpiScopeRef.current !== kpiScope) return
                   const next: KpiCounts = { total: success + pending + waiting + failed, success, pending, waiting, failed }
+                  kpiBaseRef.current = { scope: kpiScope, at: kpiAt, fullAt: now.valueOf(), counts: next }
                   setKpi(next)
                 })
                 .catch((e) => {
@@ -446,6 +463,28 @@ export default function Monitoring() {
 
       const liveRows = Array.from(live.rows.values())
       setFailedRows(liveRows.filter((row) => Number(row.status_code) === 1005))
+
+      // KPI between full counts: last full count + transactions created after it.
+      const kpiBase = kpiBaseRef.current
+      if (kpiBase && kpiBase.scope === bgKpiScope && kpiScopeRef.current === bgKpiScope) {
+        if (live.validFrom <= kpiBase.at) {
+          const next: KpiCounts = { ...kpiBase.counts }
+          liveRows.forEach((row) => {
+            if (dayjs(row.created_at).valueOf() <= kpiBase.at) return
+            const code = Number(row.status_code)
+            if (code === 1000) next.success += 1
+            else if (code === 1001) next.pending += 1
+            else if (code === 1003) next.waiting += 1
+            else if (code === 1005) next.failed += 1
+            else return
+            next.total += 1
+          })
+          setKpi(next)
+        } else {
+          // The live rows don't reach back to the last count: count in full on the next refresh.
+          kpiBase.fullAt = 0
+        }
+      }
       if (gen === loadGenRef.current) {
         setAlertSeries(withLiveOverlay(bgFineData, bgLiveScope, liveEnd))
         setReferenceNow(liveEnd)

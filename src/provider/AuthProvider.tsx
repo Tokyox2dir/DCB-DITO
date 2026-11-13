@@ -21,6 +21,23 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+// setTimeout fires immediately for delays above 2^31-1 ms, so long-lived tokens are re-checked in steps.
+const MAX_TIMER_MS = 2_147_000_000
+
+/**
+ * The session is over (token expired or rejected): drop the token and go to the login page with a full
+ * page load, which also stops every polling timer, so an open tab doesn't keep hitting the API with a dead token.
+ */
+let sessionEnding = false
+function endSession() {
+  if (sessionEnding) return
+  sessionEnding = true
+  localStorage.removeItem('token')
+  delete axios.defaults.headers.common['Authorization']
+  if (window.location.pathname !== '/login') window.location.replace('/login')
+  else sessionEnding = false
+}
+
 const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [token, setToken_] = useState<string | null>(localStorage.getItem('token'))
   const [role, setRole] = useState<string | null>(null)
@@ -76,8 +93,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (isExpired || !decoded) {
         setToken(null)
-        localStorage.removeItem('token')
-        window.location.href = '/login'
+        endSession()
       } else {
         setRole(decoded.role)
 
@@ -94,6 +110,44 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
       localStorage.removeItem('token')
     }
   }, [token, isDev])
+
+  // Log out the moment the token expires, instead of only checking it when the app is opened.
+  useEffect(() => {
+    if (!token) return
+    let exp = 0
+    try {
+      exp = Number((jwtDecode(token) as { exp?: number }).exp) * 1000
+    } catch {
+      return
+    }
+    if (!Number.isFinite(exp) || exp <= 0) return
+    let timer: number
+    const schedule = () => {
+      const left = exp - Date.now()
+      if (left <= 0) {
+        setToken(null)
+        endSession()
+        return
+      }
+      timer = window.setTimeout(schedule, Math.min(left, MAX_TIMER_MS))
+    }
+    schedule()
+    return () => window.clearTimeout(timer)
+  }, [token])
+
+  // Any 401 from the API means the token is no longer accepted: stop and send the user to log in again
+  // rather than letting the polling pages retry with the same token every minute.
+  useEffect(() => {
+    const id = axios.interceptors.response.use(undefined, (error) => {
+      const url: string = error?.config?.url || ''
+      if (error?.response?.status === 401 && !url.includes('/user/login')) {
+        setToken_(null)
+        endSession()
+      }
+      return Promise.reject(error)
+    })
+    return () => axios.interceptors.response.eject(id)
+  }, [])
 
   const contextValue = useMemo(
     () => ({
