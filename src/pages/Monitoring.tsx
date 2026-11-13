@@ -21,7 +21,8 @@ dayjs.extend(utc)
 const { RangePicker } = DatePicker
 const { Option } = Select
 
-const REFRESH_MS = 30_000
+// 60 s instead of 30 s to ease the load on the temporary legacy API server; can go back down after the AWS migration.
+const REFRESH_MS = 60_000
 // A request the server never answers would hold the panels on "Loading" and block every later refresh,
 // so each one gives up after this long; the panel keeps its last data and the next refresh retries.
 const REQUEST_TIMEOUT_MS = 20_000
