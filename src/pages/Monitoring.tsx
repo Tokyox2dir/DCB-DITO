@@ -23,6 +23,9 @@ const { Option } = Select
 
 // 60 s instead of 30 s to ease the load on the temporary legacy API server; can go back down after the AWS migration.
 const REFRESH_MS = 60_000
+// Backend guidance: only a today-only range is refreshed every minute; a range spanning more days is heavier
+// to count, so it is refreshed every 5 minutes.
+const REFRESH_MULTI_DAY_MS = 5 * 60_000
 // A request the server never answers would hold the panels on "Loading" and block every later refresh,
 // so each one gives up after this long; the panel keeps its last data and the next refresh retries.
 const REQUEST_TIMEOUT_MS = 20_000
@@ -470,6 +473,8 @@ export default function Monitoring() {
   }, [apiUrl, token, applied.dateRange, applied.merchant, applied.paymentMethod, merchants, withLiveOverlay])
 
   const isLiveView = !applied.dateRange?.[1] || applied.dateRange[1].isSame(dayjs(), 'day')
+  const isTodayOnly = isLiveView && (!applied.dateRange?.[0] || applied.dateRange[0].isSame(dayjs(), 'day'))
+  const refreshMs = isTodayOnly ? REFRESH_MS : REFRESH_MULTI_DAY_MS
 
   useEffect(() => {
     if (document.visibilityState !== 'hidden') load()
@@ -483,15 +488,15 @@ export default function Monitoring() {
       load()
     }
     const onVisibility = () => {
-      if (document.visibilityState === 'visible' && Date.now() - lastLoadAtRef.current > REFRESH_MS / 2) load()
+      if (document.visibilityState === 'visible' && Date.now() - lastLoadAtRef.current > refreshMs / 2) load()
     }
-    const id = window.setInterval(tick, REFRESH_MS)
+    const id = window.setInterval(tick, refreshMs)
     document.addEventListener('visibilitychange', onVisibility)
     return () => {
       window.clearInterval(id)
       document.removeEventListener('visibilitychange', onVisibility)
     }
-  }, [load, isLiveView])
+  }, [load, isLiveView, refreshMs])
 
   const filteredSeries = useMemo(() => {
     return series.filter((s) => {
@@ -604,7 +609,7 @@ export default function Monitoring() {
       {trafficTimedOut && (
         <div className='mon-error'>
           The traffic server did not respond within {REQUEST_TIMEOUT_MS / 1000} seconds. The charts show the last data that loaded
-          and retry automatically every {REFRESH_MS / 1000} seconds.
+          and retry automatically every {refreshMs >= 60_000 ? `${refreshMs / 60_000} minute${refreshMs === 60_000 ? "" : "s"}` : `${refreshMs / 1000} seconds`}.
         </div>
       )}
 
