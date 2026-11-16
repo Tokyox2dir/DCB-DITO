@@ -376,6 +376,22 @@ const toCsv = (rows) => {
 
 // ---------- auth ----------
 // Any password works. Usernames containing "merchant" log in as the first merchant; everyone else is admin.
+// Access tokens are short here (15 min) so the panel's refresh flow actually runs on staging; production gives 24 h.
+// Refresh tokens rotate like the real API: 7 days, the old one stays usable for 30 s (409), reuse after that revokes
+// the whole login session. Sessions live in memory only, so a restart of dito-api means logging in again.
+const ACCESS_TTL_S = Number(process.env.MOCK_ACCESS_TTL_S) || 15 * 60
+const REFRESH_TTL_S = 7 * 86400
+const SESSION_MAX_S = 30 * 86400
+const sessions = new Map() // sid -> { claims, loginAt, revoked }
+const refreshTokens = new Map() // rt -> { sid, exp, usedAt }
+function issueTokens(sid) {
+  const sess = sessions.get(sid)
+  const now = Math.floor(Date.now() / 1000)
+  const token = `${b64url({ alg: 'none', typ: 'JWT' })}.${b64url({ ...sess.claims, exp: now + ACCESS_TTL_S })}.dito`
+  const refresh_token = 'rt_' + crypto.randomBytes(24).toString('hex')
+  refreshTokens.set(refresh_token, { sid, exp: now + REFRESH_TTL_S, usedAt: 0 })
+  return { token, expires_in: ACCESS_TTL_S, refresh_token, refresh_expires_in: REFRESH_TTL_S }
+}
 function login(body) {
   const username = String(body.username || '').trim()
   if (!username) return [400, { message: 'Username wajib diisi' }]
@@ -384,10 +400,43 @@ function login(body) {
   const claims = {
     username,
     role: merchant ? 'merchant' : 'admin',
-    exp: Math.floor(Date.now() / 1000) + 7 * 86400,
     ...(merchant ? { appid: app.appid, appkey: app.appkey, devappid: app.appid, devappkey: app.appkey } : {}),
   }
-  return [200, { token: `${b64url({ alg: 'none', typ: 'JWT' })}.${b64url(claims)}.dito` }]
+  const sid = crypto.randomUUID()
+  sessions.set(sid, { claims, loginAt: Math.floor(Date.now() / 1000), revoked: false })
+  return [200, { status: 'success', message: 'Success login', ...issueTokens(sid) }]
+}
+function refresh(body) {
+  const rt = body.refresh_token
+  if (typeof rt !== 'string' || !/^rt_[0-9a-f]+$/.test(rt)) return [400, { status: 'error', message: 'refresh_token kosong atau formatnya salah' }]
+  const entry = refreshTokens.get(rt)
+  const sess = entry && sessions.get(entry.sid)
+  const now = Math.floor(Date.now() / 1000)
+  if (!entry || !sess || sess.revoked || entry.exp < now || sess.loginAt + SESSION_MAX_S < now)
+    return [401, { status: 'error', message: 'Refresh token invalid' }]
+  if (entry.usedAt) {
+    if (now - entry.usedAt < 30) return [409, { status: 'error', message: 'Token baru saja di-refresh' }]
+    sess.revoked = true
+    return [401, { status: 'error', message: 'Refresh token dipakai ulang, sesi dicabut' }]
+  }
+  entry.usedAt = now
+  return [200, { status: 'success', message: 'Token refreshed', ...issueTokens(entry.sid) }]
+}
+function logout(body) {
+  const entry = refreshTokens.get(body.refresh_token)
+  const sess = entry && sessions.get(entry.sid)
+  if (sess) sess.revoked = true
+  return [200, { status: 'success', message: 'Logged out' }]
+}
+const accessTokenValid = (header) => {
+  const m = /^Bearer (.+)$/.exec(header || '')
+  if (!m) return false
+  try {
+    const claims = JSON.parse(Buffer.from(m[1].split('.')[1], 'base64url').toString())
+    return !claims.exp || claims.exp * 1000 > Date.now()
+  } catch {
+    return false
+  }
 }
 const scope = (req) => {
   const appid = req.headers.appid
@@ -401,6 +450,8 @@ const routes = []
 const on = (method, pattern, fn) => routes.push({ method, re: new RegExp('^/api' + pattern.replace(/:(\w+)/g, '(?<$1>[^/]+)') + '/?$'), fn })
 
 on('POST', '/user/login', (ctx) => login(ctx.body))
+on('POST', '/user/refresh', (ctx) => refresh(ctx.body))
+on('POST', '/user/logout', (ctx) => logout(ctx.body))
 
 on('GET', '/admin/merchants', () => [200, { data: db.merchants }])
 on('GET', '/admin/merchant/:id', ({ p }) => {
@@ -527,8 +578,8 @@ http.createServer((req, res) => {
   if (url.pathname === '/health') return send(res, 200, { ok: true, transactions: db.trx.length, merchants: db.merchants.length })
   const route = routes.find((r) => r.method === req.method && r.re.test(url.pathname))
   if (!route) return send(res, 404, { message: `dito-api: ${req.method} ${url.pathname} belum ada` })
-  const needsAuth = !url.pathname.endsWith('/user/login') && !url.pathname.startsWith('/api/check/')
-  if (needsAuth && !/^Bearer .+/.test(req.headers.authorization || '')) return send(res, 401, { message: 'Unauthorized' })
+  const needsAuth = !/\/user\/(login|refresh|logout)\/?$/.test(url.pathname) && !url.pathname.startsWith('/api/check/')
+  if (needsAuth && !accessTokenValid(req.headers.authorization)) return send(res, 401, { message: 'Unauthorized' })
   let raw = ''
   req.on('data', (c) => (raw += c))
   req.on('end', () => {

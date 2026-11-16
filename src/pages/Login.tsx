@@ -97,7 +97,7 @@ export default function Login(props: { disableCustomTheme?: boolean }) {
         { headers: { 'Content-Type': 'application/json' } },
       )
 
-      setToken(response.data.token)
+      setToken(response.data.token, response.data.refresh_token || null)
       window.location.href = '/'
     } catch (error: unknown) {
       console.error('Login failed:', error)

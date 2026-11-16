@@ -8,9 +8,16 @@ HOST="${STAGING_HOST:-noc@100.88.239.67}"
 IP="${HOST#*@}"
 
 cd "$(dirname "$0")/.."
-rsync -az mock-api/ "$HOST:staging/dito-api/"
+# On the staging server itself, copy and run locally (like deploy-staging.sh); elsewhere, over SSH.
+if [ -d "$HOME/staging/dito-api" ]; then
+  rsync -a mock-api/ "$HOME/staging/dito-api/"
+  RUN=(env IP="$IP" bash -s)
+else
+  rsync -az mock-api/ "$HOST:staging/dito-api/"
+  RUN=(ssh "$HOST" IP="$IP" 'bash -s')
+fi
 
-ssh "$HOST" IP="$IP" 'bash -s' <<'REMOTE'
+"${RUN[@]}" <<'REMOTE'
 set -euo pipefail
 mkdir -p ~/staging/dcb-dito/html ~/staging/dito-api-data
 cat > ~/staging/dcb-dito/nginx.conf <<"EOF"

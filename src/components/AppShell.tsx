@@ -56,7 +56,7 @@ function isOn(pathname: string, path: string) {
 export default function AppShell() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { token, setToken } = useAuth()
+  const { token, logout } = useAuth()
   const { mode, systemMode, setMode } = useColorScheme()
   const decoded: any = token ? jwtDecode(token) : {}
   const role = decoded.role || ''
@@ -156,8 +156,7 @@ export default function AppShell() {
 
   const handleLogout = () => {
     setUserAnchor(null)
-    setToken(null)
-    localStorage.removeItem('token')
+    logout()
     navigate('/login', { replace: true })
   }
 
