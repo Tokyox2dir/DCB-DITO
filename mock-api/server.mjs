@@ -456,6 +456,16 @@ on('PUT', '/merchant/profile', ({ body, req }) => {
 
 on('GET', '/transactions', ({ q }) => [200, page(filterTrx(q), q)])
 on('GET', '/merchant/transactions', ({ q, req }) => [200, page(filterTrx(q, scope(req)), q)])
+// Counts per status for the same filters as /transactions (the status filter itself is ignored).
+on('GET', '/transactions/status-count', ({ q }) => {
+  const counts = { success: 0, pending: 0, waiting: 0, failed: 0, other: 0, total: 0 }
+  const name = { [STATUS.success]: 'success', [STATUS.pending]: 'pending', [STATUS.waiting]: 'waiting', [STATUS.failed]: 'failed' }
+  for (const t of filterTrx({ ...q, status: '' })) {
+    counts[name[t.status_code] || 'other'] += 1
+    counts.total += 1
+  }
+  return [200, { success: true, data: counts }]
+})
 const findTrx = (id) => db.trx.find((t) => t.u_id === id || t.merchant_transaction_id === id)
 on('GET', '/transaction/:id', ({ p }) => (findTrx(p.id) ? [200, { data: findTrx(p.id) }] : [404, { message: 'Transaksi tidak ditemukan' }]))
 on('GET', '/merchant/transaction/:id', ({ p }) => (findTrx(p.id) ? [200, { data: findTrx(p.id) }] : [404, { message: 'Transaksi tidak ditemukan' }]))

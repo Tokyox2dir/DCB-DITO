@@ -43,11 +43,6 @@ const FINE_FULL_RESYNC_MS = 10 * 60_000
 // refetched, with a slower full resync.
 const HOURLY_TAIL_HOURS = 2
 const HOURLY_FULL_RESYNC_MS = 30 * 60_000
-const KPI_STATUSES = [1000, 1001, 1003, 1005] as const
-// KPI counts take one /transactions request per status. They are counted in full this often; in between,
-// the new transactions the live tail already fetches are added on top, so a refresh costs no extra requests.
-// Status changes of older transactions (pending -> success) show up at the next full count.
-const KPI_FULL_RESYNC_MS = 5 * 60_000
 
 /** The aggregate only fills a bucket once it has closed: the open bucket starts here. */
 function aggregateCoverageEnd(series: TrafficSeries[]): number | null {
@@ -62,7 +57,6 @@ function aggregateCoverageEnd(series: TrafficSeries[]): number | null {
 }
 
 type KpiCounts = { total: number; success: number; pending: number; waiting: number; failed: number }
-type StatusCounts = [number, number, number, number] // success, pending, waiting, failed
 
 const seriesKey = (s: TrafficSeries) => `${s.client_uid || ''}::${s.merchant_name || ''}::${s.payment_method || ''}`
 
@@ -126,8 +120,6 @@ export default function Monitoring() {
   const loadingRef = useRef(false)
   const kpiScopeRef = useRef('')
   const kpiInFlightRef = useRef<string | null>(null)
-  // Last full KPI count: covers transactions created up to `at` (ms).
-  const kpiBaseRef = useRef<{ scope: string; at: number; fullAt: number; counts: KpiCounts } | null>(null)
   const fineCacheRef = useRef<{ scope: string; data: TrafficSeries[]; fullAt: number } | null>(null)
   const hourlyCacheRef = useRef<{ scope: string; data: TrafficSeries[]; fullAt: number } | null>(null)
   const lastLoadAtRef = useRef(0)
@@ -188,7 +180,6 @@ export default function Monitoring() {
     } | null = null
     let bgFineData: TrafficSeries[] | null = null
     let bgLiveScope = ''
-    let bgKpiScope = ''
     let bgIsLiveRange = false
 
     try {
@@ -237,22 +228,9 @@ export default function Monitoring() {
         applied.merchant,
       ])
 
-      const gmt = (t: Dayjs | number) => dayjs(t).utc().format('ddd, DD MMM YYYY HH:mm:ss [GMT]')
-      const trxCount = async (status: number, from: Dayjs | number, to: Dayjs | number): Promise<number> => {
-        const res = await axios.get(`${apiUrl}/transactions`, {
-          headers: authHeaders,
-          timeout: REQUEST_TIMEOUT_MS,
-          params: { page: 1, limit: 1, ...trxDateParams, start_date: gmt(from), end_date: gmt(to), status },
-        })
-        return Number(res.data?.pagination?.total_items) || 0
-      }
-      const countStatuses = (from: Dayjs | number, to: Dayjs | number) =>
-        Promise.all(KPI_STATUSES.map((status) => trxCount(status, from, to))) as Promise<StatusCounts>
-
-      // Same source as Transaction List → live KPI / Status.
-      // The counts can take longer than REFRESH_MS, so a batch is never discarded just because a newer
-      // refresh started (that left the cards stuck on stale numbers), and a new batch is only sent once
-      // the previous one for the same filters has finished, so slow counts don't pile up on the database.
+      // KPI / Status: one status-count request per refresh, same filters as Transaction List.
+      // A slow count is never discarded just because a newer refresh started (that left the cards stuck on
+      // stale numbers), and a new one is only sent once the previous one for the same filters has finished.
       const kpiScope = JSON.stringify([
         dayStart.format('YYYY-MM-DD'),
         bgIsLiveRange ? 'live' : end.format('YYYY-MM-DD'),
@@ -260,25 +238,26 @@ export default function Monitoring() {
         applied.paymentMethod,
       ])
       kpiScopeRef.current = kpiScope
-      bgKpiScope = kpiScope
-      const kpiBase = kpiBaseRef.current
-      const kpiBaseFresh =
-        bgIsLiveRange &&
-        !!kpiBase &&
-        kpiBase.scope === kpiScope &&
-        now.valueOf() - kpiBase.fullAt < KPI_FULL_RESYNC_MS
-      // The API compares end_date to the second, so the count covers rows up to the start of that second.
-      const kpiAt = Math.floor(end.valueOf() / 1000) * 1000
       const kpiPromise =
-        kpiBaseFresh || kpiInFlightRef.current === kpiScope
+        kpiInFlightRef.current === kpiScope
           ? Promise.resolve()
           : (() => {
               kpiInFlightRef.current = kpiScope
-              return countStatuses(dayStart, end)
-                .then(([success, pending, waiting, failed]) => {
+              return axios
+                .get(`${apiUrl}/transactions/status-count`, {
+                  headers: authHeaders,
+                  timeout: REQUEST_TIMEOUT_MS,
+                  params: trxDateParams,
+                })
+                .then((res) => {
                   if (kpiScopeRef.current !== kpiScope) return
+                  const d = res.data?.data || {}
+                  const success = Number(d.success) || 0
+                  const pending = Number(d.pending) || 0
+                  const waiting = Number(d.waiting) || 0
+                  const failed = Number(d.failed) || 0
+                  // Total stays the sum of the four shown statuses, as before ("other" is not counted).
                   const next: KpiCounts = { total: success + pending + waiting + failed, success, pending, waiting, failed }
-                  kpiBaseRef.current = { scope: kpiScope, at: kpiAt, fullAt: now.valueOf(), counts: next }
                   setKpi(next)
                 })
                 .catch((e) => {
@@ -464,27 +443,6 @@ export default function Monitoring() {
       const liveRows = Array.from(live.rows.values())
       setFailedRows(liveRows.filter((row) => Number(row.status_code) === 1005))
 
-      // KPI between full counts: last full count + transactions created after it.
-      const kpiBase = kpiBaseRef.current
-      if (kpiBase && kpiBase.scope === bgKpiScope && kpiScopeRef.current === bgKpiScope) {
-        if (live.validFrom <= kpiBase.at) {
-          const next: KpiCounts = { ...kpiBase.counts }
-          liveRows.forEach((row) => {
-            if (dayjs(row.created_at).valueOf() <= kpiBase.at) return
-            const code = Number(row.status_code)
-            if (code === 1000) next.success += 1
-            else if (code === 1001) next.pending += 1
-            else if (code === 1003) next.waiting += 1
-            else if (code === 1005) next.failed += 1
-            else return
-            next.total += 1
-          })
-          setKpi(next)
-        } else {
-          // The live rows don't reach back to the last count: count in full on the next refresh.
-          kpiBase.fullAt = 0
-        }
-      }
       if (gen === loadGenRef.current) {
         setAlertSeries(withLiveOverlay(bgFineData, bgLiveScope, liveEnd))
         setReferenceNow(liveEnd)
