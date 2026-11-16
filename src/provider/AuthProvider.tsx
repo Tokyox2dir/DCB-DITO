@@ -255,13 +255,11 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [token])
 
-  // Follow the other tabs: a token they refreshed, or a logout.
+  // Use the token another tab just refreshed (backend doc, 409: take the latest token stored by another tab).
   useEffect(() => {
     const onStorage = (e: StorageEvent) => {
-      if (e.key !== TOKEN_KEY && e.key !== null) return
-      const next = localStorage.getItem(TOKEN_KEY)
-      if (next) setToken_(next)
-      else endSession()
+      if (e.key !== TOKEN_KEY || !e.newValue) return
+      setToken_(e.newValue)
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)

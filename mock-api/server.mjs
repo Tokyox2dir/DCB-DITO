@@ -376,10 +376,10 @@ const toCsv = (rows) => {
 
 // ---------- auth ----------
 // Any password works. Usernames containing "merchant" log in as the first merchant; everyone else is admin.
-// Access tokens are short here (15 min) so the panel's refresh flow actually runs on staging; production gives 24 h.
-// Refresh tokens rotate like the real API: 7 days, the old one stays usable for 30 s (409), reuse after that revokes
+// Same lifetimes as the real API (backend doc, 16 Nov 2026): access token 24 h, refresh token 7 days, session 30 days.
+// Refresh tokens rotate like the real API: a reuse within 30 s gets 409, reuse after that revokes
 // the whole login session. Sessions live in memory only, so a restart of dito-api means logging in again.
-const ACCESS_TTL_S = Number(process.env.MOCK_ACCESS_TTL_S) || 15 * 60
+const ACCESS_TTL_S = 86400
 const REFRESH_TTL_S = 7 * 86400
 const SESSION_MAX_S = 30 * 86400
 const sessions = new Map() // sid -> { claims, loginAt, revoked }
