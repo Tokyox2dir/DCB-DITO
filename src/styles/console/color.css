@@ -235,3 +235,78 @@ html[data-theme] .sf-shell .rpt-carousel .slick-dots li.slick-active button { ba
 .sf-login-tile.sky svg,
 .sf-login-tile.rose svg { color: #fff; }
 .sf-login-tile small { color: rgba(255, 255, 255, 0.85); }
+
+/* ---------- More colour: every card, button and rail item gets its own hue ---------- */
+html[data-theme='light'] { --card-tint: 7%; --card-edge: 28%; --data-2: var(--c-pink); }
+html[data-theme='dark'] { --card-tint: 11%; --card-edge: 35%; --data-2: var(--c-pink); }
+
+/* Cards are filled with a soft wash of their colour, not only a stripe */
+html[data-theme] .sf-shell :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card) {
+  --card-bg: color-mix(in srgb, var(--tone) var(--card-tint), var(--surface));
+  background: var(--card-bg);
+  border-color: color-mix(in srgb, var(--tone) var(--card-edge), var(--border));
+  box-shadow: inset 0 4px 0 var(--tone), 0 8px 22px -14px color-mix(in srgb, var(--tone) 60%, transparent);
+}
+html[data-theme] .sf-shell .ant-table-wrapper :is(.ant-table-cell-fix-left, .ant-table-cell-fix-right) { background: var(--card-bg, var(--surface)) !important; }
+html[data-theme] .sf-shell :is(.rp-card-head h3, .tx-card-head h3, .mon-panel-title h4) { color: color-mix(in srgb, var(--tone) 70%, var(--text)); }
+/* Zebra rows in the card colour */
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table-tbody > tr:nth-child(even) > td,
+html[data-theme] .sf-shell .MuiTableBody-root .MuiTableRow-root:nth-child(even) .MuiTableCell-root { background: color-mix(in srgb, var(--tone, var(--c-blue)) 5%, transparent); }
+
+/* Spread colours over the whole page: cards in the 2nd/3rd/... container start further along the palette,
+   so a page never shows a column of same-coloured cards. Fixed-meaning cards (alerts, dashboard) keep theirs. */
+html[data-theme] .sf-shell .rp-page :not(.ov-row):nth-child(3n + 2) > :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):not(.mon-panel-alert):not(.is-abnormal):nth-child(6n + 1) { --tone: var(--c-teal); }
+html[data-theme] .sf-shell .rp-page :not(.ov-row):nth-child(3n + 2) > :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):not(.mon-panel-alert):not(.is-abnormal):nth-child(6n + 2) { --tone: var(--c-amber); }
+html[data-theme] .sf-shell .rp-page :not(.ov-row):nth-child(3n + 2) > :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):not(.mon-panel-alert):not(.is-abnormal):nth-child(6n + 3) { --tone: var(--c-pink); }
+html[data-theme] .sf-shell .rp-page :not(.ov-row):nth-child(3n + 2) > :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):not(.mon-panel-alert):not(.is-abnormal):nth-child(6n + 4) { --tone: var(--c-green); }
+html[data-theme] .sf-shell .rp-page :not(.ov-row):nth-child(3n + 2) > :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):not(.mon-panel-alert):not(.is-abnormal):nth-child(6n + 5) { --tone: var(--c-blue); }
+html[data-theme] .sf-shell .rp-page :not(.ov-row):nth-child(3n + 2) > :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):not(.mon-panel-alert):not(.is-abnormal):nth-child(6n + 6) { --tone: var(--c-violet); }
+html[data-theme] .sf-shell .rp-page :not(.ov-row):nth-child(3n + 3) > :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):not(.mon-panel-alert):not(.is-abnormal):nth-child(6n + 1) { --tone: var(--c-pink); }
+html[data-theme] .sf-shell .rp-page :not(.ov-row):nth-child(3n + 3) > :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):not(.mon-panel-alert):not(.is-abnormal):nth-child(6n + 2) { --tone: var(--c-green); }
+html[data-theme] .sf-shell .rp-page :not(.ov-row):nth-child(3n + 3) > :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):not(.mon-panel-alert):not(.is-abnormal):nth-child(6n + 3) { --tone: var(--c-blue); }
+html[data-theme] .sf-shell .rp-page :not(.ov-row):nth-child(3n + 3) > :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):not(.mon-panel-alert):not(.is-abnormal):nth-child(6n + 4) { --tone: var(--c-violet); }
+html[data-theme] .sf-shell .rp-page :not(.ov-row):nth-child(3n + 3) > :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):not(.mon-panel-alert):not(.is-abnormal):nth-child(6n + 5) { --tone: var(--c-teal); }
+html[data-theme] .sf-shell .rp-page :not(.ov-row):nth-child(3n + 3) > :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):not(.mon-panel-alert):not(.is-abnormal):nth-child(6n + 6) { --tone: var(--c-amber); }
+
+/* Secondary buttons: each one in a group gets its own colour */
+html[data-theme] .sf-shell :is(.rp-btn:not(.primary), .MuiButton-outlined, .ant-btn-default:not(.ant-btn-dangerous)):not(td *) {
+  --b: var(--c-blue);
+  border-color: color-mix(in srgb, var(--b) 45%, transparent);
+  background: color-mix(in srgb, var(--b) var(--tint), var(--surface));
+  color: color-mix(in srgb, var(--b) 80%, var(--text));
+}
+html[data-theme] .sf-shell :is(.rp-btn:not(.primary), .MuiButton-outlined, .ant-btn-default:not(.ant-btn-dangerous)):not(td *):nth-child(5n + 2) { --b: var(--c-teal); }
+html[data-theme] .sf-shell :is(.rp-btn:not(.primary), .MuiButton-outlined, .ant-btn-default:not(.ant-btn-dangerous)):not(td *):nth-child(5n + 3) { --b: var(--c-violet); }
+html[data-theme] .sf-shell :is(.rp-btn:not(.primary), .MuiButton-outlined, .ant-btn-default:not(.ant-btn-dangerous)):not(td *):nth-child(5n + 4) { --b: var(--c-pink); }
+html[data-theme] .sf-shell :is(.rp-btn:not(.primary), .MuiButton-outlined, .ant-btn-default:not(.ant-btn-dangerous)):not(td *):nth-child(5n + 5) { --b: var(--c-amber); }
+html[data-theme] .sf-shell :is(.rp-btn:not(.primary), .MuiButton-outlined, .ant-btn-default:not(.ant-btn-dangerous)):not(td *):not(:disabled):hover {
+  border-color: var(--b);
+  background: color-mix(in srgb, var(--b) calc(var(--tint) + 8%), var(--surface));
+  color: color-mix(in srgb, var(--b) 85%, var(--text));
+}
+html[data-theme] .sf-shell :is(.rp-btn:not(.primary), .MuiButton-outlined, .ant-btn-default:not(.ant-btn-dangerous)):not(td *) :is(svg, .anticon) { color: var(--b); }
+/* The dashboard shortcuts already pick their icon colour; match the button to it */
+html[data-theme] .sf-shell .ov .ov-buttons .rp-btn:nth-child(2) { --b: var(--c-blue); }
+html[data-theme] .sf-shell .ov .ov-buttons .rp-btn:nth-child(3) { --b: var(--c-violet); }
+html[data-theme] .sf-shell .ov .ov-buttons .rp-btn:nth-child(4) { --b: var(--c-pink); }
+
+/* Rail: the active item takes the colour of its own icon */
+html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 1) { background: linear-gradient(135deg, #3d63dd, #6584ff); }
+html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 2) { background: linear-gradient(135deg, #7c4ddb, #b59bff); }
+html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 3) { background: linear-gradient(135deg, #0e9f94, #2cc0b2); }
+html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 4) { background: linear-gradient(135deg, #e07b06, #f0682f); }
+html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 5) { background: linear-gradient(135deg, #d6336c, #ec5b8e); }
+html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 6) { background: linear-gradient(135deg, #0f9d58, #2fbf71); }
+
+/* Tabs and pagination: a different colour per item */
+html[data-theme] .sf-shell :is(.ant-tabs-tab, .MuiTab-root):nth-child(4n + 1) { --tab: var(--c-blue); }
+html[data-theme] .sf-shell :is(.ant-tabs-tab, .MuiTab-root):nth-child(4n + 2) { --tab: var(--c-teal); }
+html[data-theme] .sf-shell :is(.ant-tabs-tab, .MuiTab-root):nth-child(4n + 3) { --tab: var(--c-pink); }
+html[data-theme] .sf-shell :is(.ant-tabs-tab, .MuiTab-root):nth-child(4n + 4) { --tab: var(--c-amber); }
+html[data-theme] .sf-shell .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn,
+html[data-theme] .sf-shell .MuiTab-root.Mui-selected { color: var(--tab, var(--c-violet)); }
+html[data-theme] .sf-shell :is(.ant-tabs-ink-bar, .MuiTabs-indicator) { background: var(--grad-rainbow); }
+
+/* Chart legend for the second series (Yesterday) */
+html[data-theme] .sf-shell .mon-dot { border-top-color: var(--c-blue); }
+html[data-theme] .sf-shell .mon-dot.yesterday { border-top-color: var(--c-pink); }
