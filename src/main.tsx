@@ -8,6 +8,7 @@ import './styles/console/monitoring.css'
 import './styles/console/login.css'
 import './styles/console/transactions.css'
 import './styles/console/reports.css'
+import './styles/console/color.css'
 import App from './App'
 import AppTheme from './styles/theme/shared-theme/AppTheme'
 

@@ -455,36 +455,7 @@ html[data-theme] .sf-shell .dm-grid > .MuiTypography-root a { color: var(--muted
 /* ---------- Full colour overview (.ov) ----------
    Solid gradient KPI tiles, a multi-hue heatmap and a colour per card. Overrides the quiet
    console defaults above for the admin overview only. */
-html[data-theme='light'] .sf-shell .ov {
-  --c-blue: #3d63dd;
-  --c-violet: #7c4ddb;
-  --c-green: #0f9d58;
-  --c-teal: #0e9f94;
-  --c-amber: #e07b06;
-  --c-orange: #d9480f;
-  --c-red: #e5383b;
-  --c-pink: #d6336c;
-  --c-gold: #e9a800;
-  --heat-low: #cdf3e6;   --heat-low-ink: #0b5d52;
-  --heat-mid: #2fb3a6;   --heat-mid-ink: #ffffff;
-  --heat-high: #4f46e5;  --heat-high-ink: #ffffff;
-  --tint: 12%;
-}
-html[data-theme='dark'] .sf-shell .ov {
-  --c-blue: #6584ff;
-  --c-violet: #9b74f5;
-  --c-green: #2fbf71;
-  --c-teal: #2cc0b2;
-  --c-amber: #f59f0b;
-  --c-orange: #f0682f;
-  --c-red: #f25257;
-  --c-pink: #ec5b8e;
-  --c-gold: #f5c33b;
-  --heat-low: #123d38;   --heat-low-ink: #7fe3cf;
-  --heat-mid: #1d8f86;   --heat-mid-ink: #ffffff;
-  --heat-high: #5b5bf0;  --heat-high-ink: #ffffff;
-  --tint: 20%;
-}
+/* Palette tokens (--c-*, --heat-*, --tint) live in color.css. */
 
 /* Shortcut buttons */
 html[data-theme] .sf-shell .ov .ov-buttons .rp-btn.primary {
@@ -537,11 +508,12 @@ html[data-theme] .sf-shell .ov .ov-kpi-bar i,
 html[data-theme] .sf-shell .ov .ov-kpi-bar:is(.good, .warn, .bad) i { background: #fff; }
 
 /* Cards: a colour each, shown as a top stripe and an icon chip */
-html[data-theme] .sf-shell .ov .rp-card { --tone: var(--c-blue); box-shadow: inset 0 3px 0 var(--tone); }
-html[data-theme] .sf-shell .ov .ov-issues { --tone: var(--c-red); }
-html[data-theme] .sf-shell .ov .ov-methods { --tone: var(--c-violet); }
-html[data-theme] .sf-shell .ov .dash-rank-client { --tone: var(--c-blue); }
-html[data-theme] .sf-shell .ov .dash-rank-sender { --tone: var(--c-green); }
+html[data-theme] .sf-shell .ov .rp-card.sf-heat { --tone: var(--c-blue); }
+html[data-theme] .sf-shell .ov .rp-card { box-shadow: inset 0 3px 0 var(--tone); }
+html[data-theme] .sf-shell .ov .rp-card.ov-issues { --tone: var(--c-red); }
+html[data-theme] .sf-shell .ov .rp-card.ov-methods { --tone: var(--c-violet); }
+html[data-theme] .sf-shell .ov .rp-card.dash-rank-client { --tone: var(--c-blue); }
+html[data-theme] .sf-shell .ov .rp-card.dash-rank-sender { --tone: var(--c-green); }
 html[data-theme] .sf-shell .ov .rp-card-head { justify-content: flex-start; align-items: center; }
 html[data-theme] .sf-shell .ov .rp-card-head > div { flex: 1; min-width: 0; }
 html[data-theme] .sf-shell .ov .sf-heat .rp-card-head > div { flex: 1 1 200px; }
