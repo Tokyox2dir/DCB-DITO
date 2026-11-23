@@ -1,47 +1,45 @@
 /* Full colour layer. Loaded after every other console stylesheet.
-   Adds a shared vivid palette and applies it across all pages: gradient KPI tiles, a colour stripe
+   Adds a shared muted (calm) palette and applies it across all pages: gradient KPI tiles, a colour stripe
    per card, solid status pills, gradient primary buttons, tinted table heads and a coloured rail.
    Layout and spacing stay as defined in the area files. */
 
 /* ---------- Palette ---------- */
 html[data-theme='light'] {
-  --c-blue: #2563eb;
-  --c-green: #0f9d58;
-  --c-teal: #0e9f94;
-  --c-sky: #0b8bd6;
-  --c-amber: #e07b06;
-  --c-orange: #d9480f;
-  --c-red: #e5383b;
-  --c-pink: #d6336c;
-  --c-gold: #e9a800;
-  --heat-low: #cdf3e6;   --heat-low-ink: #0b5d52;
-  --heat-mid: #2fb3a6;   --heat-mid-ink: #ffffff;
-  --heat-high: #2563eb;  --heat-high-ink: #ffffff;
-  --tint: 12%;
-  --bg: #f1f3fa;
+  --c-blue: #4a6fa5;
+  --c-green: #4a8f6a;
+  --c-teal: #3f8f89;
+  --c-sky: #4b8fb8;
+  --c-amber: #b9853b;
+  --c-orange: #c46a3f;
+  --c-red: #c25450;
+  --c-pink: #b85c7d;
+  --c-gold: #c9a14a;
+  --heat-low: #e1efea;   --heat-low-ink: #2f5f58;
+  --heat-mid: #7fb0a9;   --heat-mid-ink: #ffffff;
+  --heat-high: #4a6fa5;  --heat-high-ink: #ffffff;
+  --tint: 9%;
+  --bg: #f3f4f7;
   --bg-glow:
-    radial-gradient(900px 500px at 100% -10%, rgba(224, 123, 6, 0.10), transparent 60%),
-    radial-gradient(800px 500px at -10% 110%, rgba(14, 159, 148, 0.09), transparent 60%),
-    radial-gradient(700px 420px at 40% -20%, rgba(37, 99, 235, 0.08), transparent 60%);
+    radial-gradient(900px 500px at 100% -10%, rgba(185, 133, 59, 0.05), transparent 60%),
+    radial-gradient(800px 500px at -10% 110%, rgba(63, 143, 137, 0.05), transparent 60%);
 }
 html[data-theme='dark'] {
-  --c-blue: #4d8dff;
-  --c-green: #2fbf71;
-  --c-teal: #2cc0b2;
-  --c-sky: #3aa9f0;
-  --c-amber: #f59f0b;
-  --c-orange: #f0682f;
-  --c-red: #f25257;
-  --c-pink: #ec5b8e;
-  --c-gold: #f5c33b;
-  --heat-low: #123d38;   --heat-low-ink: #7fe3cf;
-  --heat-mid: #1d8f86;   --heat-mid-ink: #ffffff;
-  --heat-high: #3b82f6;  --heat-high-ink: #ffffff;
-  --tint: 20%;
+  --c-blue: #7a9cd0;
+  --c-green: #6fb08d;
+  --c-teal: #66b2aa;
+  --c-sky: #73aed3;
+  --c-amber: #d6a65e;
+  --c-orange: #d98a62;
+  --c-red: #d9736f;
+  --c-pink: #d082a0;
+  --c-gold: #dbbd70;
+  --heat-low: #1e3533;   --heat-low-ink: #a8d6cc;
+  --heat-mid: #3f7f78;   --heat-mid-ink: #ffffff;
+  --heat-high: #5a7fb5;  --heat-high-ink: #ffffff;
+  --tint: 14%;
   --bg-glow:
-    radial-gradient(900px 500px at 100% -10%, rgba(245, 159, 11, 0.10), transparent 60%),
-    radial-gradient(800px 500px at -10% 110%, rgba(44, 192, 178, 0.10), transparent 60%),
-    radial-gradient(700px 420px at 40% -20%, rgba(77, 141, 255, 0.10), transparent 60%);
+    radial-gradient(900px 500px at 100% -10%, rgba(214, 166, 94, 0.05), transparent 60%),
+    radial-gradient(800px 500px at -10% 110%, rgba(102, 178, 170, 0.05), transparent 60%);
 }
 html[data-theme] {
   --grad-brand: linear-gradient(135deg, var(--c-red), var(--c-orange));
@@ -64,8 +62,9 @@ html[data-theme] .rp-bar::after {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 3px;
+  height: 2px;
   background: var(--grad-rainbow);
+  opacity: 0.55;
 }
 html[data-theme] .rp-avatar { background: var(--grad-brand); color: #fff; }
 html[data-theme] .rp-crumbs h1 { color: var(--text); }
@@ -73,14 +72,14 @@ html[data-theme] .aura-api-opt.active { background: var(--grad-good); color: #ff
 html[data-theme] .aura-api-opt.active.dev { background: var(--grad-warn); }
 html[data-theme] .aura-api-opt.active::before { background: #fff; }
 /* Rail: same capsule shape, coloured icons and a gradient active item */
-html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open) { background: var(--grad-brand); color: #fff; box-shadow: 0 4px 12px -3px color-mix(in srgb, var(--c-orange) 70%, transparent); }
-html[data-theme] .rp-rail .sf-capsule-item:not(.active):not(.open):nth-of-type(6n + 1) { color: #7fb0ff; }
-html[data-theme] .rp-rail .sf-capsule-item:not(.active):not(.open):nth-of-type(6n + 2) { color: #6fd3ff; }
-html[data-theme] .rp-rail .sf-capsule-item:not(.active):not(.open):nth-of-type(6n + 3) { color: #5fd8c9; }
-html[data-theme] .rp-rail .sf-capsule-item:not(.active):not(.open):nth-of-type(6n + 4) { color: #ffb84d; }
-html[data-theme] .rp-rail .sf-capsule-item:not(.active):not(.open):nth-of-type(6n + 5) { color: #ff8fb3; }
-html[data-theme] .rp-rail .sf-capsule-item:not(.active):not(.open):nth-of-type(6n + 6) { color: #6fdc9b; }
-html[data-theme] .rp-rail .sf-capsule-item.rp-rail-logout:not(.active) { color: #ff8a8d; }
+html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open) { background: var(--grad-brand); color: #fff; box-shadow: none; }
+html[data-theme] .rp-rail .sf-capsule-item:not(.active):not(.open):nth-of-type(6n + 1) { color: #9db4d6; }
+html[data-theme] .rp-rail .sf-capsule-item:not(.active):not(.open):nth-of-type(6n + 2) { color: #9cc3db; }
+html[data-theme] .rp-rail .sf-capsule-item:not(.active):not(.open):nth-of-type(6n + 3) { color: #94c7c1; }
+html[data-theme] .rp-rail .sf-capsule-item:not(.active):not(.open):nth-of-type(6n + 4) { color: #d9b98a; }
+html[data-theme] .rp-rail .sf-capsule-item:not(.active):not(.open):nth-of-type(6n + 5) { color: #d6a3b6; }
+html[data-theme] .rp-rail .sf-capsule-item:not(.active):not(.open):nth-of-type(6n + 6) { color: #9cc9ae; }
+html[data-theme] .rp-rail .sf-capsule-item.rp-rail-logout:not(.active) { color: #d9a09e; }
 
 /* ---------- Buttons ---------- */
 html[data-theme] .sf-shell .rp-btn.primary,
@@ -88,14 +87,14 @@ html[data-theme] .sf-shell :is(.sf-btn-primary, .MuiButton-contained, .ant-btn-p
   background: var(--grad-brand);
   border-color: transparent;
   color: #fff;
-  box-shadow: 0 4px 12px -4px color-mix(in srgb, var(--c-orange) 60%, transparent);
+  box-shadow: none;
 }
 html[data-theme] .sf-shell .rp-btn.primary:hover,
 html[data-theme] .sf-shell :is(.sf-btn-primary, .MuiButton-contained, .ant-btn-primary:not(.ant-btn-dangerous)):not(:disabled):hover {
   background: var(--grad-brand);
   border-color: transparent;
   color: #fff;
-  filter: brightness(1.08);
+  filter: brightness(1.05);
 }
 html[data-theme] .sf-shell :is(.MuiButton-containedError, .ant-btn-primary.ant-btn-dangerous) { background: var(--grad-bad); border-color: transparent; color: #fff; }
 html[data-theme] .sf-shell .MuiButton-containedSuccess { background: var(--grad-good); }
@@ -130,7 +129,7 @@ html[data-theme] .sf-shell .ant-table-wrapper .ant-table-thead > tr > :is(th, td
 html[data-theme] .sf-shell .MuiTableHead-root .MuiTableCell-root,
 html[data-theme] .sf-shell :is(.rpt-table, .report-margin-table) .ant-table-thead > tr > th,
 html[data-theme] .sf-shell .ov-methods th {
-  background: color-mix(in srgb, var(--tone, var(--c-blue)) 9%, var(--surface)) !important;
+  background: color-mix(in srgb, var(--tone, var(--c-blue)) 6%, var(--surface)) !important;
   color: color-mix(in srgb, var(--tone, var(--c-blue)) 75%, var(--text)) !important;
   border-bottom-color: color-mix(in srgb, var(--tone, var(--c-blue)) 25%, var(--border)) !important;
 }
@@ -141,20 +140,26 @@ html[data-theme] .sf-shell .MuiTableBody-root .MuiTableRow-root:hover .MuiTableC
 html[data-theme] .sf-shell .ant-table-wrapper .ant-table-summary > tr > td { background: color-mix(in srgb, var(--tone, var(--c-blue)) 9%, var(--surface)); }
 html[data-theme] .sf-shell .ant-table-wrapper .ant-table-column-sorter .active { color: var(--c-orange); }
 
-/* ---------- Pills and badges: solid colour, white ink ---------- */
+/* ---------- Pills and badges: soft tint, coloured ink ---------- */
 html[data-theme] .sf-shell :is(.ant-tag-success, .ant-tag-green, .MuiChip-colorSuccess),
-html[data-theme] .tx-badge.is-success { background: var(--grad-good); color: #fff; }
+html[data-theme] .tx-badge.is-success { --p: var(--c-green); }
 html[data-theme] .sf-shell :is(.ant-tag-warning, .ant-tag-gold, .ant-tag-orange, .ant-tag-yellow, .MuiChip-colorWarning),
-html[data-theme] .tx-badge.is-pending { background: var(--grad-warn); color: #fff; }
+html[data-theme] .tx-badge.is-pending { --p: var(--c-amber); }
 html[data-theme] .sf-shell :is(.ant-tag-error, .ant-tag-red, .ant-tag-volcano, .MuiChip-colorError),
-html[data-theme] .tx-badge.is-error { background: var(--grad-bad); color: #fff; }
+html[data-theme] .tx-badge.is-error { --p: var(--c-red); }
 html[data-theme] .sf-shell :is(.ant-tag-processing, .ant-tag-blue, .ant-tag-geekblue, .ant-tag-cyan, .MuiChip-colorInfo, .MuiChip-colorPrimary),
-html[data-theme] .tx-badge.is-waiting-callback { background: var(--grad-info); color: #fff; }
-html[data-theme] .sf-shell .ant-tag-purple { background: linear-gradient(135deg, var(--c-pink), var(--c-red)); color: #fff; }
-html[data-theme] .tx-badge::before { background: #fff; opacity: 0.9; }
+html[data-theme] .tx-badge.is-waiting-callback { --p: var(--c-sky); }
+html[data-theme] .sf-shell .ant-tag-purple { --p: var(--c-pink); }
+html[data-theme] .sf-shell :is(.ant-tag-success, .ant-tag-green, .ant-tag-warning, .ant-tag-gold, .ant-tag-orange, .ant-tag-yellow, .ant-tag-error, .ant-tag-red, .ant-tag-volcano, .ant-tag-processing, .ant-tag-blue, .ant-tag-geekblue, .ant-tag-cyan, .ant-tag-purple, .MuiChip-colorSuccess, .MuiChip-colorWarning, .MuiChip-colorError, .MuiChip-colorInfo, .MuiChip-colorPrimary),
+html[data-theme] .tx-badge:is(.is-success, .is-pending, .is-error, .is-waiting-callback) {
+  background: color-mix(in srgb, var(--p) calc(var(--tint) + 5%), var(--surface));
+  border-color: color-mix(in srgb, var(--p) 30%, transparent);
+  color: color-mix(in srgb, var(--p) 85%, var(--text));
+}
+html[data-theme] .tx-badge::before { background: var(--p, currentColor); opacity: 1; }
 html[data-theme] .sf-shell .tx-code { background: color-mix(in srgb, var(--c-orange) var(--tint), transparent); color: var(--c-orange); }
-html[data-theme] .sf-shell .sf-env { background: var(--grad-good); color: #fff; }
-html[data-theme] .sf-shell .sf-env.dev { background: var(--grad-warn); color: #fff; }
+html[data-theme] .sf-shell .sf-env { background: color-mix(in srgb, var(--c-green) var(--tint), var(--surface)); color: var(--c-green); }
+html[data-theme] .sf-shell .sf-env.dev { background: color-mix(in srgb, var(--c-amber) var(--tint), var(--surface)); color: var(--c-amber); }
 
 /* ---------- Pagination, tabs, fields ---------- */
 html[data-theme] .sf-shell .ant-pagination .ant-pagination-item-active { background: var(--grad-brand); border-color: transparent; }
@@ -176,39 +181,32 @@ html[data-theme] .sf-shell :is(.mon-kpi-grid, .rpt-kpis, .dm-kpis, .mon-dur-kpis
   overflow: visible;
 }
 html[data-theme] .sf-shell :is(.mon-kpi-card, .rpt-kpi, .dm-kpi, .mon-dur-kpis:not(.small) > div) {
-  --k: var(--grad-total);
-  --k-shadow: var(--c-blue);
+  --k: var(--c-blue);
   position: relative;
   overflow: hidden;
-  border: 0 !important;
+  border: 1px solid color-mix(in srgb, var(--k) 22%, var(--border)) !important;
   border-radius: var(--radius-card);
-  background: var(--k);
-  color: #fff;
-  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--k-shadow) 75%, transparent);
+  background: color-mix(in srgb, var(--k) calc(var(--tint) - 2%), var(--surface));
+  box-shadow: inset 0 3px 0 var(--k);
 }
 /* Cycle colours by position; status tiles below get their own */
-html[data-theme] .sf-shell :is(.rpt-kpi, .dm-kpi, .mon-dur-kpis:not(.small) > div):nth-child(5n + 2) { --k: var(--grad-good); --k-shadow: var(--c-green); }
-html[data-theme] .sf-shell :is(.rpt-kpi, .dm-kpi, .mon-dur-kpis:not(.small) > div):nth-child(5n + 3) { --k: var(--grad-info); --k-shadow: var(--c-sky); }
-html[data-theme] .sf-shell :is(.rpt-kpi, .dm-kpi, .mon-dur-kpis:not(.small) > div):nth-child(5n + 4) { --k: var(--grad-warn); --k-shadow: var(--c-amber); }
-html[data-theme] .sf-shell :is(.rpt-kpi, .dm-kpi, .mon-dur-kpis:not(.small) > div):nth-child(5n + 5) { --k: var(--grad-bad); --k-shadow: var(--c-pink); }
-html[data-theme] .sf-shell .mon-kpi-success { --k: var(--grad-good); --k-shadow: var(--c-green); }
-html[data-theme] .sf-shell .mon-kpi-pending { --k: var(--grad-warn); --k-shadow: var(--c-amber); }
-html[data-theme] .sf-shell .mon-kpi-waiting { --k: var(--grad-info); --k-shadow: var(--c-sky); }
-html[data-theme] .sf-shell .mon-kpi-failed { --k: var(--grad-bad); --k-shadow: var(--c-pink); }
-html[data-theme] .sf-shell .mon-kpi-card:hover { background: var(--k); filter: brightness(1.07); }
-html[data-theme] .sf-shell .mon-kpi-card.is-active { background: var(--k); outline: 3px solid color-mix(in srgb, var(--k-shadow) 40%, transparent); outline-offset: 2px; }
-html[data-theme] .sf-shell .mon-kpi-card.is-active::after { height: 4px; background: rgba(255, 255, 255, 0.85); }
+html[data-theme] .sf-shell :is(.rpt-kpi, .dm-kpi, .mon-dur-kpis:not(.small) > div):nth-child(5n + 2) { --k: var(--c-green); }
+html[data-theme] .sf-shell :is(.rpt-kpi, .dm-kpi, .mon-dur-kpis:not(.small) > div):nth-child(5n + 3) { --k: var(--c-sky); }
+html[data-theme] .sf-shell :is(.rpt-kpi, .dm-kpi, .mon-dur-kpis:not(.small) > div):nth-child(5n + 4) { --k: var(--c-amber); }
+html[data-theme] .sf-shell :is(.rpt-kpi, .dm-kpi, .mon-dur-kpis:not(.small) > div):nth-child(5n + 5) { --k: var(--c-pink); }
+html[data-theme] .sf-shell .mon-kpi-success { --k: var(--c-green); }
+html[data-theme] .sf-shell .mon-kpi-pending { --k: var(--c-amber); }
+html[data-theme] .sf-shell .mon-kpi-waiting { --k: var(--c-sky); }
+html[data-theme] .sf-shell .mon-kpi-failed { --k: var(--c-red); }
+html[data-theme] .sf-shell .mon-kpi-card:hover { background: color-mix(in srgb, var(--k) calc(var(--tint) + 3%), var(--surface)); }
+html[data-theme] .sf-shell .mon-kpi-card.is-active { background: color-mix(in srgb, var(--k) calc(var(--tint) + 5%), var(--surface)); outline: 2px solid color-mix(in srgb, var(--k) 45%, transparent); outline-offset: 2px; }
+html[data-theme] .sf-shell .mon-kpi-card.is-active::after { height: 3px; background: var(--k); }
 html[data-theme] .sf-shell .mon-kpi-dot,
-html[data-theme] .sf-shell :is(.mon-kpi-success, .mon-kpi-pending, .mon-kpi-waiting, .mon-kpi-failed) .mon-kpi-dot { background: #fff; }
-/* White text on the tiles */
-html[data-theme] .sf-shell :is(.mon-kpi-card, .rpt-kpi, .dm-kpi, .mon-dur-kpis:not(.small) > div) :is(strong, .rpt-kpi-value, .rpt-kpi-value.is-empty) { color: #fff; }
-html[data-theme] .sf-shell :is(.mon-kpi-top, .mon-kpi-sub, .rpt-kpi-label, .rpt-kpi-sub, .dm-kpi-label, .dm-delta),
-html[data-theme] .sf-shell .mon-dur-kpis:not(.small) span,
-html[data-theme] .sf-shell .dm-kpi strong em { color: rgba(255, 255, 255, 0.88); }
-html[data-theme] .sf-shell :is(.dm-delta.good, .dm-delta.bad) b { color: #fff; }
+html[data-theme] .sf-shell :is(.mon-kpi-success, .mon-kpi-pending, .mon-kpi-waiting, .mon-kpi-failed) .mon-kpi-dot { background: var(--k); }
+/* Values take the tile colour, labels stay neutral */
+html[data-theme] .sf-shell :is(.mon-kpi-card, .rpt-kpi, .dm-kpi, .mon-dur-kpis:not(.small) > div) :is(strong, .rpt-kpi-value, .rpt-kpi-value.is-empty) { color: color-mix(in srgb, var(--k) 80%, var(--text)); }
 html[data-theme] .sf-shell .dm-kpi .ov-dot,
-html[data-theme] .sf-shell .rpt-kpi .rpt-dot { background: #fff !important; }
-html[data-theme] .sf-shell .dm-kpi-totals > div + div { border-left-color: rgba(255, 255, 255, 0.3); }
+html[data-theme] .sf-shell .rpt-kpi .rpt-dot { background: var(--k) !important; }
 /* Wrapped layouts in the area files add hairlines between rows; tiles have gaps instead */
 html[data-theme] .sf-shell :is(.mon-kpi-card, .rpt-kpi, .dm-kpi, .ov-kpi) { border-top: 0 !important; border-left: 0 !important; }
 
@@ -218,18 +216,18 @@ html[data-theme] .sf-shell .tx-stat:nth-child(2) .value { color: var(--c-green);
 html[data-theme] .sf-shell .tx-stat:nth-child(3) .value { color: var(--c-amber); }
 
 /* ---------- Charts and bars ---------- */
-html[data-theme] .sf-shell .rpt-bar > i { background: var(--grad-rainbow); }
+html[data-theme] .sf-shell .rpt-bar > i { background: var(--c-teal); }
 html[data-theme] .sf-shell .rpt-dot.data { background: var(--c-blue); }
 html[data-theme] .sf-shell .rpt-dot.data-2 { background: var(--c-orange); }
 html[data-theme] .sf-shell .rpt-carousel .slick-dots li.slick-active button { background: var(--grad-brand) !important; }
 
 /* ---------- Login ---------- */
-.sf-login-showcase { background: linear-gradient(140deg, #12306b 0%, #0b6e8a 40%, #0e9f94 70%, #e07b06 115%); }
-.sf-login-showcase::before { background: radial-gradient(circle, rgba(255, 184, 77, 0.35), transparent 65%); }
-.sf-login-showcase::after { background: radial-gradient(circle, rgba(95, 216, 201, 0.35), transparent 65%); }
-.sf-login-tile.peach { background: linear-gradient(135deg, #e07b06, #d9480f); }
-.sf-login-tile.sky { background: linear-gradient(135deg, #2563eb, #0b8bd6); }
-.sf-login-tile.rose { background: linear-gradient(135deg, #e5383b, #d6336c); }
+.sf-login-showcase { background: linear-gradient(140deg, #2c3e5c 0%, #33606b 50%, #3f7f78 85%, #8a7454 120%); }
+.sf-login-showcase::before { background: radial-gradient(circle, rgba(214, 166, 94, 0.18), transparent 65%); }
+.sf-login-showcase::after { background: radial-gradient(circle, rgba(102, 178, 170, 0.18), transparent 65%); }
+.sf-login-tile.peach { background: linear-gradient(135deg, #b9853b, #c46a3f); }
+.sf-login-tile.sky { background: linear-gradient(135deg, #4a6fa5, #4b8fb8); }
+.sf-login-tile.rose { background: linear-gradient(135deg, #c25450, #b85c7d); }
 .sf-login-tile,
 .sf-login-tile.peach svg,
 .sf-login-tile.sky svg,
@@ -237,21 +235,21 @@ html[data-theme] .sf-shell .rpt-carousel .slick-dots li.slick-active button { ba
 .sf-login-tile small { color: rgba(255, 255, 255, 0.85); }
 
 /* ---------- More colour: every card, button and rail item gets its own hue ---------- */
-html[data-theme='light'] { --card-tint: 7%; --card-edge: 28%; --data-2: var(--c-pink); }
-html[data-theme='dark'] { --card-tint: 11%; --card-edge: 35%; --data-2: var(--c-pink); }
+html[data-theme='light'] { --card-tint: 3%; --card-edge: 16%; --data-2: var(--c-pink); }
+html[data-theme='dark'] { --card-tint: 6%; --card-edge: 22%; --data-2: var(--c-pink); }
 
 /* Cards are filled with a soft wash of their colour, not only a stripe */
 html[data-theme] .sf-shell :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card) {
   --card-bg: color-mix(in srgb, var(--tone) var(--card-tint), var(--surface));
   background: var(--card-bg);
   border-color: color-mix(in srgb, var(--tone) var(--card-edge), var(--border));
-  box-shadow: inset 0 4px 0 var(--tone), 0 8px 22px -14px color-mix(in srgb, var(--tone) 60%, transparent);
+  box-shadow: inset 0 3px 0 var(--tone), 0 1px 2px rgba(15, 23, 40, 0.05);
 }
 html[data-theme] .sf-shell .ant-table-wrapper :is(.ant-table-cell-fix-left, .ant-table-cell-fix-right) { background: var(--card-bg, var(--surface)) !important; }
 html[data-theme] .sf-shell :is(.rp-card-head h3, .tx-card-head h3, .mon-panel-title h4) { color: color-mix(in srgb, var(--tone) 70%, var(--text)); }
 /* Zebra rows in the card colour */
 html[data-theme] .sf-shell .ant-table-wrapper .ant-table-tbody > tr:nth-child(even) > td,
-html[data-theme] .sf-shell .MuiTableBody-root .MuiTableRow-root:nth-child(even) .MuiTableCell-root { background: color-mix(in srgb, var(--tone, var(--c-blue)) 5%, transparent); }
+html[data-theme] .sf-shell .MuiTableBody-root .MuiTableRow-root:nth-child(even) .MuiTableCell-root { background: color-mix(in srgb, var(--tone, var(--c-blue)) 3%, transparent); }
 
 /* Spread colours over the whole page: cards in the 2nd/3rd/... container start further along the palette,
    so a page never shows a column of same-coloured cards. Fixed-meaning cards (alerts, dashboard) keep theirs. */
@@ -291,12 +289,12 @@ html[data-theme] .sf-shell .ov .ov-buttons .rp-btn:nth-child(3) { --b: var(--c-o
 html[data-theme] .sf-shell .ov .ov-buttons .rp-btn:nth-child(4) { --b: var(--c-pink); }
 
 /* Rail: the active item takes the colour of its own icon */
-html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 1) { background: linear-gradient(135deg, #2563eb, #4d8dff); }
-html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 2) { background: linear-gradient(135deg, #0b8bd6, #3aa9f0); }
-html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 3) { background: linear-gradient(135deg, #0e9f94, #2cc0b2); }
-html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 4) { background: linear-gradient(135deg, #e07b06, #f0682f); }
-html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 5) { background: linear-gradient(135deg, #d6336c, #ec5b8e); }
-html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 6) { background: linear-gradient(135deg, #0f9d58, #2fbf71); }
+html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 1) { background: linear-gradient(135deg, #4a6fa5, #6386bb); }
+html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 2) { background: linear-gradient(135deg, #4b8fb8, #66a3c8); }
+html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 3) { background: linear-gradient(135deg, #3f8f89, #5aa59e); }
+html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 4) { background: linear-gradient(135deg, #b9853b, #c46a3f); }
+html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 5) { background: linear-gradient(135deg, #b85c7d, #c97592); }
+html[data-theme] .rp-rail .sf-capsule-item:is(.active, .open):nth-of-type(6n + 6) { background: linear-gradient(135deg, #4a8f6a, #62a37f); }
 
 /* Tabs and pagination: a different colour per item */
 html[data-theme] .sf-shell :is(.ant-tabs-tab, .MuiTab-root):nth-child(4n + 1) { --tab: var(--c-blue); }
@@ -305,7 +303,7 @@ html[data-theme] .sf-shell :is(.ant-tabs-tab, .MuiTab-root):nth-child(4n + 3) { 
 html[data-theme] .sf-shell :is(.ant-tabs-tab, .MuiTab-root):nth-child(4n + 4) { --tab: var(--c-amber); }
 html[data-theme] .sf-shell .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn,
 html[data-theme] .sf-shell .MuiTab-root.Mui-selected { color: var(--tab, var(--c-orange)); }
-html[data-theme] .sf-shell :is(.ant-tabs-ink-bar, .MuiTabs-indicator) { background: var(--grad-rainbow); }
+html[data-theme] .sf-shell :is(.ant-tabs-ink-bar, .MuiTabs-indicator) { background: var(--tab, var(--c-orange)); }
 
 /* Chart legend for the second series (Yesterday) */
 html[data-theme] .sf-shell .mon-dot { border-top-color: var(--c-blue); }
