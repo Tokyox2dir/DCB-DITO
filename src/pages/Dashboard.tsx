@@ -9,6 +9,12 @@ import MonitorHeartOutlinedIcon from '@mui/icons-material/MonitorHeartOutlined'
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined'
 import PeopleAltOutlinedIcon from '@mui/icons-material/PeopleAltOutlined'
 import ArrowOutwardRoundedIcon from '@mui/icons-material/ArrowOutwardRounded'
+import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded'
+import ScheduleRoundedIcon from '@mui/icons-material/ScheduleRounded'
+import ErrorOutlineRoundedIcon from '@mui/icons-material/ErrorOutlineRounded'
+import GridViewRoundedIcon from '@mui/icons-material/GridViewRounded'
+import ReportProblemOutlinedIcon from '@mui/icons-material/ReportProblemOutlined'
+import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined'
 import RankingCard from '../components/RankingCard'
 import useDashboardData, { BUCKET_MINUTES, TrafficBucket, WINDOW_HOURS } from '../hooks/useDashboardData'
 import { useAuth } from '../provider/AuthProvider'
@@ -105,9 +111,9 @@ export default function Dashboard() {
 
   const failedRate = percent(totals.failed, totals.total)
   const kpis = [
-    { label: 'Success', dot: 'good', value: totals.success, share: percent(totals.success, totals.total), tone: '' },
-    { label: 'Pending', dot: 'warn', value: totals.pending, share: percent(totals.pending, totals.total), tone: '' },
-    { label: 'Failed', dot: 'bad', value: totals.failed, share: failedRate, tone: failedRate >= 5 ? 'bad' : '' },
+    { label: 'Success', dot: 'good', icon: <CheckCircleOutlineRoundedIcon />, value: totals.success, share: percent(totals.success, totals.total), tone: '' },
+    { label: 'Pending', dot: 'warn', icon: <ScheduleRoundedIcon />, value: totals.pending, share: percent(totals.pending, totals.total), tone: '' },
+    { label: 'Failed', dot: 'bad', icon: <ErrorOutlineRoundedIcon />, value: totals.failed, share: failedRate, tone: failedRate >= 5 ? 'bad' : '' },
   ]
   const slotOffsets = Array.from({ length: SLOTS_PER_HOUR }, (_, i) => `+${String(i * BUCKET_MINUTES).padStart(2, '0')}`)
 
@@ -142,14 +148,17 @@ export default function Dashboard() {
       <div className='ov-kpis' role='list'>
         <div className='ov-kpi lead' role='listitem'>
           <span>Total transactions</span>
+          <span className='ov-kpi-icon' aria-hidden='true'>
+            <ReceiptLongOutlinedIcon />
+          </span>
           <strong>{formatNumber(totals.total)}</strong>
           <small>Last {WINDOW_HOURS} hours</small>
         </div>
         {kpis.map((k) => (
-          <div key={k.label} className='ov-kpi' role='listitem'>
-            <span>
-              <i className={`ov-dot ${k.dot}`} aria-hidden='true' />
-              {k.label}
+          <div key={k.label} className={`ov-kpi ${k.dot}`} role='listitem'>
+            <span>{k.label}</span>
+            <span className='ov-kpi-icon' aria-hidden='true'>
+              {k.icon}
             </span>
             <strong>{formatNumber(k.value)}</strong>
             <small className={k.tone}>
@@ -171,16 +180,19 @@ export default function Dashboard() {
       <div className='ov-row ov-main'>
         <article className='rp-card sf-heat'>
           <header className='rp-card-head'>
+            <span className='ov-card-icon' aria-hidden='true'>
+              <GridViewRoundedIcon />
+            </span>
             <div>
               <h3>Traffic per {BUCKET_MINUTES} minutes</h3>
               <small>Each cell = one {BUCKET_MINUTES}-minute slot, number = transaction count</small>
             </div>
             <div className='sf-legend'>
-              <span><i className='low' /> Sepi</span>
-              <span><i className='mid' /> Ramai</span>
-              <span><i className='high' /> Puncak</span>
+              <span><i className='low' /> Quiet</span>
+              <span><i className='mid' /> Busy</span>
+              <span><i className='high' /> Peak</span>
               <span><i className='alert' /> ≥30% failed</span>
-              <span><i className='now' /> Sekarang</span>
+              <span><i className='now' /> Now</span>
             </div>
           </header>
           {!hours.length && <p className='sf-heat-empty'>{loading ? 'Loading traffic…' : 'No traffic data yet.'}</p>}
@@ -222,8 +234,11 @@ export default function Dashboard() {
 
         <article className='rp-card ov-issues'>
           <header className='rp-card-head'>
+            <span className='ov-card-icon' aria-hidden='true'>
+              <ReportProblemOutlinedIcon />
+            </span>
             <div>
-              <h3>Klien bermasalah</h3>
+              <h3>Failing merchants</h3>
               <small>Merchants with the most failed transactions</small>
             </div>
             <Link to={isAdmin ? '/monitoring' : '/transactions'} className='rp-link'>
@@ -262,6 +277,9 @@ export default function Dashboard() {
       <div className='ov-row ov-bottom'>
         <article className='rp-card ov-methods'>
           <header className='rp-card-head'>
+            <span className='ov-card-icon' aria-hidden='true'>
+              <PaymentsOutlinedIcon />
+            </span>
             <div>
               <h3>Payment methods</h3>
               <small>
@@ -276,7 +294,7 @@ export default function Dashboard() {
                   <th>Method</th>
                   <th className='num'>Merchant</th>
                   <th className='num'>Transactions</th>
-                  <th className='num'>Porsi</th>
+                  <th className='num'>Share</th>
                 </tr>
               </thead>
               <tbody>

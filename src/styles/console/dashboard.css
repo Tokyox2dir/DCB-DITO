@@ -451,3 +451,176 @@ html[data-theme] .sf-shell .dm-grid > .MuiTypography-root a { color: var(--muted
   html[data-theme] .sf-shell .sf-heat-hour { font-size: 10px; padding-left: 0; letter-spacing: -0.04em; }
   html[data-theme] .sf-shell .sf-heat-cell { font-size: 10px; letter-spacing: -0.04em; }
 }
+
+/* ---------- Full colour overview (.ov) ----------
+   Solid gradient KPI tiles, a multi-hue heatmap and a colour per card. Overrides the quiet
+   console defaults above for the admin overview only. */
+html[data-theme='light'] .sf-shell .ov {
+  --c-blue: #3d63dd;
+  --c-violet: #7c4ddb;
+  --c-green: #0f9d58;
+  --c-teal: #0e9f94;
+  --c-amber: #e07b06;
+  --c-orange: #d9480f;
+  --c-red: #e5383b;
+  --c-pink: #d6336c;
+  --c-gold: #e9a800;
+  --heat-low: #cdf3e6;   --heat-low-ink: #0b5d52;
+  --heat-mid: #2fb3a6;   --heat-mid-ink: #ffffff;
+  --heat-high: #4f46e5;  --heat-high-ink: #ffffff;
+  --tint: 12%;
+}
+html[data-theme='dark'] .sf-shell .ov {
+  --c-blue: #6584ff;
+  --c-violet: #9b74f5;
+  --c-green: #2fbf71;
+  --c-teal: #2cc0b2;
+  --c-amber: #f59f0b;
+  --c-orange: #f0682f;
+  --c-red: #f25257;
+  --c-pink: #ec5b8e;
+  --c-gold: #f5c33b;
+  --heat-low: #123d38;   --heat-low-ink: #7fe3cf;
+  --heat-mid: #1d8f86;   --heat-mid-ink: #ffffff;
+  --heat-high: #5b5bf0;  --heat-high-ink: #ffffff;
+  --tint: 20%;
+}
+
+/* Shortcut buttons */
+html[data-theme] .sf-shell .ov .ov-buttons .rp-btn.primary {
+  background: linear-gradient(135deg, var(--c-blue), var(--c-violet));
+  border-color: transparent;
+  color: #fff;
+}
+html[data-theme] .sf-shell .ov .ov-buttons .rp-btn.primary:hover { filter: brightness(1.08); }
+html[data-theme] .sf-shell .ov .ov-buttons .rp-btn:nth-child(2) svg { color: var(--c-blue); }
+html[data-theme] .sf-shell .ov .ov-buttons .rp-btn:nth-child(3) svg { color: var(--c-violet); }
+html[data-theme] .sf-shell .ov .ov-buttons .rp-btn:nth-child(4) svg { color: var(--c-pink); }
+
+/* KPI tiles: separate cards, each a solid gradient */
+html[data-theme] .sf-shell .ov .ov-kpis { gap: var(--gap); background: none; border: 0; overflow: visible; }
+html[data-theme] .sf-shell .ov .ov-kpi {
+  --k1: var(--c-blue);
+  --k2: var(--c-violet);
+  overflow: hidden;
+  padding: 16px 18px 18px;
+  border: 0 !important;
+  border-radius: var(--radius-card);
+  background: linear-gradient(135deg, var(--k1), var(--k2));
+  color: #fff;
+  box-shadow: 0 6px 18px -8px color-mix(in srgb, var(--k1) 70%, transparent);
+}
+html[data-theme] .sf-shell .ov .ov-kpi.good { --k1: var(--c-green); --k2: var(--c-teal); }
+html[data-theme] .sf-shell .ov .ov-kpi.warn { --k1: var(--c-amber); --k2: var(--c-orange); }
+html[data-theme] .sf-shell .ov .ov-kpi.bad { --k1: var(--c-red); --k2: var(--c-pink); }
+html[data-theme] .sf-shell .ov .ov-kpi > span:first-child { color: rgba(255, 255, 255, 0.9); }
+html[data-theme] .sf-shell .ov .ov-kpi strong { font-size: 28px; color: #fff; }
+html[data-theme] .sf-shell .ov .ov-kpi small,
+html[data-theme] .sf-shell .ov .ov-kpi small b,
+html[data-theme] .sf-shell .ov .ov-kpi small.bad b { color: rgba(255, 255, 255, 0.88); }
+html[data-theme] .sf-shell .ov .ov-kpi small b { font-weight: 600; color: #fff; }
+html[data-theme] .sf-shell .ov .ov-kpi-icon {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+html[data-theme] .sf-shell .ov .ov-kpi-icon svg { font-size: 18px; }
+html[data-theme] .sf-shell .ov .ov-kpi-bar { height: 4px; background: rgba(255, 255, 255, 0.22); }
+html[data-theme] .sf-shell .ov .ov-kpi-bar i,
+html[data-theme] .sf-shell .ov .ov-kpi-bar:is(.good, .warn, .bad) i { background: #fff; }
+
+/* Cards: a colour each, shown as a top stripe and an icon chip */
+html[data-theme] .sf-shell .ov .rp-card { --tone: var(--c-blue); box-shadow: inset 0 3px 0 var(--tone); }
+html[data-theme] .sf-shell .ov .ov-issues { --tone: var(--c-red); }
+html[data-theme] .sf-shell .ov .ov-methods { --tone: var(--c-violet); }
+html[data-theme] .sf-shell .ov .dash-rank-client { --tone: var(--c-blue); }
+html[data-theme] .sf-shell .ov .dash-rank-sender { --tone: var(--c-green); }
+html[data-theme] .sf-shell .ov .rp-card-head { justify-content: flex-start; align-items: center; }
+html[data-theme] .sf-shell .ov .rp-card-head > div { flex: 1; min-width: 0; }
+html[data-theme] .sf-shell .ov .sf-heat .rp-card-head > div { flex: 1 1 200px; }
+html[data-theme] .sf-shell .ov :is(.ov-card-icon, .dash-rank-head .dash-rank-icon) {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: color-mix(in srgb, var(--tone) var(--tint), transparent);
+  color: var(--tone);
+}
+html[data-theme] .sf-shell .ov .ov-card-icon svg { font-size: 18px; }
+html[data-theme] .sf-shell .ov .dash-rank-head .dash-rank-icon { order: -1; }
+html[data-theme] .sf-shell .ov .rp-link { color: var(--tone); }
+
+/* Heatmap: mint, teal, indigo; failures in solid red */
+html[data-theme] .sf-shell .ov :is(.sf-legend i, .sf-heat-cell).low { background: var(--heat-low); }
+html[data-theme] .sf-shell .ov :is(.sf-legend i, .sf-heat-cell).mid { background: var(--heat-mid); }
+html[data-theme] .sf-shell .ov :is(.sf-legend i, .sf-heat-cell).high { background: var(--heat-high); }
+html[data-theme] .sf-shell .ov :is(.sf-legend i, .sf-heat-cell).alert { background: var(--c-red); box-shadow: none; }
+html[data-theme] .sf-shell .ov .sf-heat-cell.low { color: var(--heat-low-ink); }
+html[data-theme] .sf-shell .ov .sf-heat-cell.mid { color: var(--heat-mid-ink); }
+html[data-theme] .sf-shell .ov .sf-heat-cell.high { color: var(--heat-high-ink); }
+html[data-theme] .sf-shell .ov .sf-heat-cell.alert { color: #fff; }
+html[data-theme] .sf-shell .ov .sf-heat-cell.now::after { background: #fff; box-shadow: 0 0 0 1.5px var(--c-green); }
+
+/* Failing merchants: coloured avatars, solid red for high rates */
+html[data-theme] .sf-shell .ov .ov-issues li { --av: var(--c-red); }
+html[data-theme] .sf-shell .ov .ov-issues li:nth-child(5n + 2) { --av: var(--c-orange); }
+html[data-theme] .sf-shell .ov .ov-issues li:nth-child(5n + 3) { --av: var(--c-violet); }
+html[data-theme] .sf-shell .ov .ov-issues li:nth-child(5n + 4) { --av: var(--c-blue); }
+html[data-theme] .sf-shell .ov .ov-issues li:nth-child(5n + 5) { --av: var(--c-teal); }
+html[data-theme] .sf-shell .ov .ov-avatar {
+  border: 0;
+  border-radius: 50%;
+  background: var(--av);
+  color: #fff;
+}
+html[data-theme] .sf-shell .ov .ov-rate.bad { background: var(--c-red); color: #fff; }
+html[data-theme] .sf-shell .ov .ov-issues li small b { color: var(--c-red); }
+
+/* Payment methods: one colour per row */
+html[data-theme] .sf-shell .ov .ov-methods tbody tr { --row: var(--c-violet); }
+html[data-theme] .sf-shell .ov .ov-methods tbody tr:nth-child(6n + 2) { --row: var(--c-blue); }
+html[data-theme] .sf-shell .ov .ov-methods tbody tr:nth-child(6n + 3) { --row: var(--c-teal); }
+html[data-theme] .sf-shell .ov .ov-methods tbody tr:nth-child(6n + 4) { --row: var(--c-amber); }
+html[data-theme] .sf-shell .ov .ov-methods tbody tr:nth-child(6n + 5) { --row: var(--c-pink); }
+html[data-theme] .sf-shell .ov .ov-methods tbody tr:nth-child(6n + 6) { --row: var(--c-green); }
+html[data-theme] .sf-shell .ov .ov-methods td strong { display: flex; align-items: center; gap: 7px; }
+html[data-theme] .sf-shell .ov .ov-methods td strong::before {
+  content: '';
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--row);
+}
+html[data-theme] .sf-shell .ov .ov-share { height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--row) var(--tint), transparent); }
+html[data-theme] .sf-shell .ov .ov-share i { background: var(--row); border-radius: 3px; }
+
+/* Ranking cards: gradient bars, medal colours for the top three */
+html[data-theme] .sf-shell .ov .dash-rank-bar { height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--tone) var(--tint), transparent); }
+html[data-theme] .sf-shell .ov .dash-rank-bar i { border-radius: 3px; background: linear-gradient(90deg, var(--c-blue), var(--c-violet)); }
+html[data-theme] .sf-shell .ov .dash-rank-bar.sender i { background: linear-gradient(90deg, var(--c-green), var(--c-teal)); }
+html[data-theme] .sf-shell .ov .dash-rank-list li:not(.dash-rank-empty) { grid-template-columns: 24px minmax(0, 1fr); }
+html[data-theme] .sf-shell .ov .dash-rank-pos {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--pill-neutral-bg);
+  color: var(--muted);
+  font-size: 10px;
+}
+html[data-theme] .sf-shell .ov .dash-rank-list li:nth-child(-n + 3) .dash-rank-pos { color: #fff; }
+html[data-theme] .sf-shell .ov .dash-rank-list li:nth-child(1) .dash-rank-pos { background: var(--c-gold); }
+html[data-theme] .sf-shell .ov .dash-rank-list li:nth-child(2) .dash-rank-pos { background: #94a3b8; }
+html[data-theme] .sf-shell .ov .dash-rank-list li:nth-child(3) .dash-rank-pos { background: #c8743a; }
