@@ -459,20 +459,20 @@ html[data-theme] .sf-shell .dm-grid > .MuiTypography-root a { color: var(--muted
 
 /* Shortcut buttons */
 html[data-theme] .sf-shell .ov .ov-buttons .rp-btn.primary {
-  background: linear-gradient(135deg, var(--c-blue), var(--c-violet));
+  background: var(--grad-brand);
   border-color: transparent;
   color: #fff;
 }
 html[data-theme] .sf-shell .ov .ov-buttons .rp-btn.primary:hover { filter: brightness(1.08); }
 html[data-theme] .sf-shell .ov .ov-buttons .rp-btn:nth-child(2) svg { color: var(--c-blue); }
-html[data-theme] .sf-shell .ov .ov-buttons .rp-btn:nth-child(3) svg { color: var(--c-violet); }
+html[data-theme] .sf-shell .ov .ov-buttons .rp-btn:nth-child(3) svg { color: var(--c-orange); }
 html[data-theme] .sf-shell .ov .ov-buttons .rp-btn:nth-child(4) svg { color: var(--c-pink); }
 
 /* KPI tiles: separate cards, each a solid gradient */
 html[data-theme] .sf-shell .ov .ov-kpis { gap: var(--gap); background: none; border: 0; overflow: visible; }
 html[data-theme] .sf-shell .ov .ov-kpi {
   --k1: var(--c-blue);
-  --k2: var(--c-violet);
+  --k2: var(--c-sky);
   overflow: hidden;
   padding: 16px 18px 18px;
   border: 0 !important;
@@ -508,10 +508,10 @@ html[data-theme] .sf-shell .ov .ov-kpi-bar i,
 html[data-theme] .sf-shell .ov .ov-kpi-bar:is(.good, .warn, .bad) i { background: #fff; }
 
 /* Cards: a colour each, shown as a top stripe and an icon chip */
-html[data-theme] .sf-shell .ov .rp-card.sf-heat { --tone: var(--c-blue); }
+html[data-theme] .sf-shell .ov .rp-card.sf-heat { --tone: var(--c-teal); }
 html[data-theme] .sf-shell .ov .rp-card { box-shadow: inset 0 3px 0 var(--tone); }
 html[data-theme] .sf-shell .ov .rp-card.ov-issues { --tone: var(--c-red); }
-html[data-theme] .sf-shell .ov .rp-card.ov-methods { --tone: var(--c-violet); }
+html[data-theme] .sf-shell .ov .rp-card.ov-methods { --tone: var(--c-orange); }
 html[data-theme] .sf-shell .ov .rp-card.dash-rank-client { --tone: var(--c-blue); }
 html[data-theme] .sf-shell .ov .rp-card.dash-rank-sender { --tone: var(--c-green); }
 html[data-theme] .sf-shell .ov .rp-card-head { justify-content: flex-start; align-items: center; }
@@ -546,7 +546,7 @@ html[data-theme] .sf-shell .ov .sf-heat-cell.now::after { background: #fff; box-
 /* Failing merchants: coloured avatars, solid red for high rates */
 html[data-theme] .sf-shell .ov .ov-issues li { --av: var(--c-red); }
 html[data-theme] .sf-shell .ov .ov-issues li:nth-child(5n + 2) { --av: var(--c-orange); }
-html[data-theme] .sf-shell .ov .ov-issues li:nth-child(5n + 3) { --av: var(--c-violet); }
+html[data-theme] .sf-shell .ov .ov-issues li:nth-child(5n + 3) { --av: var(--c-pink); }
 html[data-theme] .sf-shell .ov .ov-issues li:nth-child(5n + 4) { --av: var(--c-blue); }
 html[data-theme] .sf-shell .ov .ov-issues li:nth-child(5n + 5) { --av: var(--c-teal); }
 html[data-theme] .sf-shell .ov .ov-avatar {
@@ -559,7 +559,7 @@ html[data-theme] .sf-shell .ov .ov-rate.bad { background: var(--c-red); color: #
 html[data-theme] .sf-shell .ov .ov-issues li small b { color: var(--c-red); }
 
 /* Payment methods: one colour per row */
-html[data-theme] .sf-shell .ov .ov-methods tbody tr { --row: var(--c-violet); }
+html[data-theme] .sf-shell .ov .ov-methods tbody tr { --row: var(--c-orange); }
 html[data-theme] .sf-shell .ov .ov-methods tbody tr:nth-child(6n + 2) { --row: var(--c-blue); }
 html[data-theme] .sf-shell .ov .ov-methods tbody tr:nth-child(6n + 3) { --row: var(--c-teal); }
 html[data-theme] .sf-shell .ov .ov-methods tbody tr:nth-child(6n + 4) { --row: var(--c-amber); }
@@ -579,7 +579,7 @@ html[data-theme] .sf-shell .ov .ov-share i { background: var(--row); border-radi
 
 /* Ranking cards: gradient bars, medal colours for the top three */
 html[data-theme] .sf-shell .ov .dash-rank-bar { height: 5px; border-radius: 3px; background: color-mix(in srgb, var(--tone) var(--tint), transparent); }
-html[data-theme] .sf-shell .ov .dash-rank-bar i { border-radius: 3px; background: linear-gradient(90deg, var(--c-blue), var(--c-violet)); }
+html[data-theme] .sf-shell .ov .dash-rank-bar i { border-radius: 3px; background: linear-gradient(90deg, var(--c-blue), var(--c-sky)); }
 html[data-theme] .sf-shell .ov .dash-rank-bar.sender i { background: linear-gradient(90deg, var(--c-green), var(--c-teal)); }
 html[data-theme] .sf-shell .ov .dash-rank-list li:not(.dash-rank-empty) { grid-template-columns: 24px minmax(0, 1fr); }
 html[data-theme] .sf-shell .ov .dash-rank-pos {
