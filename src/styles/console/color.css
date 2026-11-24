@@ -310,3 +310,105 @@ html[data-theme] .sf-shell :is(.ant-tabs-ink-bar, .MuiTabs-indicator) { backgrou
 /* Chart legend for the second series (Yesterday) */
 html[data-theme] .sf-shell .mon-dot { border-top-color: var(--c-blue); }
 html[data-theme] .sf-shell .mon-dot.yesterday { border-top-color: var(--c-pink); }
+
+/* ---------- Round 3: no page reads as one colour ---------- */
+
+/* Monitoring KPI tiles: the shared tile rule above wins on specificity (its :is() list holds a
+   two-class selector), so the status colours never applied and every tile was blue. */
+html[data-theme] .sf-shell .mon-kpi-grid .mon-kpi-card.mon-kpi-success { --k: var(--grad-good); --k-shadow: var(--c-green); }
+html[data-theme] .sf-shell .mon-kpi-grid .mon-kpi-card.mon-kpi-pending { --k: var(--grad-warn); --k-shadow: var(--c-amber); }
+html[data-theme] .sf-shell .mon-kpi-grid .mon-kpi-card.mon-kpi-waiting { --k: var(--grad-info); --k-shadow: var(--c-sky); }
+html[data-theme] .sf-shell .mon-kpi-grid .mon-kpi-card.mon-kpi-failed { --k: var(--grad-bad); --k-shadow: var(--c-pink); }
+
+/* Cards: a two-colour top band and a two-colour wash, so a page with one big card is not one hue */
+html[data-theme] .sf-shell :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card) { --tone-2: var(--c-pink); }
+html[data-theme] .sf-shell :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):nth-child(6n + 1) { --tone-2: var(--c-gold); }
+html[data-theme] .sf-shell :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):nth-child(6n + 2) { --tone-2: var(--c-sky); }
+html[data-theme] .sf-shell :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):nth-child(6n + 3) { --tone-2: var(--c-orange); }
+html[data-theme] .sf-shell :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):nth-child(6n + 4) { --tone-2: var(--c-sky); }
+html[data-theme] .sf-shell :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):nth-child(6n + 5) { --tone-2: var(--c-amber); }
+html[data-theme] .sf-shell :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card):nth-child(6n + 6) { --tone-2: var(--c-blue); }
+html[data-theme] .sf-shell .rpt-mon-card.is-abnormal,
+html[data-theme] .sf-shell .mon-panel-alert { --tone-2: var(--c-orange); }
+html[data-theme] .sf-shell :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card) {
+  background:
+    linear-gradient(90deg, var(--tone), var(--tone-2)) top / 100% 4px no-repeat,
+    linear-gradient(135deg, color-mix(in srgb, var(--tone) var(--card-tint), var(--surface)) 0%, var(--surface) 55%, color-mix(in srgb, var(--tone-2) var(--card-tint), var(--surface)) 100%);
+  box-shadow: 0 8px 22px -14px color-mix(in srgb, var(--tone) 60%, transparent);
+}
+
+/* Table heads: every column its own colour, with a matching underline */
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table-thead > tr > th,
+html[data-theme] .sf-shell .MuiTableHead-root .MuiTableCell-root,
+html[data-theme] .sf-shell .ov-methods th { --col: var(--c-sky); }
+html[data-theme] .sf-shell :is(.ant-table-thead > tr > th, .MuiTableHead-root .MuiTableCell-root, .ov-methods th):nth-child(7n + 2) { --col: var(--c-orange); }
+html[data-theme] .sf-shell :is(.ant-table-thead > tr > th, .MuiTableHead-root .MuiTableCell-root, .ov-methods th):nth-child(7n + 3) { --col: var(--c-green); }
+html[data-theme] .sf-shell :is(.ant-table-thead > tr > th, .MuiTableHead-root .MuiTableCell-root, .ov-methods th):nth-child(7n + 4) { --col: var(--c-pink); }
+html[data-theme] .sf-shell :is(.ant-table-thead > tr > th, .MuiTableHead-root .MuiTableCell-root, .ov-methods th):nth-child(7n + 5) { --col: var(--c-gold); }
+html[data-theme] .sf-shell :is(.ant-table-thead > tr > th, .MuiTableHead-root .MuiTableCell-root, .ov-methods th):nth-child(7n + 6) { --col: var(--c-teal); }
+html[data-theme] .sf-shell :is(.ant-table-thead > tr > th, .MuiTableHead-root .MuiTableCell-root, .ov-methods th):nth-child(7n + 7) { --col: var(--c-red); }
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table-thead > tr > th,
+html[data-theme] .sf-shell .MuiTableHead-root .MuiTableCell-root,
+html[data-theme] .sf-shell .ov-methods th {
+  color: var(--col) !important;
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--col) 70%, transparent);
+}
+/* Table bodies: each column carries a light touch of its header colour */
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table-tbody > tr > td { --col: var(--c-sky); }
+html[data-theme] .sf-shell .ant-table-tbody > tr > td:nth-child(7n + 2) { --col: var(--c-orange); }
+html[data-theme] .sf-shell .ant-table-tbody > tr > td:nth-child(7n + 3) { --col: var(--c-green); }
+html[data-theme] .sf-shell .ant-table-tbody > tr > td:nth-child(7n + 4) { --col: var(--c-pink); }
+html[data-theme] .sf-shell .ant-table-tbody > tr > td:nth-child(7n + 5) { --col: var(--c-gold); }
+html[data-theme] .sf-shell .ant-table-tbody > tr > td:nth-child(7n + 6) { --col: var(--c-teal); }
+html[data-theme] .sf-shell .ant-table-tbody > tr > td:nth-child(7n + 7) { --col: var(--c-red); }
+html[data-theme] .sf-shell .ant-table-wrapper .ant-table-tbody > tr > td:not(.ant-table-cell-fix-right):not(.ant-table-selection-column) {
+  color: color-mix(in srgb, var(--col) 45%, var(--text));
+}
+
+/* Row buttons (Detail, View, Edit, Delete) are coloured too */
+html[data-theme] .sf-shell td :is(.ant-btn-default:not(.ant-btn-dangerous), .rp-btn:not(.primary), .MuiButton-outlined) {
+  --b: var(--c-sky);
+  border-color: color-mix(in srgb, var(--b) 50%, transparent);
+  background: color-mix(in srgb, var(--b) var(--tint), var(--surface));
+  color: color-mix(in srgb, var(--b) 85%, var(--text));
+}
+html[data-theme] .sf-shell td :is(.ant-btn-default:not(.ant-btn-dangerous), .rp-btn:not(.primary), .MuiButton-outlined):nth-child(2) { --b: var(--c-amber); }
+html[data-theme] .sf-shell td :is(.ant-btn-default:not(.ant-btn-dangerous), .rp-btn:not(.primary), .MuiButton-outlined):nth-child(3) { --b: var(--c-green); }
+html[data-theme] .sf-shell td :is(.ant-btn-default:not(.ant-btn-dangerous), .rp-btn:not(.primary), .MuiButton-outlined):not(:disabled):hover { border-color: var(--b); background: color-mix(in srgb, var(--b) calc(var(--tint) + 10%), var(--surface)); color: color-mix(in srgb, var(--b) 90%, var(--text)); }
+html[data-theme] .sf-shell td :is(.ant-btn-default:not(.ant-btn-dangerous), .rp-btn:not(.primary), .MuiButton-outlined) :is(svg, .anticon) { color: var(--b); }
+html[data-theme] .sf-shell td .ant-btn-dangerous:not(.ant-btn-primary) {
+  border-color: color-mix(in srgb, var(--c-red) 55%, transparent);
+  background: color-mix(in srgb, var(--c-red) var(--tint), var(--surface));
+  color: var(--c-red);
+}
+
+/* Summary status: a solid pill instead of a dot */
+html[data-theme] .sf-shell .rpt-status { padding: 2px 9px; border-radius: 999px; color: #fff; font-weight: 600; font-size: 12px; background: var(--grad-info); }
+html[data-theme] .sf-shell .rpt-status:has(.rpt-dot.positive) { background: var(--grad-good); }
+html[data-theme] .sf-shell .rpt-status:has(.rpt-dot.warning) { background: var(--grad-warn); }
+html[data-theme] .sf-shell .rpt-status:has(.rpt-dot.negative) { background: var(--grad-bad); }
+html[data-theme] .sf-shell .rpt-status .rpt-dot { background: #fff !important; }
+
+/* Dashboard heatmap: quiet teal, busy amber, peak blue (failed stays red) */
+html[data-theme='light'] { --heat-mid: #f5a623; --heat-mid-ink: #3a2400; }
+html[data-theme='dark'] { --heat-mid: #e8930c; --heat-mid-ink: #1f1300; }
+
+/* Filter bars: each field gets its own coloured edge */
+html[data-theme] .sf-shell :where(.ant-picker, .ant-select, .ant-input-affix-wrapper, .ant-input) { --f: var(--c-sky); }
+html[data-theme] .sf-shell :where(.ant-picker, .ant-select, .ant-input-affix-wrapper, .ant-input):nth-child(5n + 2) { --f: var(--c-orange); }
+html[data-theme] .sf-shell :where(.ant-picker, .ant-select, .ant-input-affix-wrapper, .ant-input):nth-child(5n + 3) { --f: var(--c-green); }
+html[data-theme] .sf-shell :where(.ant-picker, .ant-select, .ant-input-affix-wrapper, .ant-input):nth-child(5n + 4) { --f: var(--c-pink); }
+html[data-theme] .sf-shell :where(.ant-picker, .ant-select, .ant-input-affix-wrapper, .ant-input):nth-child(5n + 5) { --f: var(--c-gold); }
+html[data-theme] .sf-shell :is(.ant-picker, .ant-select .ant-select-selector, .ant-input-affix-wrapper, .ant-input:not(.ant-input-affix-wrapper *)) {
+  border-color: color-mix(in srgb, var(--f, var(--c-sky)) 50%, var(--control)) !important;
+}
+html[data-theme] .sf-shell :is(.ant-picker-suffix, .ant-select-arrow, .ant-input-prefix) { color: var(--f, var(--c-sky)); }
+
+/* Row link buttons (Transactions "Detail", Merchant "View") */
+html[data-theme] .sf-shell .tx-link-btn:not(.danger) {
+  border-color: color-mix(in srgb, var(--c-sky) 50%, transparent);
+  background: color-mix(in srgb, var(--c-sky) var(--tint), var(--surface));
+  color: color-mix(in srgb, var(--c-sky) 85%, var(--text));
+}
+html[data-theme] .sf-shell .tx-link-btn:not(.danger):hover { border-color: var(--c-sky); background: color-mix(in srgb, var(--c-sky) calc(var(--tint) + 10%), var(--surface)); }
+html[data-theme] .sf-shell .tx-link-btn:not(.danger) :is(svg, .anticon) { color: var(--c-sky); }
