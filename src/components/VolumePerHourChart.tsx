@@ -89,7 +89,7 @@ export function chartTooltip(t: ChartTokens) {
 
 export function chartAxis(t: ChartTokens) {
   return {
-    ticks: { color: t.faint, font: { family: t.font, size: 11 } },
+    ticks: { color: t.muted, font: { family: t.font, size: 11, weight: 600 as const } },
     grid: { color: t.rule, drawTicks: false },
     border: { display: false },
   }
@@ -290,12 +290,12 @@ export default function VolumePerHourChart({
       y: {
         ...axis,
         beginAtZero: true,
-        ticks: { ...axis.ticks, precision: 0, padding: 6, font: { family: t.mono, size: 11 } },
+        ticks: { ...axis.ticks, precision: 0, padding: 6, font: { family: t.mono, size: 11, weight: 600 as const } },
       },
       x: {
         ...axis,
         grid: { display: false },
-        ticks: { ...axis.ticks, padding: 6, font: { family: t.mono, size: 11 } },
+        ticks: { ...axis.ticks, padding: 6, font: { family: t.mono, size: 11, weight: 600 as const } },
       },
     },
   }

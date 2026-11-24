@@ -10,9 +10,9 @@ html[data-theme='light'] {
   --surface: #ffffff;   /* cards, bars, dialogs */
   --raised: #f8f9fb;    /* table heads, hover rows, wells */
   --active: #eceef2;    /* selected rows and items */
-  --border: #e2e5ea;    /* card edges */
-  --rule: #edeff2;      /* row rules inside cards */
-  --control: #cfd4dc;   /* field and button edges */
+  --border: #c3cad5;    /* card edges */
+  --rule: #d8dde5;      /* row rules inside cards */
+  --control: #aab3c1;   /* field and button edges */
   --text: #0f1728;
   --muted: #475467;
   --faint: #667085;
@@ -41,9 +41,9 @@ html[data-theme='dark'] {
   --surface: #10141d;
   --raised: #151a25;
   --active: #1c2231;
-  --border: #212938;
-  --rule: #1a2030;
-  --control: #344055;
+  --border: #364359;
+  --rule: #2a3447;
+  --control: #4d5b75;
   --text: #e7eaf1;
   --muted: #a5adbe;
   --faint: #7f899c;
@@ -63,7 +63,7 @@ html[data-theme='dark'] {
   --pill-negative-bg: #2f1517; --pill-negative-ink: #fb9a92;
   --pill-info-bg: #102340;     --pill-info-ink: #84c5fe;
   --pill-neutral-bg: #1c2231;  --pill-neutral-ink: #c9cfdb;
-  --float-shadow: 0 14px 36px rgba(0, 0, 0, 0.55), 0 0 0 1px #212938;
+  --float-shadow: 0 14px 36px rgba(0, 0, 0, 0.55), 0 0 0 1px #364359;
   --focus: 0 0 0 3px rgba(115, 145, 255, 0.3);
   color-scheme: dark;
 }

@@ -237,8 +237,8 @@ html[data-theme] .sf-shell .rpt-carousel .slick-dots li.slick-active button { ba
 .sf-login-tile small { color: rgba(255, 255, 255, 0.85); }
 
 /* ---------- More colour: every card, button and rail item gets its own hue ---------- */
-html[data-theme='light'] { --card-tint: 7%; --card-edge: 28%; --data-2: var(--c-pink); }
-html[data-theme='dark'] { --card-tint: 11%; --card-edge: 35%; --data-2: var(--c-pink); }
+html[data-theme='light'] { --card-tint: 7%; --card-edge: 45%; --data-2: var(--c-pink); }
+html[data-theme='dark'] { --card-tint: 11%; --card-edge: 50%; --data-2: var(--c-pink); }
 
 /* Cards are filled with a soft wash of their colour, not only a stripe */
 html[data-theme] .sf-shell :is(.rp-card, .sf-card, .sf-panel, .MuiCard-root, .ant-card, .mon-panel, .tx-card, .rpt-card, .rpt-mon-card) {

@@ -287,7 +287,7 @@ const DurationChart: React.FC = () => {
         display: true,
         text,
         color: t.faint,
-        font: { family: t.font, size: 11, weight: 500 as const },
+        font: { family: t.font, size: 11, weight: 600 as const },
       })
       return {
         responsive: true,

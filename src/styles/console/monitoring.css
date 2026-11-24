@@ -670,3 +670,19 @@ html[data-theme] .sf-shell .mon-dur-chart { position: relative; height: 300px; p
   html[data-theme] .sf-shell .mon-tpc-table .bar-col { display: none; }
   html[data-theme] .sf-shell .mon-dur-chart { height: 240px; }
 }
+
+/* Grey helper text on the monitoring pages is bold and one step brighter, so it reads on the coloured cards */
+html[data-theme] .sf-shell .mon-page :is(
+  .mon-head p, .mon-live, .mon-panel-title small, .mon-panel-meta, .mon-panel-empty, .mon-panel-foot,
+  .mon-panel-legend, .mon-perf-legend, .mon-donut-legend, .mon-donut-center span, .mon-tpc-table .muted,
+  .mon-alert-section-title span, .mon-alert-table .product, .mon-alert-table .since, .mon-alert-table .detail,
+  .mon-perf-name .num, .mon-perf-cols, .mon-trx-date, .mon-dur-series, .mon-dur-help > summary,
+  .mon-dur-help-body p, .mon-dur-state, .mon-filter-label, .ant-pagination-total-text,
+  .ant-select-selection-placeholder
+) {
+  font-weight: 600;
+  color: var(--muted);
+}
+html[data-theme] .sf-shell .mon-page :is(.ant-input, .ant-picker-input > input)::placeholder { font-weight: 600; color: var(--muted); }
+/* The KPI tiles keep their white text; only the weight changes */
+html[data-theme] .sf-shell .mon-page :is(.mon-kpi-top, .mon-kpi-sub, .mon-dur-kpis span) { font-weight: 600; }
